@@ -46,7 +46,10 @@ const Products = () => {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error creating product:", error);
+        throw new Error(error.message);
+      }
       return data;
     },
     onSuccess: () => {
@@ -55,7 +58,7 @@ const Products = () => {
       setIsDialogOpen(false);
       setSelectedProduct(null);
     },
-    onError: (error) => {
+    onError: (error: Error) => {
       toast.error("Failed to create product: " + error.message);
     },
   });
@@ -74,7 +77,10 @@ const Products = () => {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error updating product:", error);
+        throw new Error(error.message);
+      }
       return data;
     },
     onSuccess: () => {
@@ -83,21 +89,28 @@ const Products = () => {
       setIsDialogOpen(false);
       setSelectedProduct(null);
     },
-    onError: (error) => {
+    onError: (error: Error) => {
       toast.error("Failed to update product: " + error.message);
     },
   });
 
   const deleteProductMutation = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from("products").delete().eq("id", id);
-      if (error) throw error;
+      const { error } = await supabase
+        .from("products")
+        .delete()
+        .eq("id", id);
+
+      if (error) {
+        console.error("Error deleting product:", error);
+        throw new Error(error.message);
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["products"] });
       toast.success("Product deleted successfully");
     },
-    onError: (error) => {
+    onError: (error: Error) => {
       toast.error("Failed to delete product: " + error.message);
     },
   });
