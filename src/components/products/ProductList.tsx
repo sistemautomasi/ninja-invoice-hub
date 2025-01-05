@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Pencil, Trash2 } from "lucide-react";
+import { useCurrency } from "@/hooks/use-currency";
 import {
   Table,
   TableBody,
@@ -25,6 +26,8 @@ interface ProductListProps {
 }
 
 export const ProductList = ({ products, isLoading, onEdit, onDelete }: ProductListProps) => {
+  const { formatPrice } = useCurrency();
+
   return (
     <div className="rounded-md border">
       <Table>
@@ -55,7 +58,7 @@ export const ProductList = ({ products, isLoading, onEdit, onDelete }: ProductLi
               <TableRow key={product.id}>
                 <TableCell>{product.name}</TableCell>
                 <TableCell>{product.description}</TableCell>
-                <TableCell>${product.price.toFixed(2)}</TableCell>
+                <TableCell>{formatPrice(product.price)}</TableCell>
                 <TableCell>{product.stock_quantity}</TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-2">

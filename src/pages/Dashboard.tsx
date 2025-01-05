@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { TrendingUp, DollarSign, Package } from "lucide-react";
+import { useCurrency } from "@/hooks/use-currency";
 
 const data = [
   { name: 'Jan', sales: 4000 },
@@ -12,6 +13,8 @@ const data = [
 ];
 
 const Dashboard = () => {
+  const { formatPrice } = useCurrency();
+
   return (
     <div className="space-y-8 animate-fade-in">
       <div className="flex items-center justify-between">
@@ -41,7 +44,7 @@ const Dashboard = () => {
             <DollarSign className="h-4 w-4 text-success" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">$12,345</div>
+            <div className="text-2xl font-bold">{formatPrice(12345)}</div>
             <p className="text-xs text-muted-foreground">
               +15% from last month
             </p>
@@ -77,6 +80,7 @@ const Dashboard = () => {
                 <XAxis dataKey="name" stroke="#6b7280" />
                 <YAxis stroke="#6b7280" />
                 <Tooltip 
+                  formatter={(value) => formatPrice(Number(value))}
                   contentStyle={{ 
                     background: '#fff',
                     border: '1px solid #e5e7eb',
