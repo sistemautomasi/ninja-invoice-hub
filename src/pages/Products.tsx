@@ -39,15 +39,19 @@ const Products = () => {
   });
 
   const createProductMutation = useMutation({
-    mutationFn: async (newProduct: Omit<Product, "id">) => {
+    mutationFn: async (formData: FormData) => {
+      const newProduct = {
+        name: String(formData.get("name")),
+        description: String(formData.get("description")),
+        price: Number(formData.get("price")),
+        stock_quantity: Number(formData.get("stock_quantity")),
+      };
+
       const { error } = await supabase
         .from("products")
         .insert([newProduct]);
 
-      if (error) {
-        console.error("Error creating product:", error);
-        throw new Error(error.message);
-      }
+      if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["products"] });
@@ -56,26 +60,29 @@ const Products = () => {
       setSelectedProduct(null);
     },
     onError: (error: Error) => {
+      console.error("Error creating product:", error);
       toast.error("Failed to create product: " + error.message);
     },
   });
 
   const updateProductMutation = useMutation({
-    mutationFn: async (product: Product) => {
+    mutationFn: async (formData: FormData) => {
+      const productId = selectedProduct?.id;
+      if (!productId) throw new Error("No product selected");
+
+      const updatedProduct = {
+        name: String(formData.get("name")),
+        description: String(formData.get("description")),
+        price: Number(formData.get("price")),
+        stock_quantity: Number(formData.get("stock_quantity")),
+      };
+
       const { error } = await supabase
         .from("products")
-        .update({
-          name: product.name,
-          description: product.description,
-          price: product.price,
-          stock_quantity: product.stock_quantity,
-        })
-        .eq("id", product.id);
+        .update(updatedProduct)
+        .eq("id", productId);
 
-      if (error) {
-        console.error("Error updating product:", error);
-        throw new Error(error.message);
-      }
+      if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["products"] });
@@ -84,6 +91,7 @@ const Products = () => {
       setSelectedProduct(null);
     },
     onError: (error: Error) => {
+      console.error("Error updating product:", error);
       toast.error("Failed to update product: " + error.message);
     },
   });
@@ -95,32 +103,23 @@ const Products = () => {
         .delete()
         .eq("id", id);
 
-      if (error) {
-        console.error("Error deleting product:", error);
-        throw new Error(error.message);
-      }
+      if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["products"] });
       toast.success("Product deleted successfully");
     },
     onError: (error: Error) => {
+      console.error("Error deleting product:", error);
       toast.error("Failed to delete product: " + error.message);
     },
   });
 
   const handleSubmit = (formData: FormData) => {
-    const productData = {
-      name: String(formData.get("name")),
-      description: String(formData.get("description")),
-      price: Number(formData.get("price")),
-      stock_quantity: Number(formData.get("stock_quantity")),
-    };
-
     if (selectedProduct) {
-      updateProductMutation.mutate({ ...productData, id: selectedProduct.id });
+      updateProductMutation.mutate(formData);
     } else {
-      createProductMutation.mutate(productData);
+      createProductMutation.mutate(formData);
     }
   };
 
