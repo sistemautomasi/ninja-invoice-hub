@@ -22,13 +22,14 @@ export const SecuritySettings = () => {
               <p className="text-sm text-gray-500 mb-3">
                 Change your password to keep your account secure
               </p>
-              <Button
-                variant="outline"
-                onClick={() => navigate("/forgot-password")}
-                className="w-full md:w-auto"
-              >
-                Change Password
-              </Button>
+              <div className="flex justify-start">
+                <Button
+                  variant="outline"
+                  onClick={() => navigate("/forgot-password")}
+                >
+                  Change Password
+                </Button>
+              </div>
             </div>
           </div>
           

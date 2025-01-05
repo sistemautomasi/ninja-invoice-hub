@@ -60,10 +60,10 @@ export const AppearanceSettings = () => {
       <CardContent className="space-y-6">
         <div className="space-y-2">
           <h3 className="font-medium">Theme</h3>
-          <div className="flex flex-col md:flex-row gap-4">
-            <Button variant="outline" className="flex-1">Light</Button>
-            <Button variant="outline" className="flex-1">Dark</Button>
-            <Button variant="outline" className="flex-1">System</Button>
+          <div className="flex gap-4">
+            <Button variant="outline">Light</Button>
+            <Button variant="outline">Dark</Button>
+            <Button variant="outline">System</Button>
           </div>
         </div>
 

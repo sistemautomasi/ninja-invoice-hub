@@ -2,7 +2,6 @@ import { Profile } from "@/types/profile";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
-import { Separator } from "@/components/ui/separator";
 
 interface ProfileFormProps {
   profile: Profile | undefined;
@@ -96,12 +95,14 @@ export const ProfileForm = ({ profile, userEmail, isSubmitting, onSubmit }: Prof
         />
       </div>
       
-      <Button type="submit" disabled={isSubmitting}>
-        {isSubmitting && (
-          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-        )}
-        Save Changes
-      </Button>
+      <div className="flex justify-start">
+        <Button type="submit" disabled={isSubmitting}>
+          {isSubmitting && (
+            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+          )}
+          Save Changes
+        </Button>
+      </div>
     </form>
   );
 };
