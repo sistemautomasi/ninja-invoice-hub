@@ -6,6 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 import { OrderFormData } from "@/types/order";
 import { useCurrency } from "@/hooks/use-currency";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Product {
   id: string;
@@ -43,22 +45,94 @@ export const OrderForm = ({ products, isSubmitting, onSubmit }: OrderFormProps) 
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [quantity, setQuantity] = useState(1);
   const { formatPrice } = useCurrency();
+  const { toast } = useToast();
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     
-    onSubmit({
-      customerName: String(formData.get("customerName")),
-      email: formData.get("email") ? String(formData.get("email")) : undefined,
-      phone: String(formData.get("phone")),
-      productId: String(formData.get("product")),
-      address: String(formData.get("address")),
-      district: String(formData.get("district")),
-      state: String(formData.get("state")),
-      postcode: String(formData.get("postcode")),
-      quantity: Number(quantity),
-    });
+    try {
+      // Get the current user
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast({
+          title: "Error",
+          description: "You must be logged in to submit an order",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (!selectedProduct) {
+        toast({
+          title: "Error",
+          description: "Please select a product",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const totalAmount = selectedProduct.price * quantity;
+
+      // Create the order
+      const { data: order, error: orderError } = await supabase
+        .from('orders')
+        .insert([
+          {
+            user_id: user.id,
+            total_amount: totalAmount,
+            status: 'pending'
+          }
+        ])
+        .select()
+        .single();
+
+      if (orderError) {
+        console.error('Order creation error:', orderError);
+        throw orderError;
+      }
+
+      // Create the order item
+      const { error: itemError } = await supabase
+        .from('order_items')
+        .insert([
+          {
+            order_id: order.id,
+            product_id: selectedProduct.id,
+            quantity: quantity,
+            price_at_time: selectedProduct.price
+          }
+        ]);
+
+      if (itemError) {
+        console.error('Order item creation error:', itemError);
+        throw itemError;
+      }
+
+      toast({
+        title: "Success",
+        description: "Order submitted successfully!",
+      });
+
+      onSubmit({
+        customerName: String(formData.get("customerName")),
+        email: formData.get("email") ? String(formData.get("email")) : undefined,
+        phone: String(formData.get("phone")),
+        productId: selectedProduct.id,
+        address: String(formData.get("address")),
+        district: String(formData.get("district")),
+        state: String(formData.get("state")),
+        postcode: String(formData.get("postcode")),
+        quantity: quantity,
+      });
+    } catch (error) {
+      console.error('Order submission error:', error);
+      toast({
+        title: "Error",
+        description: "Failed to submit order. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const totalPrice = selectedProduct ? selectedProduct.price * quantity : 0;
