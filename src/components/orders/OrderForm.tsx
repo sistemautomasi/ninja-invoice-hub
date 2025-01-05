@@ -82,27 +82,6 @@ export const OrderForm = ({ products, isSubmitting, onSubmit }: OrderFormProps) 
           </div>
 
           <div className="space-y-2 text-left">
-            <Label htmlFor="product" className="text-left">Product *</Label>
-            <select
-              id="product"
-              name="product"
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-              required
-              onChange={(e) => {
-                const product = products.find(p => p.id === e.target.value);
-                setSelectedProduct(product || null);
-              }}
-            >
-              <option value="">Select a product</option>
-              {products.map((product) => (
-                <option key={product.id} value={product.id}>
-                  {product.name} (${product.price})
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="space-y-2 text-left">
             <Label htmlFor="address" className="text-left">Address *</Label>
             <Input id="address" name="address" required />
           </div>
@@ -132,6 +111,27 @@ export const OrderForm = ({ products, isSubmitting, onSubmit }: OrderFormProps) 
           <div className="space-y-2 text-left">
             <Label htmlFor="postcode" className="text-left">Postcode *</Label>
             <Input id="postcode" name="postcode" required />
+          </div>
+
+          <div className="space-y-2 text-left">
+            <Label htmlFor="product" className="text-left">Product *</Label>
+            <select
+              id="product"
+              name="product"
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              required
+              onChange={(e) => {
+                const product = products.find(p => p.id === e.target.value);
+                setSelectedProduct(product || null);
+              }}
+            >
+              <option value="">Select a product</option>
+              {products.map((product) => (
+                <option key={product.id} value={product.id}>
+                  {product.name} (${product.price})
+                </option>
+              ))}
+            </select>
           </div>
 
           <div className="space-y-2 text-left">
