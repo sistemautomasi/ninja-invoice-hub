@@ -61,6 +61,8 @@ export const OrderForm = ({ products, isSubmitting, onSubmit }: OrderFormProps) 
     });
   };
 
+  const totalPrice = selectedProduct ? selectedProduct.price * quantity : 0;
+
   return (
     <Card className="w-full border-none shadow-none">
       <CardHeader className="px-0">
@@ -147,6 +149,11 @@ export const OrderForm = ({ products, isSubmitting, onSubmit }: OrderFormProps) 
               onChange={(e) => setQuantity(Number(e.target.value))}
               required
             />
+          </div>
+
+          <div className="space-y-2 text-left">
+            <Label className="text-left">Total Price</Label>
+            <div className="text-lg font-semibold">{formatPrice(totalPrice)}</div>
           </div>
 
           <Button type="submit" className="w-full bg-primary" disabled={isSubmitting}>
