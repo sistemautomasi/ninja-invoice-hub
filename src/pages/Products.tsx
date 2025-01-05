@@ -27,8 +27,7 @@ const Products = () => {
       console.log("Fetching products...");
       const { data, error } = await supabase
         .from("products")
-        .select("*")
-        .order("created_at", { ascending: false });
+        .select("*");
 
       if (error) {
         console.error("Error fetching products:", error);
