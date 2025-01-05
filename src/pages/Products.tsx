@@ -40,27 +40,21 @@ const Products = () => {
 
   const createProductMutation = useMutation({
     mutationFn: async (formData: FormData) => {
-      const name = formData.get("name");
-      const description = formData.get("description");
-      const price = formData.get("price");
-      const stock_quantity = formData.get("stock_quantity");
-
-      if (!name || !price || !stock_quantity) {
-        throw new Error("Missing required fields");
-      }
-
       const productData = {
-        name: String(name),
-        description: description ? String(description) : null,
-        price: Number(price),
-        stock_quantity: Number(stock_quantity),
+        name: formData.get("name") as string,
+        description: formData.get("description") as string || null,
+        price: Number(formData.get("price")),
+        stock_quantity: Number(formData.get("stock_quantity")),
       };
 
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from("products")
-        .insert(productData);
+        .insert(productData)
+        .select()
+        .single();
 
       if (error) throw error;
+      return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["products"] });
@@ -79,28 +73,22 @@ const Products = () => {
       const productId = selectedProduct?.id;
       if (!productId) throw new Error("No product selected");
 
-      const name = formData.get("name");
-      const description = formData.get("description");
-      const price = formData.get("price");
-      const stock_quantity = formData.get("stock_quantity");
-
-      if (!name || !price || !stock_quantity) {
-        throw new Error("Missing required fields");
-      }
-
       const productData = {
-        name: String(name),
-        description: description ? String(description) : null,
-        price: Number(price),
-        stock_quantity: Number(stock_quantity),
+        name: formData.get("name") as string,
+        description: formData.get("description") as string || null,
+        price: Number(formData.get("price")),
+        stock_quantity: Number(formData.get("stock_quantity")),
       };
 
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from("products")
         .update(productData)
-        .eq("id", productId);
+        .eq("id", productId)
+        .select()
+        .single();
 
       if (error) throw error;
+      return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["products"] });
