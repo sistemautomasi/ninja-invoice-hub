@@ -25,7 +25,6 @@ export const CurrencySettings = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Check authentication status on component mount
   useEffect(() => {
     const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
@@ -82,8 +81,8 @@ export const CurrencySettings = () => {
         throw new Error("No authenticated session");
       }
 
-      // If we have existing settings, update them
       if (currencySettings?.id) {
+        // Update existing setting
         const { error: updateError } = await supabase
           .from("settings")
           .update({
@@ -95,7 +94,7 @@ export const CurrencySettings = () => {
 
         if (updateError) throw updateError;
       } else {
-        // If no settings exist, insert new ones
+        // Insert new setting
         const { error: insertError } = await supabase
           .from("settings")
           .insert({
