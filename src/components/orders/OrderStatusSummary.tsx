@@ -69,45 +69,50 @@ export function OrderStatusSummary({ onStatusClick, selectedStatus }: OrderStatu
       label: "New Orders",
       icon: CirclePlus,
       color: "text-blue-500",
-      bgColor: "bg-blue-50/50",
-      borderColor: "border-blue-100",
-      gradient: "from-blue-500/10 to-blue-50/50",
+      bgGradient: "bg-gradient-to-br from-blue-500/5 via-blue-50/50 to-white",
+      borderColor: "border-blue-100/50",
+      shadowColor: "shadow-blue-500/20",
+      iconGradient: "bg-gradient-to-br from-blue-400 to-blue-600",
     },
     {
       status: "confirmed",
       label: "Confirmed",
       icon: CheckCircle,
-      color: "text-green-500",
-      bgColor: "bg-green-50/50",
-      borderColor: "border-green-100",
-      gradient: "from-green-500/10 to-green-50/50",
+      color: "text-emerald-500",
+      bgGradient: "bg-gradient-to-br from-emerald-500/5 via-emerald-50/50 to-white",
+      borderColor: "border-emerald-100/50",
+      shadowColor: "shadow-emerald-500/20",
+      iconGradient: "bg-gradient-to-br from-emerald-400 to-emerald-600",
     },
     {
       status: "shipped",
       label: "Shipped",
       icon: Truck,
-      color: "text-orange-500",
-      bgColor: "bg-orange-50/50",
-      borderColor: "border-orange-100",
-      gradient: "from-orange-500/10 to-orange-50/50",
+      color: "text-amber-500",
+      bgGradient: "bg-gradient-to-br from-amber-500/5 via-amber-50/50 to-white",
+      borderColor: "border-amber-100/50",
+      shadowColor: "shadow-amber-500/20",
+      iconGradient: "bg-gradient-to-br from-amber-400 to-amber-600",
     },
     {
       status: "cancelled",
       label: "Cancelled",
       icon: XCircle,
-      color: "text-red-500",
-      bgColor: "bg-red-50/50",
-      borderColor: "border-red-100",
-      gradient: "from-red-500/10 to-red-50/50",
+      color: "text-rose-500",
+      bgGradient: "bg-gradient-to-br from-rose-500/5 via-rose-50/50 to-white",
+      borderColor: "border-rose-100/50",
+      shadowColor: "shadow-rose-500/20",
+      iconGradient: "bg-gradient-to-br from-rose-400 to-rose-600",
     },
     {
       status: "returned",
       label: "Returned",
       icon: RotateCcw,
-      color: "text-yellow-500",
-      bgColor: "bg-yellow-50/50",
-      borderColor: "border-yellow-100",
-      gradient: "from-yellow-500/10 to-yellow-50/50",
+      color: "text-violet-500",
+      bgGradient: "bg-gradient-to-br from-violet-500/5 via-violet-50/50 to-white",
+      borderColor: "border-violet-100/50",
+      shadowColor: "shadow-violet-500/20",
+      iconGradient: "bg-gradient-to-br from-violet-400 to-violet-600",
     },
   ];
 
@@ -136,21 +141,20 @@ export function OrderStatusSummary({ onStatusClick, selectedStatus }: OrderStatu
         return (
           <Card
             key={config.status}
-            className={`relative overflow-hidden cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-lg ${
-              config.bgColor
-            } ${config.borderColor} ${
-              isSelected ? 'ring-2 ring-offset-2 ring-primary shadow-lg scale-105' : ''
-            }`}
+            className={`relative overflow-hidden cursor-pointer transition-all duration-300 
+              hover:scale-105 hover:-translate-y-1 hover:shadow-xl ${config.bgGradient} 
+              ${config.borderColor} border backdrop-blur-sm 
+              ${config.shadowColor} shadow-lg
+              ${isSelected ? `ring-2 ring-offset-2 ring-${config.color} scale-105 -translate-y-1` : ''}`}
             onClick={() => onStatusClick(config.status)}
           >
-            <div className="absolute inset-0 bg-gradient-to-br ${config.gradient} opacity-50" />
             <div className="relative p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <config.icon className={`h-8 w-8 ${config.color} transition-transform duration-300 group-hover:scale-110`} />
-                  <h3 className="text-sm font-medium mt-2 text-gray-700">{config.label}</h3>
-                  <p className={`text-2xl font-bold mt-1 ${config.color}`}>{count}</p>
+              <div className="flex flex-col">
+                <div className={`rounded-full p-2 w-fit ${config.iconGradient}`}>
+                  <config.icon className="h-6 w-6 text-white transition-transform duration-300 group-hover:scale-110" />
                 </div>
+                <h3 className="text-sm font-medium mt-3 text-gray-600">{config.label}</h3>
+                <p className={`text-3xl font-bold mt-1 ${config.color}`}>{count}</p>
               </div>
             </div>
           </Card>
