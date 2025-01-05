@@ -62,7 +62,7 @@ export const OrderForm = ({ products, isSubmitting, onSubmit }: OrderFormProps) 
   return (
     <Card className="w-full border-none shadow-none">
       <CardHeader className="px-0">
-        <CardTitle className="text-2xl">Order Details</CardTitle>
+        <CardTitle>Order Details</CardTitle>
       </CardHeader>
       <CardContent className="px-0">
         <form onSubmit={handleSubmit} className="space-y-4">
