@@ -10,6 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useEffect } from "react";
 
 const SUPPORTED_CURRENCIES = [
   { value: "MYR", label: "Malaysian Ringgit (MYR)" },
@@ -23,6 +24,21 @@ const DEFAULT_CURRENCY = "MYR";
 export const CurrencySettings = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // Check authentication status on component mount
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast({
+          title: "Authentication Required",
+          description: "Please sign in to change currency settings.",
+          variant: "destructive",
+        });
+      }
+    };
+    checkAuth();
+  }, [toast]);
 
   const { data: currencySettings, isLoading } = useQuery({
     queryKey: ["settings", "currency"],
@@ -39,7 +55,7 @@ export const CurrencySettings = () => {
         .from("settings")
         .select("*")
         .eq("setting_key", "default_currency")
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.error("Error fetching currency settings:", error);
@@ -49,6 +65,15 @@ export const CurrencySettings = () => {
       console.log("Fetched currency settings:", data);
       return data;
     },
+    retry: false,
+    onError: (error) => {
+      console.error("Error in currency settings query:", error);
+      toast({
+        title: "Error",
+        description: "Failed to load currency settings. Please ensure you're signed in.",
+        variant: "destructive",
+      });
+    }
   });
 
   const updateCurrency = useMutation({
@@ -61,22 +86,9 @@ export const CurrencySettings = () => {
         throw new Error("No authenticated session");
       }
 
-      // First, try to get the existing setting
-      const { data: existingData, error: fetchError } = await supabase
-        .from("settings")
-        .select("id")
-        .eq("setting_key", "default_currency")
-        .single();
-
-      if (fetchError && fetchError.code !== "PGRST116") { // PGRST116 is "no rows returned"
-        console.error("Error fetching existing setting:", fetchError);
-        throw fetchError;
-      }
-
       const { error: upsertError } = await supabase
         .from("settings")
         .upsert({
-          id: existingData?.id, // Include ID if it exists
           setting_key: "default_currency",
           setting_value: newCurrency,
           setting_type: "string",
@@ -101,11 +113,16 @@ export const CurrencySettings = () => {
       console.error("Failed to update currency:", error);
       toast({
         title: "Error",
-        description: "Failed to update currency settings. Please try again.",
+        description: "Failed to update currency settings. Please ensure you're signed in.",
         variant: "destructive",
       });
     },
   });
+
+  const handleCurrencyChange = (value: string) => {
+    console.log("Attempting to update currency to:", value);
+    updateCurrency.mutate(value);
+  };
 
   return (
     <Card>
@@ -118,7 +135,7 @@ export const CurrencySettings = () => {
           <Select
             disabled={isLoading || updateCurrency.isPending}
             value={currencySettings?.setting_value || DEFAULT_CURRENCY}
-            onValueChange={(value) => updateCurrency.mutate(value)}
+            onValueChange={handleCurrencyChange}
           >
             <SelectTrigger id="currency" className="w-full">
               <SelectValue placeholder="Select currency" />
