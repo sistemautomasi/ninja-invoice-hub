@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 export const useCurrency = () => {
   const { data: currencySettings } = useQuery({
-    queryKey: ["currency-settings"],
+    queryKey: ["settings", "currency"],
     queryFn: async () => {
       const { data: { session } } = await supabase.auth.getSession();
       
@@ -12,7 +12,7 @@ export const useCurrency = () => {
         return "USD";
       }
 
-      const { data: settings, error } = await supabase
+      const { data, error } = await supabase
         .from("settings")
         .select("setting_value")
         .eq("setting_key", "default_currency")
@@ -24,8 +24,8 @@ export const useCurrency = () => {
         throw error;
       }
 
-      console.log("Fetched currency settings:", settings);
-      return settings?.setting_value || "USD";
+      console.log("Fetched currency settings:", data);
+      return data?.setting_value || "USD";
     },
   });
 
