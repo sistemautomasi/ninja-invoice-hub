@@ -69,40 +69,45 @@ export function OrderStatusSummary({ onStatusClick, selectedStatus }: OrderStatu
       label: "New Orders",
       icon: CirclePlus,
       color: "text-blue-500",
-      bgColor: "bg-blue-50",
-      borderColor: "border-blue-200",
+      bgColor: "bg-blue-50/50",
+      borderColor: "border-blue-100",
+      gradient: "from-blue-500/10 to-blue-50/50",
     },
     {
       status: "confirmed",
       label: "Confirmed",
       icon: CheckCircle,
       color: "text-green-500",
-      bgColor: "bg-green-50",
-      borderColor: "border-green-200",
+      bgColor: "bg-green-50/50",
+      borderColor: "border-green-100",
+      gradient: "from-green-500/10 to-green-50/50",
     },
     {
       status: "shipped",
       label: "Shipped",
       icon: Truck,
       color: "text-orange-500",
-      bgColor: "bg-orange-50",
-      borderColor: "border-orange-200",
+      bgColor: "bg-orange-50/50",
+      borderColor: "border-orange-100",
+      gradient: "from-orange-500/10 to-orange-50/50",
     },
     {
       status: "cancelled",
       label: "Cancelled",
       icon: XCircle,
       color: "text-red-500",
-      bgColor: "bg-red-50",
-      borderColor: "border-red-200",
+      bgColor: "bg-red-50/50",
+      borderColor: "border-red-100",
+      gradient: "from-red-500/10 to-red-50/50",
     },
     {
       status: "returned",
       label: "Returned",
       icon: RotateCcw,
       color: "text-yellow-500",
-      bgColor: "bg-yellow-50",
-      borderColor: "border-yellow-200",
+      bgColor: "bg-yellow-50/50",
+      borderColor: "border-yellow-100",
+      gradient: "from-yellow-500/10 to-yellow-50/50",
     },
   ];
 
@@ -131,18 +136,21 @@ export function OrderStatusSummary({ onStatusClick, selectedStatus }: OrderStatu
         return (
           <Card
             key={config.status}
-            className={`p-4 cursor-pointer transition-all hover:shadow-md ${
+            className={`relative overflow-hidden cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-lg ${
               config.bgColor
             } ${config.borderColor} ${
-              isSelected ? 'ring-2 ring-offset-2 ring-primary' : ''
+              isSelected ? 'ring-2 ring-offset-2 ring-primary shadow-lg scale-105' : ''
             }`}
             onClick={() => onStatusClick(config.status)}
           >
-            <div className="flex items-center justify-between">
-              <div>
-                <config.icon className={`h-8 w-8 ${config.color}`} />
-                <h3 className="text-sm font-medium mt-2">{config.label}</h3>
-                <p className="text-2xl font-bold mt-1">{count}</p>
+            <div className="absolute inset-0 bg-gradient-to-br ${config.gradient} opacity-50" />
+            <div className="relative p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <config.icon className={`h-8 w-8 ${config.color} transition-transform duration-300 group-hover:scale-110`} />
+                  <h3 className="text-sm font-medium mt-2 text-gray-700">{config.label}</h3>
+                  <p className={`text-2xl font-bold mt-1 ${config.color}`}>{count}</p>
+                </div>
               </div>
             </div>
           </Card>
