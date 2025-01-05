@@ -55,6 +55,7 @@ export const CurrencySettings = () => {
         .from("settings")
         .select("*")
         .eq("setting_key", "default_currency")
+        .eq("user_id", session.user.id)
         .maybeSingle();
 
       if (error) {
@@ -95,6 +96,7 @@ export const CurrencySettings = () => {
           setting_key: "default_currency",
           setting_value: newCurrency,
           setting_type: "string",
+          user_id: session.user.id
         });
 
       if (upsertError) {
