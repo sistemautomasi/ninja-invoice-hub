@@ -69,14 +69,6 @@ export const CurrencySettings = () => {
     retry: false,
     meta: {
       errorMessage: "Failed to load currency settings. Please ensure you're signed in.",
-      onError: (error: Error) => {
-        console.error("Error in currency settings query:", error);
-        toast({
-          title: "Error",
-          description: "Failed to load currency settings. Please ensure you're signed in.",
-          variant: "destructive",
-        });
-      }
     }
   });
 
@@ -90,21 +82,32 @@ export const CurrencySettings = () => {
         throw new Error("No authenticated session");
       }
 
-      const { error: upsertError } = await supabase
-        .from("settings")
-        .upsert({
-          setting_key: "default_currency",
-          setting_value: newCurrency,
-          setting_type: "string",
-          user_id: session.user.id
-        });
+      // If we have existing settings, update them
+      if (currencySettings?.id) {
+        const { error: updateError } = await supabase
+          .from("settings")
+          .update({
+            setting_value: newCurrency,
+            updated_at: new Date().toISOString()
+          })
+          .eq("id", currencySettings.id)
+          .eq("user_id", session.user.id);
 
-      if (upsertError) {
-        console.error("Error updating currency:", upsertError);
-        throw upsertError;
+        if (updateError) throw updateError;
+      } else {
+        // If no settings exist, insert new ones
+        const { error: insertError } = await supabase
+          .from("settings")
+          .insert({
+            setting_key: "default_currency",
+            setting_value: newCurrency,
+            setting_type: "string",
+            user_id: session.user.id
+          });
+
+        if (insertError) throw insertError;
       }
 
-      console.log("Currency updated successfully to:", newCurrency);
       return newCurrency;
     },
     onSuccess: () => {
@@ -118,7 +121,7 @@ export const CurrencySettings = () => {
       console.error("Failed to update currency:", error);
       toast({
         title: "Error",
-        description: "Failed to update currency settings. Please ensure you're signed in.",
+        description: "Failed to update currency settings. Please try again.",
         variant: "destructive",
       });
     },
