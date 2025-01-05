@@ -9,6 +9,7 @@ import Products from "@/pages/Products";
 import Settings from "@/pages/Settings";
 import OrderList from "@/pages/OrderList";
 import SubmitOrder from "@/pages/SubmitOrder";
+import SignIn from "@/pages/SignIn";
 import "./App.css";
 
 const queryClient = new QueryClient();
@@ -21,6 +22,7 @@ function App() {
         <Sonner />
         <Router>
           <Routes>
+            <Route path="/signin" element={<SignIn />} />
             <Route path="/" element={<DashboardLayout />}>
               <Route index element={<Dashboard />} />
               <Route path="products" element={<Products />} />
