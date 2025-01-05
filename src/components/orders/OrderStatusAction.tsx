@@ -41,10 +41,6 @@ export const OrderStatusAction = ({ orderId, currentStatus }: OrderStatusActionP
 
       if (error) throw error;
 
-      // Broadcast the status change
-      const channel = supabase.channel(`order-status-${orderId}`);
-      await channel.subscribe();
-      
       // Invalidate queries to trigger refetch
       await queryClient.invalidateQueries({ queryKey: ["orderStatusCounts"] });
       await queryClient.invalidateQueries({ queryKey: ["orders"] });
