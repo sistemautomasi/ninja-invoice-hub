@@ -66,13 +66,16 @@ export const CurrencySettings = () => {
       return data;
     },
     retry: false,
-    onError: (error) => {
-      console.error("Error in currency settings query:", error);
-      toast({
-        title: "Error",
-        description: "Failed to load currency settings. Please ensure you're signed in.",
-        variant: "destructive",
-      });
+    meta: {
+      errorMessage: "Failed to load currency settings. Please ensure you're signed in.",
+      onError: (error: Error) => {
+        console.error("Error in currency settings query:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load currency settings. Please ensure you're signed in.",
+          variant: "destructive",
+        });
+      }
     }
   });
 
