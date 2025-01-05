@@ -1,38 +1,12 @@
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
-import {
-  LayoutDashboard,
-  Package,
-  ClipboardList,
-  Settings,
-  Menu,
-  X,
-} from "lucide-react";
+import { Menu, X, LayoutDashboard, Package, ClipboardList, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-interface SidebarItemProps {
-  icon: React.ElementType;
-  label: string;
-  href: string;
-  isActive: boolean;
-}
-
-const SidebarItem = ({ icon: Icon, label, href, isActive }: SidebarItemProps) => (
-  <Link
-    to={href}
-    className={cn(
-      "flex items-center gap-3 px-3 py-2 rounded-lg transition-colors",
-      isActive ? "bg-primary text-white" : "hover:bg-gray-100"
-    )}
-  >
-    <Icon className="w-5 h-5" />
-    <span>{label}</span>
-  </Link>
-);
+import { SidebarBranding } from "@/components/ui/sidebar/SidebarBranding";
+import { SidebarNavItem } from "@/components/ui/sidebar/SidebarNavItem";
 
 const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-  const location = useLocation();
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
 
   const sidebarItems = [
     { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
@@ -43,44 +17,65 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Mobile overlay */}
+      {isMobileOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/50 lg:hidden"
+          onClick={() => setIsMobileOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed top-0 left-0 z-40 h-screen transition-transform bg-white border-r",
-          sidebarOpen ? "w-64" : "w-16",
-          "md:translate-x-0"
+          "fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r bg-background transition-all duration-300",
+          isCollapsed && "w-16",
+          isMobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         )}
       >
-        <div className="flex flex-col h-full">
-          <div className="flex items-center justify-between p-4">
-            {sidebarOpen && <h1 className="text-xl font-bold">SubmitNinja</h1>}
-            <button
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="p-2 rounded-lg hover:bg-gray-100"
-            >
-              {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-            </button>
-          </div>
-          <nav className="flex-1 p-4 space-y-2">
-            {sidebarItems.map((item) => (
-              <SidebarItem
-                key={item.href}
-                {...item}
-                isActive={location.pathname === item.href}
-              />
-            ))}
-          </nav>
-        </div>
+        <SidebarBranding isCollapsed={isCollapsed} />
+        
+        {/* Toggle button */}
+        <button
+          onClick={() => setIsCollapsed(!isCollapsed)}
+          className="absolute -right-4 top-6 hidden h-8 w-8 items-center justify-center rounded-full border bg-background shadow-sm lg:flex"
+        >
+          {isCollapsed ? (
+            <Menu className="h-4 w-4" />
+          ) : (
+            <X className="h-4 w-4" />
+          )}
+        </button>
+
+        {/* Navigation */}
+        <nav className="flex-1 space-y-1 p-2">
+          {sidebarItems.map((item) => (
+            <SidebarNavItem
+              key={item.href}
+              {...item}
+              isCollapsed={isCollapsed}
+            />
+          ))}
+        </nav>
       </aside>
+
+      {/* Mobile toggle */}
+      <button
+        onClick={() => setIsMobileOpen(true)}
+        className="fixed left-4 top-4 z-50 flex h-10 w-10 items-center justify-center rounded-lg border bg-background shadow-sm lg:hidden"
+      >
+        <Menu className="h-4 w-4" />
+      </button>
 
       {/* Main content */}
       <main
         className={cn(
-          "transition-all duration-200 ease-in-out",
-          sidebarOpen ? "md:ml-64" : "md:ml-16"
+          "min-h-screen transition-all duration-300",
+          isCollapsed ? "lg:pl-16" : "lg:pl-64",
+          "pt-16 lg:pt-0"
         )}
       >
-        <div className="p-8">{children}</div>
+        <div className="container p-6">{children}</div>
       </main>
     </div>
   );
