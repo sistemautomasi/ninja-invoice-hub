@@ -27,9 +27,11 @@ export const CurrencySettings = () => {
   const { data: currencySettings, isLoading } = useQuery({
     queryKey: ["settings", "currency"],
     queryFn: async () => {
+      console.log("Fetching currency settings...");
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session) {
+        console.error("No authenticated session found");
         throw new Error("No authenticated session");
       }
 
@@ -44,31 +46,48 @@ export const CurrencySettings = () => {
         throw error;
       }
 
+      console.log("Fetched currency settings:", data);
       return data;
     },
   });
 
   const updateCurrency = useMutation({
     mutationFn: async (newCurrency: string) => {
+      console.log("Updating currency to:", newCurrency);
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session) {
+        console.error("No authenticated session found");
         throw new Error("No authenticated session");
       }
 
-      const { error } = await supabase
+      // First, try to get the existing setting
+      const { data: existingData, error: fetchError } = await supabase
+        .from("settings")
+        .select("id")
+        .eq("setting_key", "default_currency")
+        .single();
+
+      if (fetchError && fetchError.code !== "PGRST116") { // PGRST116 is "no rows returned"
+        console.error("Error fetching existing setting:", fetchError);
+        throw fetchError;
+      }
+
+      const { error: upsertError } = await supabase
         .from("settings")
         .upsert({
+          id: existingData?.id, // Include ID if it exists
           setting_key: "default_currency",
           setting_value: newCurrency,
           setting_type: "string",
         });
 
-      if (error) {
-        console.error("Error updating currency:", error);
-        throw error;
+      if (upsertError) {
+        console.error("Error updating currency:", upsertError);
+        throw upsertError;
       }
 
+      console.log("Currency updated successfully to:", newCurrency);
       return newCurrency;
     },
     onSuccess: () => {
