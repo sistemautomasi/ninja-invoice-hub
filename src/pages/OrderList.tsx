@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
-import { Loader2 } from "lucide-react";
+import { Loader2, Trash2 } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -10,11 +10,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrency } from "@/hooks/use-currency";
 import { OrderStatusSummary } from "@/components/orders/OrderStatusSummary";
 import { OrderStatusCell } from "@/components/orders/OrderStatusCell";
 import { OrderStatusAction } from "@/components/orders/OrderStatusAction";
+import { useToast } from "@/hooks/use-toast";
 
 interface Order {
   id: string;
@@ -34,8 +36,9 @@ const OrderList = () => {
   const [search, setSearch] = useState("");
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
   const { formatPrice } = useCurrency();
+  const { toast } = useToast();
 
-  const { data: orders, isLoading } = useQuery({
+  const { data: orders, isLoading, refetch } = useQuery({
     queryKey: ["orders", selectedStatus],
     queryFn: async () => {
       let query = supabase
@@ -63,13 +66,38 @@ const OrderList = () => {
         ...order,
         order_items: order.order_items.map(item => ({
           quantity: item.quantity,
-          product: item.products // Rename products to product to match interface
+          product: item.products
         }))
       }));
 
       return transformedData as Order[];
     },
   });
+
+  const handleDelete = async (orderId: string) => {
+    try {
+      const { error } = await supabase
+        .from('orders')
+        .delete()
+        .eq('id', orderId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Order deleted successfully",
+      });
+      
+      refetch();
+    } catch (error) {
+      console.error('Error deleting order:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete order",
+        variant: "destructive",
+      });
+    }
+  };
 
   const filteredOrders = orders?.filter(order => 
     order.order_items.some(item => 
@@ -109,12 +137,13 @@ const OrderList = () => {
               <TableHead>Status</TableHead>
               <TableHead>Date</TableHead>
               <TableHead>Actions</TableHead>
+              <TableHead>Delete</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {isLoading ? (
               <TableRow>
-                <TableCell colSpan={7} className="text-center py-10">
+                <TableCell colSpan={8} className="text-center py-10">
                   <div className="flex items-center justify-center">
                     <Loader2 className="h-8 w-8 animate-spin" />
                   </div>
@@ -122,7 +151,7 @@ const OrderList = () => {
               </TableRow>
             ) : filteredOrders?.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="text-center py-10">
+                <TableCell colSpan={8} className="text-center py-10">
                   No orders found
                 </TableCell>
               </TableRow>
@@ -148,6 +177,16 @@ const OrderList = () => {
                       orderId={order.id} 
                       currentStatus={order.status}
                     />
+                  </TableCell>
+                  <TableCell>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleDelete(order.id)}
+                      className="text-destructive hover:text-destructive/90 hover:bg-destructive/10"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))
