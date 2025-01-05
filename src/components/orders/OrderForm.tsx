@@ -53,8 +53,9 @@ export const OrderForm = ({ products, isSubmitting, onSubmit }: OrderFormProps) 
     
     try {
       // Get the current user
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      
+      if (userError || !user) {
         toast({
           title: "Error",
           description: "You must be logged in to submit an order",
@@ -74,16 +75,14 @@ export const OrderForm = ({ products, isSubmitting, onSubmit }: OrderFormProps) 
 
       const totalAmount = selectedProduct.price * quantity;
 
-      // Create the order
+      // Create the order with explicit user_id
       const { data: order, error: orderError } = await supabase
         .from('orders')
-        .insert([
-          {
-            user_id: user.id,
-            total_amount: totalAmount,
-            status: 'pending'
-          }
-        ])
+        .insert({
+          user_id: user.id,
+          total_amount: totalAmount,
+          status: 'pending'
+        })
         .select()
         .single();
 
@@ -95,14 +94,12 @@ export const OrderForm = ({ products, isSubmitting, onSubmit }: OrderFormProps) 
       // Create the order item
       const { error: itemError } = await supabase
         .from('order_items')
-        .insert([
-          {
-            order_id: order.id,
-            product_id: selectedProduct.id,
-            quantity: quantity,
-            price_at_time: selectedProduct.price
-          }
-        ]);
+        .insert({
+          order_id: order.id,
+          product_id: selectedProduct.id,
+          quantity: quantity,
+          price_at_time: selectedProduct.price
+        });
 
       if (itemError) {
         console.error('Order item creation error:', itemError);
