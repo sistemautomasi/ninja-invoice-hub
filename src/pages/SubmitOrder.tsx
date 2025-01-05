@@ -1,6 +1,5 @@
 import { useNavigate } from "react-router-dom";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
@@ -78,23 +77,15 @@ const SubmitOrder = () => {
   }
 
   return (
-    <div className="p-6 max-w-4xl">
+    <div className="p-6 max-w-xl">
       <h1 className="text-3xl font-bold mb-8">Submit Order</h1>
-      
-      <Card className="shadow-lg">
-        <CardHeader className="pb-4">
-          <CardTitle className="text-2xl">Order Details</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {products && (
-            <OrderForm
-              products={products}
-              isSubmitting={createOrderMutation.isPending}
-              onSubmit={(data) => createOrderMutation.mutate(data)}
-            />
-          )}
-        </CardContent>
-      </Card>
+      {products && (
+        <OrderForm
+          products={products}
+          isSubmitting={createOrderMutation.isPending}
+          onSubmit={(data) => createOrderMutation.mutate(data)}
+        />
+      )}
     </div>
   );
 };
