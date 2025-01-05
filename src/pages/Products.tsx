@@ -41,15 +41,16 @@ const Products = () => {
   const createProductMutation = useMutation({
     mutationFn: async (formData: FormData) => {
       const productData = {
-        name: formData.get("name"),
-        description: formData.get("description"),
+        name: String(formData.get("name")),
+        description: formData.get("description") ? String(formData.get("description")) : null,
         price: Number(formData.get("price")),
         stock_quantity: Number(formData.get("stock_quantity")),
       };
 
       const { data, error } = await supabase
         .from("products")
-        .insert(productData);
+        .insert(productData)
+        .select();
 
       if (error) throw error;
       return data;
@@ -72,8 +73,8 @@ const Products = () => {
       if (!productId) throw new Error("No product selected");
 
       const productData = {
-        name: formData.get("name"),
-        description: formData.get("description"),
+        name: String(formData.get("name")),
+        description: formData.get("description") ? String(formData.get("description")) : null,
         price: Number(formData.get("price")),
         stock_quantity: Number(formData.get("stock_quantity")),
       };
@@ -81,7 +82,8 @@ const Products = () => {
       const { data, error } = await supabase
         .from("products")
         .update(productData)
-        .eq("id", productId);
+        .eq("id", productId)
+        .select();
 
       if (error) throw error;
       return data;
