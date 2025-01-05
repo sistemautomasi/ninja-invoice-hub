@@ -8,4 +8,6 @@ export interface OrderFormData {
   state: string;
   postcode: string;
   quantity: number;
+  totalAmount: number;
+  priceAtTime: number;
 }

@@ -1,14 +1,13 @@
 import { useNavigate } from "react-router-dom";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { OrderForm } from "@/components/orders/OrderForm";
-import { OrderFormData } from "@/types/order";
+import { supabase } from "@/integrations/supabase/client";
+import { useSubmitOrder } from "@/hooks/use-submit-order";
 
 const SubmitOrder = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
+  const submitOrderMutation = useSubmitOrder();
 
   const { data: products, isLoading: isLoadingProducts } = useQuery({
     queryKey: ["products"],
@@ -18,53 +17,6 @@ const SubmitOrder = () => {
         .select("id, name, price, stock_quantity");
       if (error) throw error;
       return data;
-    },
-  });
-
-  const createOrderMutation = useMutation({
-    mutationFn: async (orderData: OrderFormData) => {
-      const selectedProduct = products?.find(p => p.id === orderData.productId);
-      if (!selectedProduct) throw new Error("Product not found");
-
-      const total_amount = selectedProduct.price * orderData.quantity;
-
-      // First create the order
-      const { data: order, error: orderError } = await supabase
-        .from("orders")
-        .insert([{ total_amount, status: "pending" }])
-        .select()
-        .single();
-
-      if (orderError) throw orderError;
-
-      // Then create the order item
-      const { error: itemError } = await supabase.from("order_items").insert([
-        {
-          order_id: order.id,
-          product_id: orderData.productId,
-          quantity: orderData.quantity,
-          price_at_time: selectedProduct.price,
-        },
-      ]);
-
-      if (itemError) throw itemError;
-
-      return order;
-    },
-    onSuccess: () => {
-      toast({
-        title: "Success",
-        description: "Order submitted successfully!",
-      });
-      navigate("/orders");
-    },
-    onError: (error) => {
-      console.error("Order submission error:", error);
-      toast({
-        title: "Error",
-        description: "Failed to submit order. Please try again.",
-        variant: "destructive",
-      });
     },
   });
 
@@ -82,8 +34,12 @@ const SubmitOrder = () => {
       {products && (
         <OrderForm
           products={products}
-          isSubmitting={createOrderMutation.isPending}
-          onSubmit={(data) => createOrderMutation.mutate(data)}
+          isSubmitting={submitOrderMutation.isPending}
+          onSubmit={(data) => {
+            submitOrderMutation.mutate(data, {
+              onSuccess: () => navigate("/orders"),
+            });
+          }}
         />
       )}
     </div>
