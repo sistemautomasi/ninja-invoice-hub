@@ -77,7 +77,7 @@ const SubmitOrder = () => {
   }
 
   return (
-    <div className="p-6 max-w-xl">
+    <div className="w-full p-6">
       <h1 className="text-3xl font-bold mb-8">Submit Order</h1>
       {products && (
         <OrderForm
