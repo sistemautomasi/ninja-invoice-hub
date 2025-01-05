@@ -40,17 +40,14 @@ const Products = () => {
 
   const createProductMutation = useMutation({
     mutationFn: async (newProduct: Omit<Product, "id">) => {
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from("products")
-        .insert([newProduct])
-        .select()
-        .single();
+        .insert([newProduct]);
 
       if (error) {
         console.error("Error creating product:", error);
         throw new Error(error.message);
       }
-      return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["products"] });
@@ -65,7 +62,7 @@ const Products = () => {
 
   const updateProductMutation = useMutation({
     mutationFn: async (product: Product) => {
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from("products")
         .update({
           name: product.name,
@@ -73,15 +70,12 @@ const Products = () => {
           price: product.price,
           stock_quantity: product.stock_quantity,
         })
-        .eq("id", product.id)
-        .select()
-        .single();
+        .eq("id", product.id);
 
       if (error) {
         console.error("Error updating product:", error);
         throw new Error(error.message);
       }
-      return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["products"] });
