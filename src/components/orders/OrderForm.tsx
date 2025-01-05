@@ -19,6 +19,25 @@ interface OrderFormProps {
   onSubmit: (data: OrderFormData) => void;
 }
 
+const MALAYSIAN_STATES = [
+  "Johor",
+  "Kedah",
+  "Kelantan",
+  "Melaka",
+  "Negeri Sembilan",
+  "Pahang",
+  "Perak",
+  "Perlis",
+  "Pulau Pinang",
+  "Sabah",
+  "Sarawak",
+  "Selangor",
+  "Terengganu",
+  "Wilayah Persekutuan Kuala Lumpur",
+  "Wilayah Persekutuan Labuan",
+  "Wilayah Persekutuan Putrajaya"
+];
+
 export const OrderForm = ({ products, isSubmitting, onSubmit }: OrderFormProps) => {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [quantity, setQuantity] = useState(1);
@@ -91,7 +110,19 @@ export const OrderForm = ({ products, isSubmitting, onSubmit }: OrderFormProps) 
 
         <div className="space-y-2">
           <Label htmlFor="state">State *</Label>
-          <Input id="state" name="state" required />
+          <select
+            id="state"
+            name="state"
+            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            required
+          >
+            <option value="">Select a state</option>
+            {MALAYSIAN_STATES.map((state) => (
+              <option key={state} value={state}>
+                {state}
+              </option>
+            ))}
+          </select>
         </div>
 
         <div className="space-y-2">
