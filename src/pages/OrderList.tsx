@@ -39,7 +39,7 @@ const OrderList = () => {
           *,
           order_items (
             quantity,
-            product (
+            products (
               name
             )
           )
@@ -47,7 +47,17 @@ const OrderList = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data as Order[];
+      
+      // Transform the data to match our interface
+      const transformedData = data?.map(order => ({
+        ...order,
+        order_items: order.order_items.map(item => ({
+          quantity: item.quantity,
+          product: item.products // Rename products to product to match interface
+        }))
+      }));
+
+      return transformedData as Order[];
     },
   });
 
