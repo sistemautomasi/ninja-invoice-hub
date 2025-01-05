@@ -13,14 +13,8 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrency } from "@/hooks/use-currency";
 import { OrderStatusSummary } from "@/components/orders/OrderStatusSummary";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { useToast } from "@/components/ui/use-toast";
+import { OrderStatusCell } from "@/components/orders/OrderStatusCell";
+import { OrderStatusAction } from "@/components/orders/OrderStatusAction";
 
 interface Order {
   id: string;
@@ -40,7 +34,6 @@ const OrderList = () => {
   const [search, setSearch] = useState("");
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
   const { formatPrice } = useCurrency();
-  const { toast } = useToast();
 
   const { data: orders, isLoading } = useQuery({
     queryKey: ["orders", selectedStatus],
@@ -78,28 +71,6 @@ const OrderList = () => {
     },
   });
 
-  const handleStatusChange = async (orderId: string, newStatus: string) => {
-    try {
-      const { error } = await supabase
-        .from('orders')
-        .update({ status: newStatus })
-        .eq('id', orderId);
-
-      if (error) throw error;
-
-      toast({
-        title: "Status Updated",
-        description: `Order status has been changed to ${newStatus}`,
-      });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to update order status",
-        variant: "destructive",
-      });
-    }
-  };
-
   const filteredOrders = orders?.filter(order => 
     order.order_items.some(item => 
       item.product.name.toLowerCase().includes(search.toLowerCase())
@@ -109,14 +80,6 @@ const OrderList = () => {
   const handleStatusClick = (status: string) => {
     setSelectedStatus(selectedStatus === status ? null : status);
   };
-
-  const statusOptions = [
-    { value: "pending", label: "Pending" },
-    { value: "confirmed", label: "Confirmed" },
-    { value: "shipped", label: "Shipped" },
-    { value: "cancelled", label: "Cancelled" },
-    { value: "returned", label: "Returned" },
-  ];
 
   return (
     <div className="space-y-6">
@@ -145,12 +108,13 @@ const OrderList = () => {
               <TableHead>Total Amount</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Date</TableHead>
+              <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {isLoading ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center py-10">
+                <TableCell colSpan={7} className="text-center py-10">
                   <div className="flex items-center justify-center">
                     <Loader2 className="h-8 w-8 animate-spin" />
                   </div>
@@ -158,7 +122,7 @@ const OrderList = () => {
               </TableRow>
             ) : filteredOrders?.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center py-10">
+                <TableCell colSpan={7} className="text-center py-10">
                   No orders found
                 </TableCell>
               </TableRow>
@@ -174,24 +138,16 @@ const OrderList = () => {
                   </TableCell>
                   <TableCell>{formatPrice(order.total_amount)}</TableCell>
                   <TableCell>
-                    <Select
-                      defaultValue={order.status}
-                      onValueChange={(value) => handleStatusChange(order.id, value)}
-                    >
-                      <SelectTrigger className="w-[140px]">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {statusOptions.map((option) => (
-                          <SelectItem key={option.value} value={option.value}>
-                            {option.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <OrderStatusCell status={order.status} />
                   </TableCell>
                   <TableCell>
                     {new Date(order.created_at).toLocaleDateString()}
+                  </TableCell>
+                  <TableCell>
+                    <OrderStatusAction 
+                      orderId={order.id} 
+                      currentStatus={order.status}
+                    />
                   </TableCell>
                 </TableRow>
               ))
