@@ -27,29 +27,47 @@ export const CurrencySettings = () => {
   const { data: currencySettings, isLoading } = useQuery({
     queryKey: ["settings", "currency"],
     queryFn: async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        throw new Error("No authenticated session");
+      }
+
       const { data, error } = await supabase
         .from("settings")
         .select("*")
         .eq("setting_key", "default_currency")
         .maybeSingle();
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching currency settings:", error);
+        throw error;
+      }
+
       return data;
     },
   });
 
   const updateCurrency = useMutation({
     mutationFn: async (newCurrency: string) => {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        throw new Error("No authenticated session");
+      }
+
       const { error } = await supabase
         .from("settings")
-        .upsert({ 
+        .upsert({
           setting_key: "default_currency",
           setting_value: newCurrency,
-          setting_type: "string"
-        })
-        .eq("setting_key", "default_currency");
+          setting_type: "string",
+        });
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error updating currency:", error);
+        throw error;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["settings", "currency"] });
