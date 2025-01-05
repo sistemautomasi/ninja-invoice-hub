@@ -56,9 +56,17 @@ export const CurrencySettings = () => {
         throw new Error("No authenticated session");
       }
 
+      // First try to get the existing setting
+      const { data: existingSetting } = await supabase
+        .from("settings")
+        .select("id")
+        .eq("setting_key", "default_currency")
+        .maybeSingle();
+
       const { error } = await supabase
         .from("settings")
         .upsert({
+          id: existingSetting?.id, // Include the id if it exists
           setting_key: "default_currency",
           setting_value: newCurrency,
           setting_type: "string",
