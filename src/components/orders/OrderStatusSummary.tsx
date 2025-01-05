@@ -1,7 +1,7 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
-import { CirclePlus, CheckCircle, Truck, XCircle, ArrowUndo, Loader2 } from "lucide-react";
+import { CirclePlus, CheckCircle, Truck, XCircle, RotateCcw, Loader2 } from "lucide-react";
 import { useEffect } from "react";
 
 interface StatusCount {
@@ -15,24 +15,28 @@ interface OrderStatusSummaryProps {
 }
 
 export function OrderStatusSummary({ onStatusClick, selectedStatus }: OrderStatusSummaryProps) {
+  const queryClient = useQueryClient();
+  
   const { data: statusCounts, isLoading, error } = useQuery({
     queryKey: ["orderStatusCounts"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("orders")
-        .select("status")
-        .then(({ data }) => {
-          if (!data) return [];
-          return Object.entries(
-            data.reduce((acc: Record<string, number>, order) => {
-              acc[order.status] = (acc[order.status] || 0) + 1;
-              return acc;
-            }, {})
-          ).map(([status, count]) => ({ status, count }));
-        });
+        .select("status");
 
       if (error) throw error;
-      return data as StatusCount[];
+
+      if (!data) return [];
+
+      const counts = data.reduce((acc: Record<string, number>, order) => {
+        acc[order.status] = (acc[order.status] || 0) + 1;
+        return acc;
+      }, {});
+
+      return Object.entries(counts).map(([status, count]) => ({ 
+        status, 
+        count 
+      }));
     },
   });
 
@@ -57,7 +61,7 @@ export function OrderStatusSummary({ onStatusClick, selectedStatus }: OrderStatu
     return () => {
       void supabase.removeChannel(channel);
     };
-  }, []);
+  }, [queryClient]);
 
   const statusConfigs = [
     {
@@ -95,7 +99,7 @@ export function OrderStatusSummary({ onStatusClick, selectedStatus }: OrderStatu
     {
       status: "returned",
       label: "Returned",
-      icon: ArrowUndo,
+      icon: RotateCcw,
       color: "text-yellow-500",
       bgColor: "bg-yellow-50",
       borderColor: "border-yellow-200",
