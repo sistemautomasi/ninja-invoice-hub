@@ -13,6 +13,14 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrency } from "@/hooks/use-currency";
 import { OrderStatusSummary } from "@/components/orders/OrderStatusSummary";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useToast } from "@/components/ui/use-toast";
 
 interface Order {
   id: string;
@@ -32,6 +40,7 @@ const OrderList = () => {
   const [search, setSearch] = useState("");
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
   const { formatPrice } = useCurrency();
+  const { toast } = useToast();
 
   const { data: orders, isLoading } = useQuery({
     queryKey: ["orders", selectedStatus],
@@ -69,6 +78,28 @@ const OrderList = () => {
     },
   });
 
+  const handleStatusChange = async (orderId: string, newStatus: string) => {
+    try {
+      const { error } = await supabase
+        .from('orders')
+        .update({ status: newStatus })
+        .eq('id', orderId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Status Updated",
+        description: `Order status has been changed to ${newStatus}`,
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update order status",
+        variant: "destructive",
+      });
+    }
+  };
+
   const filteredOrders = orders?.filter(order => 
     order.order_items.some(item => 
       item.product.name.toLowerCase().includes(search.toLowerCase())
@@ -78,6 +109,14 @@ const OrderList = () => {
   const handleStatusClick = (status: string) => {
     setSelectedStatus(selectedStatus === status ? null : status);
   };
+
+  const statusOptions = [
+    { value: "pending", label: "Pending" },
+    { value: "confirmed", label: "Confirmed" },
+    { value: "shipped", label: "Shipped" },
+    { value: "cancelled", label: "Cancelled" },
+    { value: "returned", label: "Returned" },
+  ];
 
   return (
     <div className="space-y-6">
@@ -134,7 +173,23 @@ const OrderList = () => {
                     {order.order_items.reduce((sum, item) => sum + item.quantity, 0)}
                   </TableCell>
                   <TableCell>{formatPrice(order.total_amount)}</TableCell>
-                  <TableCell className="capitalize">{order.status}</TableCell>
+                  <TableCell>
+                    <Select
+                      defaultValue={order.status}
+                      onValueChange={(value) => handleStatusChange(order.id, value)}
+                    >
+                      <SelectTrigger className="w-[140px]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {statusOptions.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </TableCell>
                   <TableCell>
                     {new Date(order.created_at).toLocaleDateString()}
                   </TableCell>
