@@ -62,27 +62,27 @@ export const OrderForm = ({ products, isSubmitting, onSubmit }: OrderFormProps) 
   return (
     <Card className="w-full border-none shadow-none">
       <CardHeader className="px-0">
-        <CardTitle>Order Details</CardTitle>
+        <CardTitle className="text-left">Order Details</CardTitle>
       </CardHeader>
       <CardContent className="px-0">
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="customerName">Customer Name *</Label>
+          <div className="space-y-2 text-left">
+            <Label htmlFor="customerName" className="text-left">Customer Name *</Label>
             <Input id="customerName" name="customerName" required />
           </div>
           
-          <div className="space-y-2">
-            <Label htmlFor="email">Email (optional)</Label>
+          <div className="space-y-2 text-left">
+            <Label htmlFor="email" className="text-left">Email (optional)</Label>
             <Input id="email" name="email" type="email" />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="phone">Phone *</Label>
+          <div className="space-y-2 text-left">
+            <Label htmlFor="phone" className="text-left">Phone *</Label>
             <Input id="phone" name="phone" required />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="product">Product *</Label>
+          <div className="space-y-2 text-left">
+            <Label htmlFor="product" className="text-left">Product *</Label>
             <select
               id="product"
               name="product"
@@ -102,18 +102,18 @@ export const OrderForm = ({ products, isSubmitting, onSubmit }: OrderFormProps) 
             </select>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="address">Address *</Label>
+          <div className="space-y-2 text-left">
+            <Label htmlFor="address" className="text-left">Address *</Label>
             <Input id="address" name="address" required />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="district">District *</Label>
+          <div className="space-y-2 text-left">
+            <Label htmlFor="district" className="text-left">District *</Label>
             <Input id="district" name="district" required />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="state">State *</Label>
+          <div className="space-y-2 text-left">
+            <Label htmlFor="state" className="text-left">State *</Label>
             <select
               id="state"
               name="state"
@@ -129,13 +129,13 @@ export const OrderForm = ({ products, isSubmitting, onSubmit }: OrderFormProps) 
             </select>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="postcode">Postcode *</Label>
+          <div className="space-y-2 text-left">
+            <Label htmlFor="postcode" className="text-left">Postcode *</Label>
             <Input id="postcode" name="postcode" required />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="quantity">Quantity *</Label>
+          <div className="space-y-2 text-left">
+            <Label htmlFor="quantity" className="text-left">Quantity *</Label>
             <Input
               id="quantity"
               name="quantity"
