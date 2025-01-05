@@ -7,6 +7,7 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface OrderStatusActionProps {
   orderId: string;
@@ -15,6 +16,7 @@ interface OrderStatusActionProps {
 
 export const OrderStatusAction = ({ orderId, currentStatus }: OrderStatusActionProps) => {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const statusOptions = [
     { value: "pending", label: "Pending" },
@@ -32,6 +34,10 @@ export const OrderStatusAction = ({ orderId, currentStatus }: OrderStatusActionP
         .eq('id', orderId);
 
       if (error) throw error;
+
+      // Invalidate both queries to trigger refetch
+      await queryClient.invalidateQueries({ queryKey: ["orderStatusCounts"] });
+      await queryClient.invalidateQueries({ queryKey: ["orders"] });
 
       toast({
         title: "Status Updated",

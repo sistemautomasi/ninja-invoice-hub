@@ -51,9 +51,9 @@ export function OrderStatusSummary({ onStatusClick, selectedStatus }: OrderStatu
           schema: 'public',
           table: 'orders'
         },
-        () => {
-          // Invalidate the query to trigger a refetch
-          void queryClient.invalidateQueries({ queryKey: ["orderStatusCounts"] });
+        (payload) => {
+          // Immediately invalidate the query to trigger a refetch
+          queryClient.invalidateQueries({ queryKey: ["orderStatusCounts"] });
         }
       )
       .subscribe();
