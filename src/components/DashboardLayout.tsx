@@ -1,18 +1,19 @@
 import { useState } from "react";
+import { Outlet } from "react-router-dom";
 import { Menu, X, LayoutDashboard, Package, ClipboardList, Settings, BoxIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SidebarBranding } from "@/components/ui/sidebar/SidebarBranding";
 import { SidebarNavItem } from "@/components/ui/sidebar/SidebarNavItem";
 
-const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
+const DashboardLayout = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
   const sidebarItems = [
-    { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
+    { icon: LayoutDashboard, label: "Dashboard", href: "/" },
     { icon: BoxIcon, label: "Products", href: "/products" },
     { icon: Package, label: "Submit Order", href: "/submit-order" },
-    { icon: ClipboardList, label: "Order List", href: "/order-list" },
+    { icon: ClipboardList, label: "Order List", href: "/orders" },
     { icon: Settings, label: "Settings", href: "/settings" },
   ];
 
@@ -76,7 +77,9 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
           "pt-16 lg:pt-0"
         )}
       >
-        <div className="container p-6">{children}</div>
+        <div className="container p-6">
+          <Outlet />
+        </div>
       </main>
     </div>
   );

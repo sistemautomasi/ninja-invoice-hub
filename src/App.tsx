@@ -21,7 +21,7 @@ function App() {
         <Sonner />
         <Router>
           <Routes>
-            <Route element={<DashboardLayout />}>
+            <Route path="/" element={<DashboardLayout />}>
               <Route index element={<Dashboard />} />
               <Route path="products" element={<Products />} />
               <Route path="settings" element={<Settings />} />
