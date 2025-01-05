@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/table";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrency } from "@/hooks/use-currency";
+import { OrderStatusSummary } from "@/components/orders/OrderStatusSummary";
 
 interface Order {
   id: string;
@@ -29,12 +30,13 @@ interface Order {
 
 const OrderList = () => {
   const [search, setSearch] = useState("");
+  const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
   const { formatPrice } = useCurrency();
 
   const { data: orders, isLoading } = useQuery({
-    queryKey: ["orders"],
+    queryKey: ["orders", selectedStatus],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from("orders")
         .select(`
           *,
@@ -47,9 +49,14 @@ const OrderList = () => {
         `)
         .order('created_at', { ascending: false });
 
+      if (selectedStatus) {
+        query = query.eq('status', selectedStatus);
+      }
+
+      const { data, error } = await query;
+
       if (error) throw error;
       
-      // Transform the data to match our interface
       const transformedData = data?.map(order => ({
         ...order,
         order_items: order.order_items.map(item => ({
@@ -68,6 +75,10 @@ const OrderList = () => {
     )
   );
 
+  const handleStatusClick = (status: string) => {
+    setSelectedStatus(selectedStatus === status ? null : status);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -79,6 +90,11 @@ const OrderList = () => {
           onChange={(e) => setSearch(e.target.value)}
         />
       </div>
+
+      <OrderStatusSummary 
+        onStatusClick={handleStatusClick}
+        selectedStatus={selectedStatus}
+      />
 
       <div className="border rounded-lg">
         <Table>
