@@ -8,6 +8,8 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
+import { Loader2 } from "lucide-react";
 
 interface OrderStatusActionProps {
   orderId: string;
@@ -17,6 +19,7 @@ interface OrderStatusActionProps {
 export const OrderStatusAction = ({ orderId, currentStatus }: OrderStatusActionProps) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [isLoading, setIsLoading] = useState(false);
 
   const statusOptions = [
     { value: "pending", label: "Pending" },
@@ -27,6 +30,9 @@ export const OrderStatusAction = ({ orderId, currentStatus }: OrderStatusActionP
   ];
 
   const handleStatusChange = async (newStatus: string) => {
+    if (newStatus === currentStatus) return;
+    
+    setIsLoading(true);
     try {
       const { error } = await supabase
         .from('orders')
@@ -35,6 +41,10 @@ export const OrderStatusAction = ({ orderId, currentStatus }: OrderStatusActionP
 
       if (error) throw error;
 
+      // Broadcast the status change
+      const channel = supabase.channel(`order-status-${orderId}`);
+      await channel.subscribe();
+      
       // Invalidate queries to trigger refetch
       await queryClient.invalidateQueries({ queryKey: ["orderStatusCounts"] });
       await queryClient.invalidateQueries({ queryKey: ["orders"] });
@@ -44,29 +54,42 @@ export const OrderStatusAction = ({ orderId, currentStatus }: OrderStatusActionP
         description: `Order status has been changed to ${newStatus}`,
       });
     } catch (error) {
+      console.error('Error updating status:', error);
       toast({
         title: "Error",
         description: "Failed to update order status",
         variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <Select
-      defaultValue={currentStatus}
-      onValueChange={handleStatusChange}
-    >
-      <SelectTrigger className="w-[140px]">
-        <SelectValue placeholder="Select status" />
-      </SelectTrigger>
-      <SelectContent>
-        {statusOptions.map((option) => (
-          <SelectItem key={option.value} value={option.value}>
-            {option.label}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
+    <div className="relative">
+      <Select
+        defaultValue={currentStatus}
+        onValueChange={handleStatusChange}
+        disabled={isLoading}
+      >
+        <SelectTrigger className="w-[140px]">
+          {isLoading ? (
+            <div className="flex items-center gap-2">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              <span>Updating...</span>
+            </div>
+          ) : (
+            <SelectValue placeholder="Select status" />
+          )}
+        </SelectTrigger>
+        <SelectContent>
+          {statusOptions.map((option) => (
+            <SelectItem key={option.value} value={option.value}>
+              {option.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
   );
 };

@@ -16,7 +16,7 @@ export const OrderStatusCell = ({ status: initialStatus, orderId }: OrderStatusC
     
     // Set up real-time subscription for status changes
     const channel = supabase
-      .channel(`orders-status-${orderId}`)
+      .channel(`order-status-${orderId}`)
       .on(
         'postgres_changes',
         {
