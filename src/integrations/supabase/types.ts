@@ -9,6 +9,39 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      login_history: {
+        Row: {
+          browser: string
+          created_at: string
+          device_name: string
+          id: string
+          ip_address: string | null
+          is_active: boolean | null
+          last_accessed: string
+          user_id: string
+        }
+        Insert: {
+          browser: string
+          created_at?: string
+          device_name: string
+          id?: string
+          ip_address?: string | null
+          is_active?: boolean | null
+          last_accessed?: string
+          user_id: string
+        }
+        Update: {
+          browser?: string
+          created_at?: string
+          device_name?: string
+          id?: string
+          ip_address?: string | null
+          is_active?: boolean | null
+          last_accessed?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       order_items: {
         Row: {
           created_at: string
@@ -110,25 +143,43 @@ export type Database = {
       }
       profiles: {
         Row: {
+          avatar_url: string | null
+          bio: string | null
+          company: string | null
           created_at: string
           full_name: string | null
           id: string
+          job_title: string | null
+          location: string | null
           phone: string | null
           updated_at: string
+          website: string | null
         }
         Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          company?: string | null
           created_at?: string
           full_name?: string | null
           id: string
+          job_title?: string | null
+          location?: string | null
           phone?: string | null
           updated_at?: string
+          website?: string | null
         }
         Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          company?: string | null
           created_at?: string
           full_name?: string | null
           id?: string
+          job_title?: string | null
+          location?: string | null
           phone?: string | null
           updated_at?: string
+          website?: string | null
         }
         Relationships: []
       }
