@@ -58,13 +58,13 @@ export const ProfileSettings = () => {
     e.preventDefault();
     const formData = new FormData(e.target as HTMLFormElement);
     const newProfile = {
-      full_name: formData.get('fullName'),
-      phone: formData.get('phone'),
-      company: formData.get('company'),
-      job_title: formData.get('jobTitle'),
-      bio: formData.get('bio'),
-      location: formData.get('location'),
-      website: formData.get('website'),
+      full_name: String(formData.get('fullName') || ''),
+      phone: String(formData.get('phone') || ''),
+      company: String(formData.get('company') || ''),
+      job_title: String(formData.get('jobTitle') || ''),
+      bio: String(formData.get('bio') || ''),
+      location: String(formData.get('location') || ''),
+      website: String(formData.get('website') || ''),
     };
     updateProfile.mutate(newProfile);
   };
