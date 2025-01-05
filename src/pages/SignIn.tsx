@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 const SignIn = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -34,26 +35,48 @@ const SignIn = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
+    
     try {
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
-      if (error) throw error;
+      if (error) {
+        if (error.message.includes("email_not_confirmed")) {
+          // Handle email not confirmed error
+          const { error: resendError } = await supabase.auth.resend({
+            type: 'signup',
+            email,
+          });
 
-      toast({
-        title: "Success",
-        description: "Successfully signed in!",
-      });
-      
-      // Navigation will be handled by the auth state change listener
+          if (resendError) {
+            throw resendError;
+          }
+
+          toast({
+            title: "Email not confirmed",
+            description: "Please check your email for the confirmation link. We've sent a new confirmation email.",
+            duration: 6000,
+          });
+        } else {
+          throw error;
+        }
+      } else {
+        toast({
+          title: "Success",
+          description: "Successfully signed in!",
+        });
+      }
     } catch (error: any) {
       toast({
         variant: "destructive",
         title: "Error",
         description: error.message || "Failed to sign in",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -72,6 +95,7 @@ const SignIn = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                disabled={isLoading}
               />
             </div>
             <div className="space-y-2">
@@ -81,6 +105,7 @@ const SignIn = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                disabled={isLoading}
               />
             </div>
             <div className="flex items-center justify-between">
@@ -91,8 +116,8 @@ const SignIn = () => {
                 Create account
               </Link>
             </div>
-            <Button type="submit" className="w-full">
-              Sign in
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? "Signing in..." : "Sign in"}
             </Button>
           </form>
         </CardContent>
