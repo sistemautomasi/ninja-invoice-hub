@@ -15,6 +15,7 @@ import { useCurrency } from "@/hooks/use-currency";
 
 interface Order {
   id: string;
+  order_number: string;
   created_at: string;
   status: string;
   total_amount: number;
@@ -83,7 +84,7 @@ const OrderList = () => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Order ID</TableHead>
+              <TableHead>Order Number</TableHead>
               <TableHead>Product</TableHead>
               <TableHead>Quantity</TableHead>
               <TableHead>Total Amount</TableHead>
@@ -109,7 +110,7 @@ const OrderList = () => {
             ) : (
               filteredOrders?.map((order) => (
                 <TableRow key={order.id}>
-                  <TableCell>{order.id}</TableCell>
+                  <TableCell>{order.order_number || order.id}</TableCell>
                   <TableCell>
                     {order.order_items.map(item => item.product.name).join(", ")}
                   </TableCell>
