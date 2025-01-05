@@ -11,13 +11,16 @@ export const OrderStatusCell = ({ status: initialStatus, orderId }: OrderStatusC
   const [currentStatus, setCurrentStatus] = useState(initialStatus);
 
   useEffect(() => {
+    // Update the current status when the prop changes
+    setCurrentStatus(initialStatus);
+    
     // Set up real-time subscription for status changes
     const channel = supabase
-      .channel('orders-status-changes')
+      .channel(`orders-status-changes-${orderId}`)
       .on(
         'postgres_changes',
         {
-          event: '*',
+          event: 'UPDATE',
           schema: 'public',
           table: 'orders',
           filter: `id=eq.${orderId}`
@@ -33,7 +36,7 @@ export const OrderStatusCell = ({ status: initialStatus, orderId }: OrderStatusC
     return () => {
       void supabase.removeChannel(channel);
     };
-  }, [orderId]);
+  }, [orderId, initialStatus]);
 
   const getStatusColor = (status: string) => {
     const colors = {

@@ -35,7 +35,7 @@ export const OrderStatusAction = ({ orderId, currentStatus }: OrderStatusActionP
 
       if (error) throw error;
 
-      // Invalidate both queries to trigger refetch
+      // Invalidate queries to trigger refetch
       await queryClient.invalidateQueries({ queryKey: ["orderStatusCounts"] });
       await queryClient.invalidateQueries({ queryKey: ["orders"] });
 
@@ -54,7 +54,7 @@ export const OrderStatusAction = ({ orderId, currentStatus }: OrderStatusActionP
 
   return (
     <Select
-      defaultValue={currentStatus}
+      value={currentStatus}
       onValueChange={handleStatusChange}
     >
       <SelectTrigger className="w-[140px]">
