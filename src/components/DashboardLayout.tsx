@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Menu, X, LayoutDashboard, Package, ClipboardList, Settings } from "lucide-react";
+import { Menu, X, LayoutDashboard, Package, ClipboardList, Settings, BoxIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SidebarBranding } from "@/components/ui/sidebar/SidebarBranding";
 import { SidebarNavItem } from "@/components/ui/sidebar/SidebarNavItem";
@@ -10,6 +10,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
 
   const sidebarItems = [
     { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
+    { icon: BoxIcon, label: "Products", href: "/products" },
     { icon: Package, label: "Submit Order", href: "/submit-order" },
     { icon: ClipboardList, label: "Order List", href: "/order-list" },
     { icon: Settings, label: "Settings", href: "/settings" },
