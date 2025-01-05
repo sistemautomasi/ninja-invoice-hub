@@ -61,7 +61,7 @@ export const OrderForm = ({ products, isSubmitting, onSubmit }: OrderFormProps) 
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="grid gap-4 sm:gap-6 md:grid-cols-2">
+      <div className="grid gap-4 md:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="customerName">Customer Name *</Label>
           <Input id="customerName" name="customerName" required />
@@ -145,7 +145,7 @@ export const OrderForm = ({ products, isSubmitting, onSubmit }: OrderFormProps) 
       </div>
 
       {selectedProduct && (
-        <Card className="mt-6 bg-primary/5">
+        <Card className="mt-6 bg-muted">
           <CardContent className="pt-6">
             <div className="flex justify-between items-center">
               <span className="font-medium">Product Total:</span>

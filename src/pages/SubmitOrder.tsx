@@ -78,11 +78,11 @@ const SubmitOrder = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-6 max-w-3xl">
-      <h1 className="text-3xl font-bold text-center mb-8">Submit Order</h1>
+    <div className="p-6 max-w-4xl">
+      <h1 className="text-3xl font-bold mb-8">Submit Order</h1>
       
       <Card className="shadow-lg">
-        <CardHeader className="text-center pb-4">
+        <CardHeader className="pb-4">
           <CardTitle className="text-2xl">Order Details</CardTitle>
         </CardHeader>
         <CardContent>
