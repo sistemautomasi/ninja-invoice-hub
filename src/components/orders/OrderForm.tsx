@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 import { OrderFormData } from "@/types/order";
+import { useCurrency } from "@/hooks/use-currency";
 
 interface Product {
   id: string;
@@ -41,6 +42,7 @@ const MALAYSIAN_STATES = [
 export const OrderForm = ({ products, isSubmitting, onSubmit }: OrderFormProps) => {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [quantity, setQuantity] = useState(1);
+  const { formatPrice } = useCurrency();
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -128,7 +130,7 @@ export const OrderForm = ({ products, isSubmitting, onSubmit }: OrderFormProps) 
               <option value="">Select a product</option>
               {products.map((product) => (
                 <option key={product.id} value={product.id}>
-                  {product.name} (${product.price})
+                  {product.name} ({formatPrice(product.price)})
                 </option>
               ))}
             </select>
