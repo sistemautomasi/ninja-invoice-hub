@@ -40,18 +40,19 @@ const Products = () => {
 
   const createProductMutation = useMutation({
     mutationFn: async (formData: FormData) => {
-      const newProduct = {
-        name: String(formData.get("name")),
-        description: String(formData.get("description")),
+      const productData = {
+        name: formData.get("name"),
+        description: formData.get("description"),
         price: Number(formData.get("price")),
         stock_quantity: Number(formData.get("stock_quantity")),
       };
 
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from("products")
-        .insert([newProduct]);
+        .insert(productData);
 
       if (error) throw error;
+      return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["products"] });
@@ -70,19 +71,20 @@ const Products = () => {
       const productId = selectedProduct?.id;
       if (!productId) throw new Error("No product selected");
 
-      const updatedProduct = {
-        name: String(formData.get("name")),
-        description: String(formData.get("description")),
+      const productData = {
+        name: formData.get("name"),
+        description: formData.get("description"),
         price: Number(formData.get("price")),
         stock_quantity: Number(formData.get("stock_quantity")),
       };
 
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from("products")
-        .update(updatedProduct)
+        .update(productData)
         .eq("id", productId);
 
       if (error) throw error;
+      return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["products"] });
