@@ -54,11 +54,11 @@ export const OrderStatusAction = ({ orderId, currentStatus }: OrderStatusActionP
 
   return (
     <Select
-      value={currentStatus}
+      defaultValue={currentStatus}
       onValueChange={handleStatusChange}
     >
       <SelectTrigger className="w-[140px]">
-        <SelectValue />
+        <SelectValue placeholder="Select status" />
       </SelectTrigger>
       <SelectContent>
         {statusOptions.map((option) => (
