@@ -18,6 +18,8 @@ const SUPPORTED_CURRENCIES = [
   { value: "EUR", label: "Euro (EUR)" },
 ];
 
+const DEFAULT_CURRENCY = "MYR";
+
 export const CurrencySettings = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -29,7 +31,7 @@ export const CurrencySettings = () => {
         .from("settings")
         .select("*")
         .eq("setting_key", "default_currency")
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
       return data;
@@ -40,7 +42,11 @@ export const CurrencySettings = () => {
     mutationFn: async (newCurrency: string) => {
       const { error } = await supabase
         .from("settings")
-        .update({ setting_value: newCurrency })
+        .upsert({ 
+          setting_key: "default_currency",
+          setting_value: newCurrency,
+          setting_type: "string"
+        })
         .eq("setting_key", "default_currency");
 
       if (error) throw error;
@@ -72,7 +78,7 @@ export const CurrencySettings = () => {
           <Label htmlFor="currency">Default Currency</Label>
           <Select
             disabled={isLoading}
-            value={currencySettings?.setting_value || "MYR"}
+            value={currencySettings?.setting_value || DEFAULT_CURRENCY}
             onValueChange={(value) => updateCurrency.mutate(value)}
           >
             <SelectTrigger id="currency" className="w-full">
