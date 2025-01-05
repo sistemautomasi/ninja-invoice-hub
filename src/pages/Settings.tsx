@@ -4,6 +4,7 @@ import { NotificationSettings } from "@/components/settings/NotificationSettings
 import { SecuritySettings } from "@/components/settings/SecuritySettings";
 import { AppearanceSettings } from "@/components/settings/AppearanceSettings";
 import { TeamSettings } from "@/components/settings/TeamSettings";
+import { CurrencySettings } from "@/components/settings/CurrencySettings";
 import { Users } from "lucide-react";
 
 const Settings = () => {
@@ -21,6 +22,7 @@ const Settings = () => {
           <TabsTrigger value="notifications" className="flex-1">Notifications</TabsTrigger>
           <TabsTrigger value="security" className="flex-1">Security</TabsTrigger>
           <TabsTrigger value="appearance" className="flex-1">Appearance</TabsTrigger>
+          <TabsTrigger value="currency" className="flex-1">Currency</TabsTrigger>
         </TabsList>
         
         <TabsContent value="profile">
@@ -41,6 +43,10 @@ const Settings = () => {
 
         <TabsContent value="appearance">
           <AppearanceSettings />
+        </TabsContent>
+
+        <TabsContent value="currency">
+          <CurrencySettings />
         </TabsContent>
       </Tabs>
     </div>

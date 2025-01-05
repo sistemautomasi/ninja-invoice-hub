@@ -306,6 +306,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
+      supported_currency: "MYR" | "USD" | "SGD" | "EUR"
       user_role: "admin" | "staff" | "customer"
     }
     CompositeTypes: {
