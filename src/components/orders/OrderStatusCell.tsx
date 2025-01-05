@@ -1,10 +1,40 @@
 import { cn } from "@/lib/utils";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface OrderStatusCellProps {
   status: string;
+  orderId: string;
 }
 
-export const OrderStatusCell = ({ status }: OrderStatusCellProps) => {
+export const OrderStatusCell = ({ status: initialStatus, orderId }: OrderStatusCellProps) => {
+  const [currentStatus, setCurrentStatus] = useState(initialStatus);
+
+  useEffect(() => {
+    // Set up real-time subscription for status changes
+    const channel = supabase
+      .channel('orders-status-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'orders',
+          filter: `id=eq.${orderId}`
+        },
+        (payload: any) => {
+          if (payload.new && payload.new.status) {
+            setCurrentStatus(payload.new.status);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      void supabase.removeChannel(channel);
+    };
+  }, [orderId]);
+
   const getStatusColor = (status: string) => {
     const colors = {
       pending: "bg-blue-100 text-blue-800",
@@ -21,10 +51,10 @@ export const OrderStatusCell = ({ status }: OrderStatusCellProps) => {
     <span
       className={cn(
         "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium capitalize",
-        getStatusColor(status)
+        getStatusColor(currentStatus)
       )}
     >
-      {status}
+      {currentStatus}
     </span>
   );
 };

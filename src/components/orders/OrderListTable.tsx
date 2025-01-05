@@ -77,7 +77,7 @@ export const OrderListTable = ({ orders, isLoading, onDelete }: OrderListTablePr
                 </TableCell>
                 <TableCell>{formatPrice(order.total_amount)}</TableCell>
                 <TableCell>
-                  <OrderStatusCell status={order.status} />
+                  <OrderStatusCell status={order.status} orderId={order.id} />
                 </TableCell>
                 <TableCell>
                   {new Date(order.created_at).toLocaleDateString()}
