@@ -56,26 +56,32 @@ export const CurrencySettings = () => {
         throw new Error("No authenticated session");
       }
 
-      // First try to get the existing setting
-      const { data: existingSetting } = await supabase
+      const { data: existingSetting, error: fetchError } = await supabase
         .from("settings")
         .select("id")
         .eq("setting_key", "default_currency")
         .maybeSingle();
 
-      const { error } = await supabase
+      if (fetchError) {
+        console.error("Error fetching existing setting:", fetchError);
+        throw fetchError;
+      }
+
+      const { error: upsertError } = await supabase
         .from("settings")
         .upsert({
-          id: existingSetting?.id, // Include the id if it exists
+          id: existingSetting?.id,
           setting_key: "default_currency",
           setting_value: newCurrency,
           setting_type: "string",
         });
 
-      if (error) {
-        console.error("Error updating currency:", error);
-        throw error;
+      if (upsertError) {
+        console.error("Error updating currency:", upsertError);
+        throw upsertError;
       }
+
+      return newCurrency;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["settings", "currency"] });
@@ -88,7 +94,7 @@ export const CurrencySettings = () => {
       console.error("Failed to update currency:", error);
       toast({
         title: "Error",
-        description: "Failed to update currency settings",
+        description: "Failed to update currency settings. Please try again.",
         variant: "destructive",
       });
     },
@@ -103,7 +109,7 @@ export const CurrencySettings = () => {
         <div className="space-y-2">
           <Label htmlFor="currency">Default Currency</Label>
           <Select
-            disabled={isLoading}
+            disabled={isLoading || updateCurrency.isPending}
             value={currencySettings?.setting_value || DEFAULT_CURRENCY}
             onValueChange={(value) => updateCurrency.mutate(value)}
           >
