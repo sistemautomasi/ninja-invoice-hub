@@ -37,7 +37,7 @@ export const CurrencySettings = () => {
         .from("settings")
         .select("*")
         .eq("setting_key", "default_currency")
-        .maybeSingle();
+        .single();
 
       if (error) {
         console.error("Error fetching currency settings:", error);
@@ -56,29 +56,17 @@ export const CurrencySettings = () => {
         throw new Error("No authenticated session");
       }
 
-      const { data: existingSetting, error: fetchError } = await supabase
-        .from("settings")
-        .select("id")
-        .eq("setting_key", "default_currency")
-        .maybeSingle();
-
-      if (fetchError) {
-        console.error("Error fetching existing setting:", fetchError);
-        throw fetchError;
-      }
-
-      const { error: upsertError } = await supabase
+      const { error } = await supabase
         .from("settings")
         .upsert({
-          id: existingSetting?.id,
           setting_key: "default_currency",
           setting_value: newCurrency,
           setting_type: "string",
         });
 
-      if (upsertError) {
-        console.error("Error updating currency:", upsertError);
-        throw upsertError;
+      if (error) {
+        console.error("Error updating currency:", error);
+        throw error;
       }
 
       return newCurrency;
