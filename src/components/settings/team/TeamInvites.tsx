@@ -35,6 +35,52 @@ export const TeamInvites = () => {
     },
   });
 
+  const acceptInvite = useMutation({
+    mutationFn: async ({ email, role }: { email: string; role: 'admin' | 'staff' }) => {
+      // First update the invite status
+      const { error: inviteError } = await supabase
+        .from('team_invites')
+        .update({ status: 'accepted' })
+        .eq('email', email)
+        .eq('status', 'pending');
+
+      if (inviteError) {
+        console.error('Error accepting invite:', inviteError);
+        throw inviteError;
+      }
+
+      // Then create or update the user role
+      const { error: roleError } = await supabase
+        .from('user_roles')
+        .upsert({
+          user_id: user?.id,
+          role: role,
+        });
+
+      if (roleError) {
+        console.error('Error setting user role:', roleError);
+        throw roleError;
+      }
+
+      return { success: true };
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['team-invites'] });
+      toast({
+        title: "Success",
+        description: "Team invite accepted successfully!",
+      });
+    },
+    onError: (error) => {
+      console.error('Mutation error:', error);
+      toast({
+        title: "Error",
+        description: "Failed to accept team invite. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
   const sendInvite = useMutation({
     mutationFn: async ({ email, role }: { email: string; role: 'admin' | 'staff' }) => {
       // First, create the invite in the database
@@ -103,6 +149,16 @@ export const TeamInvites = () => {
       return;
     }
 
+    // For testing, only allow sending to the specified email
+    if (email !== 'sistemautomasi2@gmail.com') {
+      toast({
+        title: "Testing Mode",
+        description: "Currently, invites can only be sent to sistemautomasi2@gmail.com for testing purposes.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     sendInvite.mutate({ email, role });
     (e.target as HTMLFormElement).reset();
   };
@@ -163,6 +219,20 @@ export const TeamInvites = () => {
                   Role: {invite.role} • Expires: {new Date(invite.expires_at).toLocaleDateString()}
                 </p>
               </div>
+              {user?.email === invite.email && invite.status === 'pending' && (
+                <Button 
+                  onClick={() => acceptInvite.mutate({ 
+                    email: invite.email, 
+                    role: invite.role 
+                  })}
+                  disabled={acceptInvite.isPending}
+                >
+                  {acceptInvite.isPending && (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  )}
+                  Accept Invite
+                </Button>
+              )}
             </div>
           ))}
         </div>
