@@ -9,74 +9,66 @@ import { AlertCircle, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useUser } from "@supabase/auth-helpers-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 export const TeamSettings = () => {
   const user = useUser();
   const [loading, setLoading] = useState(true);
   const [adminStatus, setAdminStatus] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     const checkAdminStatus = async () => {
-      if (!user?.email) {
-        console.log("No user email found");
+      if (!user) {
+        console.log("No user found in auth state");
         setLoading(false);
         return;
       }
 
       try {
-        console.log("Checking admin status for email:", user.email);
+        console.log("Starting admin check for user:", user.id);
         
-        // Direct check in user_roles using auth.uid()
-        const { data: directCheck, error: directError } = await supabase
+        // Simple direct check using user.id
+        const { data: roleData, error: roleError } = await supabase
           .from('user_roles')
           .select('role')
           .eq('user_id', user.id)
           .single();
 
-        if (!directError && directCheck?.role === 'admin') {
-          console.log("Admin status found directly:", directCheck);
+        if (roleError) {
+          console.error('Role check error:', roleError);
+          toast({
+            title: "Error checking permissions",
+            description: "Please try refreshing the page",
+            variant: "destructive",
+          });
+          setLoading(false);
+          return;
+        }
+
+        console.log("Role check result:", roleData);
+        
+        if (roleData?.role === 'admin') {
+          console.log("Admin access granted");
           setAdminStatus(true);
-          setLoading(false);
-          return;
-        }
-
-        // Fallback check through profiles if direct check fails
-        const { data: profileCheck, error: profileError } = await supabase
-          .from('profiles')
-          .select('id')
-          .eq('email', user.email)
-          .single();
-
-        if (profileError) {
-          console.error('Profile check error:', profileError);
-          setLoading(false);
-          return;
-        }
-
-        if (profileCheck?.id) {
-          const { data: roleCheck, error: roleError } = await supabase
-            .from('user_roles')
-            .select('role')
-            .eq('user_id', profileCheck.id)
-            .single();
-
-          if (!roleError && roleCheck?.role === 'admin') {
-            console.log("Admin status found through profile:", roleCheck);
-            setAdminStatus(true);
-          } else {
-            console.log("Not an admin or error:", roleError);
-            setAdminStatus(false);
-          }
+        } else {
+          console.log("Not an admin");
+          setAdminStatus(false);
         }
       } catch (error) {
-        console.error('Error in admin check:', error);
+        console.error('Unexpected error:', error);
+        toast({
+          title: "Error",
+          description: "An unexpected error occurred",
+          variant: "destructive",
+        });
       } finally {
         setLoading(false);
       }
     };
 
     checkAdminStatus();
-  }, [user]);
+  }, [user, toast]);
 
   if (loading) {
     return (
@@ -119,7 +111,8 @@ export const TeamSettings = () => {
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
-              You need admin access to view team management settings. Current user: {user.email}
+              You need admin access to view team management settings.
+              Current user ID: {user.id}
             </AlertDescription>
           </Alert>
         </CardContent>
