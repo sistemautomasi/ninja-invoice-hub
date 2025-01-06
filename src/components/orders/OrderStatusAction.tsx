@@ -20,6 +20,7 @@ export const OrderStatusAction = ({ orderId, currentStatus }: OrderStatusActionP
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedStatus, setSelectedStatus] = useState(currentStatus);
 
   const statusOptions = [
     { value: "pending", label: "Pending" },
@@ -30,7 +31,7 @@ export const OrderStatusAction = ({ orderId, currentStatus }: OrderStatusActionP
   ];
 
   const handleStatusChange = async (newStatus: string) => {
-    if (newStatus === currentStatus) return;
+    if (newStatus === selectedStatus) return;
     
     setIsLoading(true);
     try {
@@ -40,6 +41,8 @@ export const OrderStatusAction = ({ orderId, currentStatus }: OrderStatusActionP
         .eq('id', orderId);
 
       if (error) throw error;
+
+      setSelectedStatus(newStatus);
 
       // Invalidate queries to trigger refetch
       await queryClient.invalidateQueries({ queryKey: ["orderStatusCounts"] });
@@ -56,6 +59,8 @@ export const OrderStatusAction = ({ orderId, currentStatus }: OrderStatusActionP
         description: "Failed to update order status",
         variant: "destructive",
       });
+      // Revert the selected status on error
+      setSelectedStatus(currentStatus);
     } finally {
       setIsLoading(false);
     }
@@ -64,7 +69,7 @@ export const OrderStatusAction = ({ orderId, currentStatus }: OrderStatusActionP
   return (
     <div className="relative">
       <Select
-        defaultValue={currentStatus}
+        value={selectedStatus}
         onValueChange={handleStatusChange}
         disabled={isLoading}
       >

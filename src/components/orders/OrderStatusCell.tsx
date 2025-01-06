@@ -11,7 +11,7 @@ export const OrderStatusCell = ({ status: initialStatus, orderId }: OrderStatusC
   const [currentStatus, setCurrentStatus] = useState(initialStatus);
 
   useEffect(() => {
-    // Update the current status when the prop changes
+    // Update local state when prop changes
     setCurrentStatus(initialStatus);
     
     // Set up real-time subscription for status changes
