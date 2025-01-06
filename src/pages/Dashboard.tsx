@@ -104,21 +104,12 @@ const Dashboard = () => {
 
       if (previousError) throw previousError;
 
-      // Fetch customer metrics for CLV
-      const { data: customerMetrics, error: metricsError } = await supabase
-        .from('customer_metrics')
-        .select('lifetime_value')
-        .not('lifetime_value', 'is', null);
-
-      if (metricsError) throw metricsError;
-
-      // Calculate total revenue and total cost
+      // Calculate total revenue and total cost for current period
       let totalRevenue = 0;
       let totalCost = 0;
 
       currentOrders?.forEach(order => {
         totalRevenue += Number(order.total_amount);
-        // Calculate total cost from order items
         order.order_items?.forEach(item => {
           if (item.product) {
             totalCost += Number(item.product.cost) * item.quantity;
@@ -126,9 +117,26 @@ const Dashboard = () => {
         });
       });
 
+      // Calculate total revenue for previous period
+      const previousRevenue = previousOrders?.reduce((sum, order) => 
+        sum + Number(order.total_amount), 0) || 0;
+
       // Calculate profit margin using actual costs
       const profit = totalRevenue - totalCost;
       const profitMargin = totalRevenue > 0 ? (profit / totalRevenue) * 100 : 0;
+
+      // Calculate percentage change
+      const percentageChange = previousRevenue === 0 
+        ? 100 
+        : ((totalRevenue - previousRevenue) / previousRevenue) * 100;
+
+      // Fetch customer metrics for CLV
+      const { data: customerMetrics, error: metricsError } = await supabase
+        .from('customer_metrics')
+        .select('lifetime_value')
+        .not('lifetime_value', 'is', null);
+
+      if (metricsError) throw metricsError;
 
       // Calculate average customer lifetime value
       const averageClv = customerMetrics?.length 
@@ -167,10 +175,6 @@ const Dashboard = () => {
       const toShip = currentOrders?.filter(order => order.status === 'confirmed').length || 0;
       const inTransit = currentOrders?.filter(order => order.status === 'shipped').length || 0;
       const delivered = currentOrders?.filter(order => order.status === 'completed').length || 0;
-
-      const percentageChange = previousTotal === 0 
-        ? 100 
-        : ((currentTotal - previousTotal) / previousTotal) * 100;
 
       return {
         totalSales: totalRevenue,
