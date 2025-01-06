@@ -4,8 +4,31 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TeamMembersList } from "./team/TeamMembersList";
 import { TeamInvites } from "./team/TeamInvites";
 import { ActivityLogs } from "./team/ActivityLogs";
+import { useDirectAddUser } from "@/hooks/use-direct-add-user";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 
 export const TeamSettings = () => {
+  const { isAdmin } = useDirectAddUser();
+
+  if (!isAdmin) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Team Management</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              You need admin access to view team management settings.
+            </AlertDescription>
+          </Alert>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card>
       <CardHeader>
