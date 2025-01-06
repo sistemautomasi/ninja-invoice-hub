@@ -83,23 +83,24 @@ export const AdCostsChart = ({ selectedPeriod }: AdCostsChartProps) => {
     )
   );
 
+  // Updated colors with higher contrast and vibrancy
   const colors = {
-    facebook: "#1877F2", // Updated Facebook blue
-    tiktok: "#000000",
-    google: "#EA4335", // Updated Google red
-    instagram: "#E4405F", // Updated Instagram pink
-    Other: "#94A3B8", // Softer gray
-    total: "#3B82F6" // Bright blue for total
+    facebook: "#1877F2",
+    tiktok: "#FF0050",
+    google: "#EA4335",
+    instagram: "#E4405F",
+    Other: "#64748B",
+    total: "#8B5CF6" // Vibrant purple for total
   };
 
   const formatPlatformName = (platform: string) => {
     const names: Record<string, string> = {
-      facebook: "Facebook",
-      tiktok: "TikTok",
-      google: "Google",
-      instagram: "Instagram",
-      Other: "Other",
-      total: "Total"
+      facebook: "Facebook Ads",
+      tiktok: "TikTok Ads",
+      google: "Google Ads",
+      instagram: "Instagram Ads",
+      Other: "Other Platforms",
+      total: "Total Spend"
     };
     return names[platform] || platform;
   };
@@ -108,15 +109,17 @@ export const AdCostsChart = ({ selectedPeriod }: AdCostsChartProps) => {
     if (active && payload && payload.length) {
       return (
         <div className="bg-white p-4 border border-gray-200 rounded-lg shadow-lg">
-          <p className="font-medium text-gray-900 mb-2">{label}</p>
+          <p className="font-semibold text-gray-900 mb-3 border-b pb-2">{label}</p>
           {payload.map((entry: any, index: number) => (
-            <div key={index} className="flex items-center gap-2 text-sm">
+            <div key={index} className="flex items-center gap-3 py-1">
               <div 
-                className="w-3 h-3 rounded-full" 
+                className="w-4 h-4 rounded-full shadow-sm" 
                 style={{ backgroundColor: entry.color }}
               />
-              <span className="text-gray-700">{formatPlatformName(entry.name)}:</span>
-              <span className="font-medium">${entry.value.toFixed(2)}</span>
+              <span className="text-gray-600 font-medium">{formatPlatformName(entry.name)}:</span>
+              <span className="font-semibold text-gray-900">
+                ${Number(entry.value).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </span>
             </div>
           ))}
         </div>
@@ -137,26 +140,37 @@ export const AdCostsChart = ({ selectedPeriod }: AdCostsChartProps) => {
               data={adCosts}
               margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
             >
-              <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
+              <CartesianGrid 
+                strokeDasharray="3 3" 
+                stroke="#E2E8F0" 
+                strokeOpacity={0.8}
+              />
               <XAxis 
                 dataKey="date" 
                 stroke="#64748B"
-                tick={{ fill: '#64748B' }}
+                tick={{ fill: '#64748B', fontSize: 12 }}
                 tickLine={{ stroke: '#64748B' }}
+                axisLine={{ stroke: '#CBD5E1' }}
               />
               <YAxis 
                 stroke="#64748B"
-                tick={{ fill: '#64748B' }}
+                tick={{ fill: '#64748B', fontSize: 12 }}
                 tickLine={{ stroke: '#64748B' }}
-                tickFormatter={(value) => `$${value}`}
+                axisLine={{ stroke: '#CBD5E1' }}
+                tickFormatter={(value) => `$${value.toLocaleString()}`}
               />
-              <Tooltip content={<CustomTooltip />} />
+              <Tooltip 
+                content={<CustomTooltip />}
+                cursor={{ stroke: '#94A3B8', strokeWidth: 1 }}
+              />
               <Legend 
                 formatter={formatPlatformName}
                 iconType="circle"
                 wrapperStyle={{
-                  paddingTop: "20px"
+                  paddingTop: "20px",
+                  paddingBottom: "10px"
                 }}
+                iconSize={10}
               />
               {platforms.map((platform) => (
                 <Line
@@ -165,19 +179,35 @@ export const AdCostsChart = ({ selectedPeriod }: AdCostsChartProps) => {
                   dataKey={platform}
                   name={platform}
                   stroke={colors[platform as keyof typeof colors] || "#666666"}
-                  strokeWidth={2}
-                  dot={{ r: 4, strokeWidth: 2 }}
-                  activeDot={{ r: 6, strokeWidth: 2 }}
+                  strokeWidth={2.5}
+                  dot={{ 
+                    r: 4, 
+                    strokeWidth: 2,
+                    fill: "#FFFFFF"
+                  }}
+                  activeDot={{ 
+                    r: 6, 
+                    strokeWidth: 2,
+                    fill: "#FFFFFF"
+                  }}
                 />
               ))}
               <Line
                 type="monotone"
                 dataKey="total"
-                name="Total"
+                name="total"
                 stroke={colors.total}
                 strokeWidth={3}
-                dot={{ r: 5, strokeWidth: 2 }}
-                activeDot={{ r: 7, strokeWidth: 2 }}
+                dot={{ 
+                  r: 5, 
+                  strokeWidth: 2,
+                  fill: "#FFFFFF"
+                }}
+                activeDot={{ 
+                  r: 7, 
+                  strokeWidth: 2,
+                  fill: "#FFFFFF"
+                }}
               />
             </LineChart>
           </ResponsiveContainer>
