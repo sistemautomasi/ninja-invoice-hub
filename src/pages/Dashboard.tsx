@@ -121,7 +121,7 @@ const Dashboard = () => {
       const previousRevenue = previousOrders?.reduce((sum, order) => 
         sum + Number(order.total_amount), 0) || 0;
 
-      // Calculate profit margin using actual costs
+      // Calculate profit and profit margin using actual costs
       const profit = totalRevenue - totalCost;
       const profitMargin = totalRevenue > 0 ? (profit / totalRevenue) * 100 : 0;
 
@@ -181,6 +181,7 @@ const Dashboard = () => {
         ordersCount: currentOrders?.length || 0,
         percentageChange: percentageChange.toFixed(1),
         profitMargin: Number(profitMargin.toFixed(1)),
+        profit: profit,
         customerLifetimeValue: averageClv,
         averageProcessingTime: `${Math.floor(averageProcessingTime)}h ${Math.round((averageProcessingTime % 1) * 60)}m`,
         topSellingProduct: topProduct,

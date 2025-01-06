@@ -9,6 +9,7 @@ interface DashboardStatsProps {
     percentageChange: string;
     averageOrderValue?: number;
     profitMargin?: number;
+    profit?: number;
     customerLifetimeValue?: number;
     averageProcessingTime?: string;
     topSellingProduct?: {
@@ -40,15 +41,15 @@ const DashboardStats = ({ stats }: DashboardStatsProps) => {
 
       <Card className="hover:shadow-lg transition-shadow duration-200 hover:scale-105 transform">
         <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-          <CardTitle className="text-sm font-medium">Profit Margin</CardTitle>
+          <CardTitle className="text-sm font-medium">Profit</CardTitle>
           <Percent className="h-4 w-4 text-success" />
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">
-            {stats?.profitMargin?.toFixed(1) || '0'}%
+            {formatPrice(stats?.profit || 0)}
           </div>
           <p className="text-xs mt-1 text-muted-foreground">
-            Net profit after costs
+            Margin: {stats?.profitMargin?.toFixed(1) || '0'}%
           </p>
         </CardContent>
       </Card>
