@@ -24,6 +24,13 @@ interface AdCostsChartProps {
   selectedPeriod: string;
 }
 
+// Define types for the chart data
+interface ChartData {
+  date: string;
+  total: number;
+  [key: string]: number | string; // Allow dynamic platform keys
+}
+
 export const AdCostsChart = ({ selectedPeriod }: AdCostsChartProps) => {
   const { data: adCosts, isLoading } = useQuery({
     queryKey: ["adCosts", selectedPeriod],
@@ -51,7 +58,8 @@ export const AdCostsChart = ({ selectedPeriod }: AdCostsChartProps) => {
     );
   }
 
-  const platforms = Array.from(
+  // Get unique platforms from the data
+  const platforms: string[] = Array.from(
     new Set(
       adCosts?.flatMap(cost => 
         Object.keys(cost).filter(key => 
@@ -105,7 +113,7 @@ export const AdCostsChart = ({ selectedPeriod }: AdCostsChartProps) => {
                 }}
                 iconSize={10}
               />
-              {platforms.map((platform) => (
+              {platforms.map((platform: string) => (
                 <Line
                   key={platform}
                   type="monotone"
