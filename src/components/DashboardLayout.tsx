@@ -1,92 +1,62 @@
 import { useState } from "react";
-import { Outlet } from "react-router-dom";
-import { Menu, X, LayoutDashboard, Package, ClipboardList, Settings, BoxIcon, LogOut, DollarSign, Megaphone, FileText, Link2 } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { SidebarBranding } from "@/components/ui/sidebar/SidebarBranding";
-import { SidebarNavItem } from "@/components/ui/sidebar/SidebarNavItem";
+import { useNavigate } from "react-router-dom";
+import { 
+  LayoutDashboard, 
+  ClipboardList, 
+  ShoppingCart, 
+  DollarSign, 
+  BarChart3, 
+  FileText,
+  Link2, 
+  Settings, 
+  LogOut 
+} from "lucide-react";
+import { Sidebar } from "@/components/ui/sidebar";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
-export const DashboardLayout = () => {
-  const [isCollapsed, setIsCollapsed] = useState(false);
-  const [isMobileOpen, setIsMobileOpen] = useState(false);
+const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
 
-  const sidebarItems = [
-    { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
-    { icon: BoxIcon, label: "Products", href: "/products" },
-    { icon: Package, label: "Submit Order", href: "/submit-order" },
-    { icon: ClipboardList, label: "Order List", href: "/orders" },
-    { icon: FileText, label: "Invoices", href: "/invoices" },
-    { icon: DollarSign, label: "Costs", href: "/costs" },
-    { icon: Megaphone, label: "Advertising", href: "/advertising" },
-    { icon: Link2, label: "Integrations", href: "/integrations" },
-    { icon: Settings, label: "Settings", href: "/settings" },
-    { icon: LogOut, label: "Logout", href: "/signin", isLogout: true },
+  const handleLogout = async () => {
+    try {
+      setIsLoading(true);
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      navigate("/");
+    } catch (error) {
+      console.error("Error logging out:", error);
+      toast("Error logging out. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const navigation = [
+    { href: "/", label: "Dashboard", icon: LayoutDashboard },
+    { href: "/orders", label: "Orders", icon: ClipboardList },
+    { href: "/products", label: "Products", icon: ShoppingCart },
+    { href: "/costs", label: "Costs", icon: DollarSign },
+    { href: "/advertising", label: "Advertising", icon: BarChart3 },
+    { href: "/invoices", label: "Invoices", icon: FileText },
+    { href: "/integrations", label: "Integrations", icon: Link2 },
+    { href: "/settings", label: "Settings", icon: Settings },
+    { 
+      href: "#", 
+      label: "Logout", 
+      icon: LogOut, 
+      isLogout: true,
+      onClick: handleLogout,
+      disabled: isLoading 
+    }
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Mobile overlay */}
-      {isMobileOpen && (
-        <div
-          className="fixed inset-0 z-40 bg-black/50 lg:hidden"
-          onClick={() => setIsMobileOpen(false)}
-        />
-      )}
-
-      {/* Sidebar */}
-      <aside
-        className={cn(
-          "fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r bg-background transition-all duration-300",
-          isCollapsed && "w-16",
-          isMobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
-        )}
-      >
-        <SidebarBranding isCollapsed={isCollapsed} />
-        
-        {/* Toggle button */}
-        <button
-          onClick={() => setIsCollapsed(!isCollapsed)}
-          className="absolute -right-4 top-6 hidden h-8 w-8 items-center justify-center rounded-full border bg-background shadow-sm lg:flex"
-        >
-          {isCollapsed ? (
-            <Menu className="h-4 w-4" />
-          ) : (
-            <X className="h-4 w-4" />
-          )}
-        </button>
-
-        {/* Navigation */}
-        <nav className="flex-1 space-y-1 p-2">
-          {sidebarItems.map((item) => (
-            <SidebarNavItem
-              key={item.href}
-              icon={item.icon}
-              label={item.label}
-              href={item.href}
-              isLogout={item.isLogout}
-            />
-          ))}
-        </nav>
-      </aside>
-
-      {/* Mobile toggle */}
-      <button
-        onClick={() => setIsMobileOpen(true)}
-        className="fixed left-4 top-4 z-50 flex h-10 w-10 items-center justify-center rounded-lg border bg-background shadow-sm lg:hidden"
-      >
-        <Menu className="h-4 w-4" />
-      </button>
-
-      {/* Main content */}
-      <main
-        className={cn(
-          "min-h-screen transition-all duration-300",
-          isCollapsed ? "lg:pl-16" : "lg:pl-64",
-          "pt-16 lg:pt-0"
-        )}
-      >
-        <div className="container p-6">
-          <Outlet />
-        </div>
+    <div className="flex min-h-screen">
+      <Sidebar navigation={navigation} />
+      <main className="flex-1 overflow-y-auto bg-background">
+        {children}
       </main>
     </div>
   );

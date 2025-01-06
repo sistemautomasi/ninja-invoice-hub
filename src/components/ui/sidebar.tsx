@@ -1,20 +1,22 @@
 import { SidebarNavItem } from "./sidebar/SidebarNavItem";
 import { SidebarBranding } from "./sidebar/SidebarBranding";
 import { ScrollArea } from "./scroll-area";
-import { LayoutDashboard, ClipboardList, ShoppingCart, DollarSign, BarChart3, FileText, Link2, Settings } from "lucide-react";
+import { LucideIcon } from "lucide-react";
 
-const navigation = [
-  { href: "/", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/orders", label: "Orders", icon: ClipboardList },
-  { href: "/products", label: "Products", icon: ShoppingCart },
-  { href: "/costs", label: "Costs", icon: DollarSign },
-  { href: "/advertising", label: "Advertising", icon: BarChart3 },
-  { href: "/invoices", label: "Invoices", icon: FileText },
-  { href: "/integrations", label: "Integrations", icon: Link2 },
-  { href: "/settings", label: "Settings", icon: Settings },
-];
+interface NavigationItem {
+  href: string;
+  label: string;
+  icon: LucideIcon;
+  isLogout?: boolean;
+  onClick?: () => void;
+  disabled?: boolean;
+}
 
-export const Sidebar = () => {
+interface SidebarProps {
+  navigation: NavigationItem[];
+}
+
+export const Sidebar = ({ navigation }: SidebarProps) => {
   return (
     <div className="flex h-full flex-col gap-2">
       <SidebarBranding isCollapsed={false} />
