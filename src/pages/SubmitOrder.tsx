@@ -30,7 +30,9 @@ const SubmitOrder = () => {
 
   return (
     <div className="w-full p-6">
-      <h1 className="text-3xl font-bold mb-8 text-left">Submit Order</h1>
+      <h1 className="text-3xl font-bold mb-8 text-left bg-gradient-to-r from-primary to-secondary-foreground bg-clip-text text-transparent">
+        Submit Order
+      </h1>
       {products && (
         <OrderForm
           products={products}

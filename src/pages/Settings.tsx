@@ -10,7 +10,9 @@ import { Users } from "lucide-react";
 const Settings = () => {
   return (
     <div className="w-full max-w-4xl mx-auto px-4 md:px-6">
-      <h1 className="text-2xl md:text-3xl font-bold mb-6">Settings</h1>
+      <h1 className="text-2xl md:text-3xl font-bold mb-6 bg-gradient-to-r from-primary to-secondary-foreground bg-clip-text text-transparent">
+        Settings
+      </h1>
       
       <Tabs defaultValue="profile" className="space-y-6">
         <TabsList className="w-full flex flex-wrap gap-2">

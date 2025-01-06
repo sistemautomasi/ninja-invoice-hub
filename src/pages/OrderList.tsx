@@ -121,12 +121,9 @@ const OrderList = () => {
 
   return (
     <div className="space-y-6">
-      <OrderListHeader 
-        search={search}
-        onSearchChange={setSearch}
-        timePeriod={timePeriod}
-        onTimePeriodChange={setTimePeriod}
-      />
+      <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary-foreground bg-clip-text text-transparent">
+        Order List
+      </h1>
 
       <OrderStatusSummary 
         onStatusClick={handleStatusClick}
