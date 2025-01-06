@@ -140,9 +140,6 @@ export function OrderStatusSummary({ onStatusClick, selectedStatus }: OrderStatu
                   </p>
                   <config.icon className={`h-5 w-5 ${config.iconColor}`} />
                 </div>
-                <p className="text-sm text-green-500 mt-2">
-                  0.0% from previous period
-                </p>
               </div>
             </div>
           </Card>
