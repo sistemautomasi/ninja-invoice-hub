@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
 import { Link2, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
@@ -15,11 +14,7 @@ export const Integrations = () => {
     e.preventDefault();
     
     if (!zapierWebhook) {
-      toast({
-        title: "Error",
-        description: "Please enter your Zapier webhook URL",
-        variant: "destructive",
-      });
+      toast("Error: Please enter your Zapier webhook URL");
       return;
     }
 
@@ -27,7 +22,7 @@ export const Integrations = () => {
     console.log("Triggering Zapier webhook:", zapierWebhook);
 
     try {
-      const response = await fetch(zapierWebhook, {
+      await fetch(zapierWebhook, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -39,17 +34,10 @@ export const Integrations = () => {
         }),
       });
 
-      toast({
-        title: "Request Sent",
-        description: "The request was sent to Zapier. Please check your Zap's history to confirm it was triggered.",
-      });
+      toast("Request sent to Zapier. Please check your Zap's history to confirm it was triggered.");
     } catch (error) {
       console.error("Error triggering webhook:", error);
-      toast({
-        title: "Error",
-        description: "Failed to trigger the Zapier webhook. Please check the URL and try again.",
-        variant: "destructive",
-      });
+      toast("Error: Failed to trigger the Zapier webhook. Please check the URL and try again.");
     } finally {
       setIsLoading(false);
     }
