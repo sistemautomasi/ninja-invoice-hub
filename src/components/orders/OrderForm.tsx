@@ -38,18 +38,28 @@ export const OrderForm = ({ products, isSubmitting, onSubmit }: OrderFormProps) 
   const { data: userRole } = useQuery({
     queryKey: ["userRole"],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return null;
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return null;
 
-      const { data, error } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", user.id)
-        .single();
+        const { data, error } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", user.id)
+          .maybeSingle();
 
-      if (error) throw error;
-      return data?.role;
-    }
+        if (error) {
+          console.error("Error fetching user role:", error);
+          return null;
+        }
+        
+        return data?.role || null;
+      } catch (error) {
+        console.error("Error in userRole query:", error);
+        return null;
+      }
+    },
+    retry: false
   });
 
   const isAdmin = userRole === 'admin';
