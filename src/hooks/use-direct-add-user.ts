@@ -11,22 +11,32 @@ export const useDirectAddUser = () => {
 
   const addUser = useMutation({
     mutationFn: async ({ email, role }: { email: string; role: UserRole }) => {
+      const profileId = crypto.randomUUID();
+
       // Create a profile for the user
-      const { data: profile, error: profileError } = await supabase
+      const { error: profileError } = await supabase
         .from('profiles')
-        .insert([{ id: crypto.randomUUID(), email }])
-        .select()
-        .single();
+        .insert([{ id: profileId, email }]);
       
       if (profileError) throw profileError;
 
       // Create the user role
       const { error: roleError } = await supabase
         .from('user_roles')
-        .insert([{ user_id: profile.id, role }]);
+        .insert([{ user_id: profileId, role }]);
 
       if (roleError) throw roleError;
-      return { success: true };
+
+      // Fetch the created profile
+      const { data: profile, error: fetchError } = await supabase
+        .from('profiles')
+        .select()
+        .eq('id', profileId)
+        .single();
+
+      if (fetchError) throw fetchError;
+      
+      return profile;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['team-members'] });
