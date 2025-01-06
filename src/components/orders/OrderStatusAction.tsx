@@ -24,6 +24,7 @@ export const OrderStatusAction = ({ orderId, currentStatus }: OrderStatusActionP
 
   // Keep local state in sync with prop changes
   useEffect(() => {
+    console.log(`Action dropdown received new status: ${currentStatus}`);
     setSelectedStatus(currentStatus);
   }, [currentStatus]);
 
@@ -39,12 +40,10 @@ export const OrderStatusAction = ({ orderId, currentStatus }: OrderStatusActionP
     if (newStatus === selectedStatus || isLoading) return;
     
     setIsLoading(true);
+    console.log(`Attempting to update order ${orderId} status from ${selectedStatus} to ${newStatus}`);
     const previousStatus = selectedStatus;
 
     try {
-      // Optimistically update UI
-      setSelectedStatus(newStatus);
-
       // Update in Supabase
       const { error } = await supabase
         .from('orders')
@@ -59,13 +58,14 @@ export const OrderStatusAction = ({ orderId, currentStatus }: OrderStatusActionP
         queryClient.invalidateQueries({ queryKey: ["orders"] })
       ]);
 
+      setSelectedStatus(newStatus);
+
       toast({
         title: "Status Updated",
         description: `Order status has been changed to ${newStatus}`,
       });
 
-      // Log successful update
-      console.log(`Status updated: Order ${orderId} changed from ${previousStatus} to ${newStatus}`);
+      console.log(`Successfully updated order ${orderId} status to ${newStatus}`);
     } catch (error) {
       console.error('Error updating status:', error);
       
@@ -78,8 +78,7 @@ export const OrderStatusAction = ({ orderId, currentStatus }: OrderStatusActionP
         variant: "destructive",
       });
 
-      // Log failed update attempt
-      console.error(`Failed status update: Order ${orderId} from ${previousStatus} to ${newStatus}`);
+      console.error(`Failed to update order ${orderId} status from ${previousStatus} to ${newStatus}`);
     } finally {
       setIsLoading(false);
     }

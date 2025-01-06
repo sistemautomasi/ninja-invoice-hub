@@ -12,15 +12,17 @@ export const OrderStatusCell = ({ status: initialStatus, orderId }: OrderStatusC
   const [currentStatus, setCurrentStatus] = useState(initialStatus);
   const [isUpdating, setIsUpdating] = useState(false);
 
-  // Immediately update status when prop changes
+  // Force status update when prop changes
   useEffect(() => {
+    console.log(`Status cell received new status: ${initialStatus}`);
     setCurrentStatus(initialStatus);
   }, [initialStatus]);
 
   // Set up real-time subscription
   useEffect(() => {
+    console.log(`Setting up real-time subscription for order: ${orderId}`);
     const channel = supabase
-      .channel(`orders-${orderId}`)
+      .channel(`order-status-${orderId}`)
       .on(
         'postgres_changes',
         {
@@ -30,6 +32,7 @@ export const OrderStatusCell = ({ status: initialStatus, orderId }: OrderStatusC
           filter: `id=eq.${orderId}`
         },
         (payload: any) => {
+          console.log(`Received real-time update for order ${orderId}:`, payload);
           if (payload.new && payload.new.status) {
             setCurrentStatus(payload.new.status);
             setIsUpdating(false);
@@ -39,6 +42,7 @@ export const OrderStatusCell = ({ status: initialStatus, orderId }: OrderStatusC
       .subscribe();
 
     return () => {
+      console.log(`Cleaning up subscription for order: ${orderId}`);
       void supabase.removeChannel(channel);
     };
   }, [orderId]);
