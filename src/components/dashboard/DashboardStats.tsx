@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { DollarSign, Package, TrendingUp, Users, ShoppingCart } from "lucide-react";
+import { DollarSign, Package, TrendingUp, ShoppingCart } from "lucide-react";
 import { useCurrency } from "@/hooks/use-currency";
 
 interface DashboardStatsProps {
@@ -8,7 +8,6 @@ interface DashboardStatsProps {
     ordersCount: number;
     percentageChange: string;
     averageOrderValue?: number;
-    uniqueCustomers?: number;
   } | undefined;
 }
 
@@ -16,7 +15,7 @@ const DashboardStats = ({ stats }: DashboardStatsProps) => {
   const { formatPrice } = useCurrency();
 
   return (
-    <div className="grid gap-6 md:grid-cols-5">
+    <div className="grid gap-6 md:grid-cols-4">
       <Card className="hover:shadow-lg transition-shadow duration-200 hover:scale-105 transform">
         <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
           <CardTitle className="text-sm font-medium">Total Sales</CardTitle>
@@ -73,21 +72,6 @@ const DashboardStats = ({ stats }: DashboardStatsProps) => {
           </div>
           <p className="text-xs mt-1 text-muted-foreground whitespace-nowrap">
             Per order average
-          </p>
-        </CardContent>
-      </Card>
-
-      <Card className="hover:shadow-lg transition-shadow duration-200 hover:scale-105 transform">
-        <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-          <CardTitle className="text-sm font-medium">Unique Customers</CardTitle>
-          <Users className="h-4 w-4 text-purple-500" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold flex flex-col items-start">
-            {stats?.uniqueCustomers || 0}
-          </div>
-          <p className="text-xs mt-1 text-muted-foreground whitespace-nowrap">
-            Active customers
           </p>
         </CardContent>
       </Card>
