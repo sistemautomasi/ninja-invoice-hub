@@ -16,7 +16,7 @@ const Dashboard = () => {
     
     switch (timePeriod) {
       case "allTime":
-        return { start: new Date(2020, 0, 1), end: now }; // Starting from 2020 as a reasonable default
+        return { start: new Date(2020, 0, 1), end: now };
       case "today":
         return { start: today, end: now };
       case "yesterday": {
@@ -72,6 +72,7 @@ const Dashboard = () => {
       
       // Calculate shipping stats
       const toShip = currentOrders?.filter(order => order.status === 'pending').length || 0;
+      const confirmed = currentOrders?.filter(order => order.status === 'confirmed').length || 0;
       const inTransit = currentOrders?.filter(order => order.status === 'shipped').length || 0;
       const delivered = currentOrders?.filter(order => order.status === 'completed').length || 0;
 
@@ -83,7 +84,7 @@ const Dashboard = () => {
         totalSales: currentTotal,
         ordersCount: currentOrders?.length || 0,
         percentageChange: percentageChange.toFixed(1),
-        shipping: { toShip, inTransit, delivered }
+        shipping: { toShip, confirmed, inTransit, delivered }
       };
     },
   });
