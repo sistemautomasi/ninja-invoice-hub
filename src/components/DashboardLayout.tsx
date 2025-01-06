@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Outlet } from "react-router-dom";
-import { Menu, X, LayoutDashboard, Package, ClipboardList, Settings, BoxIcon, LogOut, DollarSign, Megaphone } from "lucide-react";
+import { Menu, X, LayoutDashboard, Package, ClipboardList, Settings, BoxIcon, LogOut, DollarSign, Megaphone, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SidebarBranding } from "@/components/ui/sidebar/SidebarBranding";
 import { SidebarNavItem } from "@/components/ui/sidebar/SidebarNavItem";
@@ -14,6 +14,7 @@ const DashboardLayout = () => {
     { icon: BoxIcon, label: "Products", href: "/products" },
     { icon: Package, label: "Submit Order", href: "/submit-order" },
     { icon: ClipboardList, label: "Order List", href: "/orders" },
+    { icon: FileText, label: "Invoices", href: "/invoices" },
     { icon: DollarSign, label: "Costs", href: "/costs" },
     { icon: Megaphone, label: "Advertising", href: "/advertising" },
     { icon: Settings, label: "Settings", href: "/settings" },
