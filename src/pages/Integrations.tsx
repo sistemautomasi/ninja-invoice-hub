@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link2, ExternalLink } from "lucide-react";
+import { Link2, ExternalLink, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -9,6 +9,7 @@ import { toast } from "sonner";
 export const Integrations = () => {
   const [webhookUrl, setWebhookUrl] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [showSave, setShowSave] = useState(false);
 
   const handleWebhookTest = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,6 +56,21 @@ export const Integrations = () => {
     }
   };
 
+  const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setWebhookUrl(e.target.value);
+    setShowSave(e.target.value.length > 0);
+  };
+
+  const handleSave = () => {
+    try {
+      new URL(webhookUrl);
+      toast("Webhook URL saved successfully");
+      setShowSave(false);
+    } catch (e) {
+      toast("Please enter a valid URL before saving");
+    }
+  };
+
   return (
     <div className="container mx-auto p-6 space-y-8">
       <div className="flex items-center justify-between">
@@ -79,12 +95,24 @@ export const Integrations = () => {
             <form onSubmit={handleWebhookTest} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="webhook">Webhook URL</Label>
-                <Input
-                  id="webhook"
-                  placeholder="Enter your webhook URL"
-                  value={webhookUrl}
-                  onChange={(e) => setWebhookUrl(e.target.value)}
-                />
+                <div className="flex gap-2">
+                  <Input
+                    id="webhook"
+                    placeholder="Enter your webhook URL"
+                    value={webhookUrl}
+                    onChange={handleUrlChange}
+                  />
+                  {showSave && (
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={handleSave}
+                      title="Save webhook URL"
+                    >
+                      <Save className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
               </div>
             </form>
           </CardContent>
