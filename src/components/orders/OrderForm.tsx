@@ -36,7 +36,7 @@ export const OrderForm = ({ products, isSubmitting, onSubmit }: OrderFormProps) 
   const { toast } = useToast();
 
   // Fetch user role to determine if they're an admin
-  const { data: userRole } = useQuery({
+  const { data: userRole, isError: isRoleError } = useQuery({
     queryKey: ["userRole"],
     queryFn: async () => {
       try {
@@ -62,6 +62,14 @@ export const OrderForm = ({ products, isSubmitting, onSubmit }: OrderFormProps) 
     },
     retry: false
   });
+
+  if (isRoleError) {
+    toast({
+      title: "Error",
+      description: "Failed to fetch user role. Some features might be limited.",
+      variant: "destructive",
+    });
+  }
 
   const isAdmin = userRole === 'admin';
   const subtotal = selectedProduct ? selectedProduct.price * quantity : 0;
