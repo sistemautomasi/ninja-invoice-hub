@@ -71,7 +71,8 @@ export function OrderStatusSummary({ onStatusClick, selectedStatus }: OrderStatu
       icon: CirclePlus,
       color: "text-gray-900",
       bgColor: "bg-white",
-      iconColor: "text-purple-500", // Changed to purple
+      iconColor: "text-purple-500",
+      iconBgColor: "bg-purple-50", // Light purple background
     },
     {
       status: "confirmed",
@@ -79,7 +80,8 @@ export function OrderStatusSummary({ onStatusClick, selectedStatus }: OrderStatu
       icon: CheckCircle,
       color: "text-gray-900",
       bgColor: "bg-white",
-      iconColor: "text-green-500", // Changed to green
+      iconColor: "text-green-500",
+      iconBgColor: "bg-green-50", // Light green background
     },
     {
       status: "shipped",
@@ -87,7 +89,8 @@ export function OrderStatusSummary({ onStatusClick, selectedStatus }: OrderStatu
       icon: Truck,
       color: "text-gray-900",
       bgColor: "bg-white",
-      iconColor: "text-orange-500", // Changed to orange
+      iconColor: "text-orange-500",
+      iconBgColor: "bg-orange-50", // Light orange background
     },
     {
       status: "returned",
@@ -95,7 +98,8 @@ export function OrderStatusSummary({ onStatusClick, selectedStatus }: OrderStatu
       icon: RotateCcw,
       color: "text-gray-900",
       bgColor: "bg-white",
-      iconColor: "text-red-500", // Changed to red
+      iconColor: "text-red-500",
+      iconBgColor: "bg-red-50", // Light red background
     },
   ];
 
@@ -118,7 +122,6 @@ export function OrderStatusSummary({ onStatusClick, selectedStatus }: OrderStatu
   return (
     <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
       {statusConfigs.map((config) => {
-        // For the "new" status, include both "new" and "pending" counts
         const count = config.status === "new"
           ? (statusCounts?.filter(s => s.status === "new" || s.status === "pending").reduce((sum, s) => sum + s.count, 0) || 0)
           : (statusCounts?.find(s => s.status === config.status)?.count || 0);
@@ -144,7 +147,9 @@ export function OrderStatusSummary({ onStatusClick, selectedStatus }: OrderStatu
                   <p className="text-2xl font-semibold text-gray-900">
                     {count}
                   </p>
-                  <config.icon className={`h-5 w-5 ${config.iconColor}`} />
+                  <div className={`p-2 rounded-lg ${config.iconBgColor}`}>
+                    <config.icon className={`h-5 w-5 ${config.iconColor}`} />
+                  </div>
                 </div>
               </div>
             </div>
