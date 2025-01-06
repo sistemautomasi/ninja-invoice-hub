@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Database } from "@/integrations/supabase/types";
 import { SendInviteForm } from "./SendInviteForm";
 import { PendingInvitesList } from "./PendingInvitesList";
+import { DirectAddUser } from "./DirectAddUser";
 
 type UserRole = Database["public"]["Enums"]["user_role"];
 
@@ -175,6 +176,57 @@ export const TeamInvites = () => {
     },
   });
 
+  const addUser = useMutation({
+    mutationFn: async ({ email, role }: { email: string; role: UserRole }) => {
+      // First check if user already exists
+      const { data: existingUsers, error: checkError } = await supabase
+        .from('user_roles')
+        .select('user_id')
+        .eq('email', email);
+      
+      if (checkError) {
+        console.error('Error checking existing user:', checkError);
+        throw checkError;
+      }
+
+      if (existingUsers && existingUsers.length > 0) {
+        throw new Error('User already exists');
+      }
+
+      // Create user role directly
+      const { error: roleError } = await supabase
+        .from('user_roles')
+        .insert([
+          {
+            email,
+            role,
+          },
+        ]);
+
+      if (roleError) {
+        console.error('Error creating user role:', roleError);
+        throw roleError;
+      }
+
+      return { success: true };
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['team-members'] });
+      toast({
+        title: "Success",
+        description: "User added successfully!",
+      });
+    },
+    onError: (error) => {
+      console.error('Mutation error:', error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to add user. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -185,6 +237,8 @@ export const TeamInvites = () => {
 
   return (
     <div className="space-y-6">
+      <DirectAddUser addUser={addUser} />
+      <Separator />
       <SendInviteForm sendInvite={sendInvite} />
       <Separator />
       <div>
