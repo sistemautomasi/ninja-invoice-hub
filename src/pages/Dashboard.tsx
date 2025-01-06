@@ -4,7 +4,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { startOfDay, subDays, startOfMonth, endOfMonth, format, subMonths, differenceInDays } from "date-fns";
 import DashboardStats from "@/components/dashboard/DashboardStats";
 import ShippingOverview from "@/components/dashboard/ShippingOverview";
-import SalesChart from "@/components/dashboard/SalesChart";
 import TimePeriodSelect from "@/components/dashboard/TimePeriodSelect";
 import SalesChartContainer from "@/components/dashboard/charts/SalesChartContainer";
 
