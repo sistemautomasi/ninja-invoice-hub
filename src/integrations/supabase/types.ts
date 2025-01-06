@@ -41,6 +41,51 @@ export type Database = {
           },
         ]
       }
+      ad_metrics: {
+        Row: {
+          ad_spend: number
+          campaign_name: string
+          clicks: number
+          conversions: number
+          created_at: string
+          date: string
+          id: string
+          impressions: number
+          platform: string
+          revenue: number
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          ad_spend?: number
+          campaign_name: string
+          clicks?: number
+          conversions?: number
+          created_at?: string
+          date?: string
+          id?: string
+          impressions?: number
+          platform: string
+          revenue?: number
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          ad_spend?: number
+          campaign_name?: string
+          clicks?: number
+          conversions?: number
+          created_at?: string
+          date?: string
+          id?: string
+          impressions?: number
+          platform?: string
+          revenue?: number
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       business_costs: {
         Row: {
           amount: number
