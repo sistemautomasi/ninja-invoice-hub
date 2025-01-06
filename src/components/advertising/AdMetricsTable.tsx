@@ -7,6 +7,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { format } from "date-fns";
+import { useCurrency } from "@/hooks/use-currency";
 
 interface AdMetric {
   id: string;
@@ -25,6 +26,8 @@ interface AdMetricsTableProps {
 }
 
 export const AdMetricsTable = ({ metrics }: AdMetricsTableProps) => {
+  const { formatPrice } = useCurrency();
+
   if (!metrics || metrics.length === 0) {
     return (
       <div className="text-center text-muted-foreground py-4">
@@ -64,14 +67,14 @@ export const AdMetricsTable = ({ metrics }: AdMetricsTableProps) => {
               <TableCell>{format(new Date(metric.date), "MMM d, yyyy")}</TableCell>
               <TableCell className="capitalize">{metric.platform}</TableCell>
               <TableCell>{metric.campaign_name}</TableCell>
-              <TableCell className="text-right">${metric.ad_spend.toFixed(2)}</TableCell>
-              <TableCell className="text-right">${metric.revenue.toFixed(2)}</TableCell>
-              <TableCell className="text-right">${netRevenue.toFixed(2)}</TableCell>
+              <TableCell className="text-right">{formatPrice(metric.ad_spend)}</TableCell>
+              <TableCell className="text-right">{formatPrice(metric.revenue)}</TableCell>
+              <TableCell className="text-right">{formatPrice(netRevenue)}</TableCell>
               <TableCell className="text-right">{roas}x</TableCell>
               <TableCell className="text-right">{metric.impressions.toLocaleString()}</TableCell>
               <TableCell className="text-right">{metric.clicks.toLocaleString()}</TableCell>
               <TableCell className="text-right">{metric.conversions}</TableCell>
-              <TableCell className="text-right">${cpp}</TableCell>
+              <TableCell className="text-right">{formatPrice(Number(cpp))}</TableCell>
               <TableCell className="text-right">{ctr}%</TableCell>
             </TableRow>
           );

@@ -1,4 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useCurrency } from "@/hooks/use-currency";
 
 interface AdMetricsSummaryProps {
   metrics: {
@@ -10,6 +11,8 @@ interface AdMetricsSummaryProps {
 }
 
 export const AdMetricsSummary = ({ metrics }: AdMetricsSummaryProps) => {
+  const { formatPrice } = useCurrency();
+
   return (
     <div className="grid gap-4 md:grid-cols-4">
       <Card>
@@ -32,7 +35,7 @@ export const AdMetricsSummary = ({ metrics }: AdMetricsSummaryProps) => {
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">
-            ${metrics.netRevenue.toFixed(2)}
+            {formatPrice(metrics.netRevenue)}
           </div>
           <p className="text-xs text-muted-foreground">
             Sales minus Ad Spend
@@ -46,7 +49,7 @@ export const AdMetricsSummary = ({ metrics }: AdMetricsSummaryProps) => {
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">
-            ${metrics.costPerPurchase.toFixed(2)}
+            {formatPrice(metrics.costPerPurchase)}
           </div>
           <p className="text-xs text-muted-foreground">
             Average cost per conversion
