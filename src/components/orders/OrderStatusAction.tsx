@@ -41,10 +41,8 @@ export const OrderStatusAction = ({ orderId, currentStatus }: OrderStatusActionP
     
     setIsLoading(true);
     console.log(`Attempting to update order ${orderId} status from ${selectedStatus} to ${newStatus}`);
-    const previousStatus = selectedStatus;
 
     try {
-      // Update in Supabase
       const { error } = await supabase
         .from('orders')
         .update({ status: newStatus })
@@ -58,6 +56,7 @@ export const OrderStatusAction = ({ orderId, currentStatus }: OrderStatusActionP
         queryClient.invalidateQueries({ queryKey: ["orders"] })
       ]);
 
+      // Update local state after successful database update
       setSelectedStatus(newStatus);
 
       toast({
@@ -70,15 +69,13 @@ export const OrderStatusAction = ({ orderId, currentStatus }: OrderStatusActionP
       console.error('Error updating status:', error);
       
       // Revert UI state
-      setSelectedStatus(previousStatus);
+      setSelectedStatus(currentStatus);
       
       toast({
         title: "Error",
         description: "Failed to update order status. Please try again.",
         variant: "destructive",
       });
-
-      console.error(`Failed to update order ${orderId} status from ${previousStatus} to ${newStatus}`);
     } finally {
       setIsLoading(false);
     }

@@ -16,11 +16,13 @@ export const OrderStatusCell = ({ status: initialStatus, orderId }: OrderStatusC
   useEffect(() => {
     console.log(`Status cell received new status: ${initialStatus}`);
     setCurrentStatus(initialStatus);
+    setIsUpdating(false);
   }, [initialStatus]);
 
   // Set up real-time subscription
   useEffect(() => {
     console.log(`Setting up real-time subscription for order: ${orderId}`);
+    
     const channel = supabase
       .channel(`order-status-${orderId}`)
       .on(
@@ -33,7 +35,8 @@ export const OrderStatusCell = ({ status: initialStatus, orderId }: OrderStatusC
         },
         (payload: any) => {
           console.log(`Received real-time update for order ${orderId}:`, payload);
-          if (payload.new && payload.new.status) {
+          if (payload.new && payload.new.status !== currentStatus) {
+            setIsUpdating(true);
             setCurrentStatus(payload.new.status);
             setIsUpdating(false);
           }
@@ -45,7 +48,7 @@ export const OrderStatusCell = ({ status: initialStatus, orderId }: OrderStatusC
       console.log(`Cleaning up subscription for order: ${orderId}`);
       void supabase.removeChannel(channel);
     };
-  }, [orderId]);
+  }, [orderId, currentStatus]);
 
   const getStatusColor = (status: string) => {
     const colors = {
