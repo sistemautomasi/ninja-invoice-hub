@@ -11,24 +11,28 @@ const Dashboard = () => {
   const [timePeriod, setTimePeriod] = useState("today");
 
   const getDateRange = () => {
-    const today = new Date();
+    const now = new Date();
+    const today = startOfDay(now);
+    
     switch (timePeriod) {
       case "today":
-        return { start: startOfDay(today), end: today };
-      case "yesterday":
-        const yesterday = subDays(today, 1);
-        return { start: startOfDay(yesterday), end: startOfDay(today) };
+        return { start: today, end: now };
+      case "yesterday": {
+        const yesterday = startOfDay(subDays(today, 1));
+        return { start: yesterday, end: today };
+      }
       case "last7days":
-        return { start: subDays(today, 7), end: today };
+        return { start: subDays(now, 7), end: now };
       case "last30days":
-        return { start: subDays(today, 30), end: today };
+        return { start: subDays(now, 30), end: now };
       case "thisMonth":
-        return { start: startOfMonth(today), end: endOfMonth(today) };
-      case "lastMonth":
-        const lastMonth = subMonths(today, 1);
+        return { start: startOfMonth(now), end: endOfMonth(now) };
+      case "lastMonth": {
+        const lastMonth = subMonths(now, 1);
         return { start: startOfMonth(lastMonth), end: endOfMonth(lastMonth) };
+      }
       default:
-        return { start: startOfDay(today), end: today };
+        return { start: today, end: now };
     }
   };
 
@@ -92,14 +96,17 @@ const Dashboard = () => {
 
       if (error) throw error;
 
-      const groupedData = data.reduce((acc: any, order) => {
+      if (!data) return [];
+
+      const groupedData: Record<string, { name: string; sales: number }> = {};
+      
+      data.forEach(order => {
         const date = format(new Date(order.created_at), 'MMM dd');
-        if (!acc[date]) {
-          acc[date] = { name: date, sales: 0 };
+        if (!groupedData[date]) {
+          groupedData[date] = { name: date, sales: 0 };
         }
-        acc[date].sales += Number(order.total_amount);
-        return acc;
-      }, {});
+        groupedData[date].sales += Number(order.total_amount);
+      });
 
       return Object.values(groupedData);
     },
@@ -116,7 +123,7 @@ const Dashboard = () => {
       
       <DashboardStats stats={stats} />
       <ShippingOverview shipping={stats?.shipping} />
-      <SalesChart salesData={salesData} />
+      <SalesChart salesData={salesData || []} />
     </div>
   );
 };
