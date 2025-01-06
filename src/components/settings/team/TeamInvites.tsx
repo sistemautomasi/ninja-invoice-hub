@@ -182,7 +182,7 @@ export const TeamInvites = () => {
       const { data: existingUsers, error: checkError } = await supabase
         .from('user_roles')
         .select('user_id')
-        .eq('email', email);
+        .eq('user_id', email);
       
       if (checkError) {
         console.error('Error checking existing user:', checkError);
@@ -198,7 +198,7 @@ export const TeamInvites = () => {
         .from('user_roles')
         .insert([
           {
-            email,
+            user_id: email, // Using email as user_id for now
             role,
           },
         ]);
