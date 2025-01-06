@@ -71,7 +71,7 @@ export function OrderStatusSummary({ onStatusClick, selectedStatus }: OrderStatu
       icon: CirclePlus,
       color: "text-gray-900",
       bgColor: "bg-white",
-      iconColor: "text-blue-500",
+      iconColor: "text-purple-500", // Changed to purple
     },
     {
       status: "confirmed",
@@ -79,7 +79,7 @@ export function OrderStatusSummary({ onStatusClick, selectedStatus }: OrderStatu
       icon: CheckCircle,
       color: "text-gray-900",
       bgColor: "bg-white",
-      iconColor: "text-blue-500",
+      iconColor: "text-green-500", // Changed to green
     },
     {
       status: "shipped",
@@ -87,7 +87,7 @@ export function OrderStatusSummary({ onStatusClick, selectedStatus }: OrderStatu
       icon: Truck,
       color: "text-gray-900",
       bgColor: "bg-white",
-      iconColor: "text-blue-500",
+      iconColor: "text-orange-500", // Changed to orange
     },
     {
       status: "returned",
@@ -95,7 +95,7 @@ export function OrderStatusSummary({ onStatusClick, selectedStatus }: OrderStatu
       icon: RotateCcw,
       color: "text-gray-900",
       bgColor: "bg-white",
-      iconColor: "text-blue-500",
+      iconColor: "text-red-500", // Changed to red
     },
   ];
 
