@@ -178,27 +178,29 @@ export const TeamInvites = () => {
 
   const addUser = useMutation({
     mutationFn: async ({ email, role }: { email: string; role: UserRole }) => {
-      // First check if user already exists
-      const { data: existingUsers, error: checkError } = await supabase
-        .from('user_roles')
-        .select('user_id')
-        .eq('user_id', email);
+      // First create a profile for the user
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .insert([
+          {
+            id: crypto.randomUUID(), // Generate a UUID for the new profile
+            email: email,
+          },
+        ])
+        .select()
+        .single();
       
-      if (checkError) {
-        console.error('Error checking existing user:', checkError);
-        throw checkError;
+      if (profileError) {
+        console.error('Error creating profile:', profileError);
+        throw profileError;
       }
 
-      if (existingUsers && existingUsers.length > 0) {
-        throw new Error('User already exists');
-      }
-
-      // Create user role directly
+      // Then create the user role using the profile id
       const { error: roleError } = await supabase
         .from('user_roles')
         .insert([
           {
-            user_id: email, // Using email as user_id for now
+            user_id: profile.id,
             role,
           },
         ]);
