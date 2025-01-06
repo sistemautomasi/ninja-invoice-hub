@@ -56,22 +56,17 @@ export const TeamInvites = () => {
       }
 
       // Then, send the invite email
-      const response = await fetch('/functions/v1/send-team-invite', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.SUPABASE_ANON_KEY}`,
-        },
-        body: JSON.stringify({
+      const { data, error } = await supabase.functions.invoke('send-team-invite', {
+        body: {
           to: email,
           role: role,
           invitedBy: user?.email,
-        }),
+        },
       });
 
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to send invite email');
+      if (error) {
+        console.error('Error sending invite:', error);
+        throw error;
       }
 
       return invite;

@@ -30,7 +30,10 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log(`Sending invite email to: ${to}, role: ${role}`)
     
-    const signUpUrl = `${req.headers.get('origin')}/signup?invite_email=${encodeURIComponent(to)}&role=${role}`
+    const origin = req.headers.get('origin') || 'http://localhost:5173'
+    const signUpUrl = `${origin}/signup?invite_email=${encodeURIComponent(to)}&role=${role}`
+    
+    console.log("Sign up URL:", signUpUrl)
     
     const emailHtml = `
       <h2>You've been invited to join the team!</h2>
@@ -40,6 +43,7 @@ const handler = async (req: Request): Promise<Response> => {
       <p>This invitation was sent by ${invitedBy}</p>
     `
 
+    console.log("Sending email with Resend API")
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
