@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { DollarSign, Clock, Users, Package, TrendingUp, ShoppingCart, Percent, Award } from "lucide-react";
+import { DollarSign, Users, Package, TrendingUp, ShoppingCart, Percent, Award, Megaphone } from "lucide-react";
 import { useCurrency } from "@/hooks/use-currency";
 
 interface DashboardStatsProps {
@@ -10,7 +10,7 @@ interface DashboardStatsProps {
     averageOrderValue?: number;
     profitMargin?: number;
     profit?: number;
-    averageProcessingTime?: string;
+    advertisingCosts?: number;
     topSellingProduct?: {
       name: string;
       totalSold: number;
@@ -73,15 +73,15 @@ const DashboardStats = ({ stats }: DashboardStatsProps) => {
 
       <Card className="hover:shadow-lg transition-shadow duration-200 hover:scale-105 transform">
         <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-          <CardTitle className="text-sm font-medium">Processing Time</CardTitle>
-          <Clock className="h-4 w-4 text-orange-500" />
+          <CardTitle className="text-sm font-medium">Advertising Cost</CardTitle>
+          <Megaphone className="h-4 w-4 text-orange-500" />
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">
-            {stats?.averageProcessingTime || '0h'}
+            {formatPrice(stats?.advertisingCosts || 0)}
           </div>
           <p className="text-xs mt-1 text-muted-foreground">
-            Average order processing
+            Total advertising spend
           </p>
         </CardContent>
       </Card>

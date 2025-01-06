@@ -8,18 +8,10 @@ import TimePeriodSelect from "@/components/dashboard/TimePeriodSelect";
 import SalesChartContainer from "@/components/dashboard/charts/SalesChartContainer";
 import { calculateTotalCostsByType, calculateNetProfit, calculateProfitMargin } from "@/utils/profitCalculations";
 
-// Define the interval type for processing_time
-interface ProcessingTimeInterval {
-  hours: number;
-  minutes: number;
-  seconds: number;
-}
-
 interface OrderWithItems {
   id: string;
   total_amount: number;
   status: string;
-  processing_time: ProcessingTimeInterval | null;
   order_items: {
     quantity: number;
     price_at_time: number;
@@ -79,7 +71,6 @@ const Dashboard = () => {
           id,
           total_amount,
           status,
-          processing_time,
           order_items (
             quantity,
             price_at_time,
@@ -151,29 +142,6 @@ const Dashboard = () => {
         ? 100 
         : ((totalRevenue - previousRevenue) / previousRevenue) * 100;
 
-      // Fetch customer metrics for CLV
-      const { data: customerMetrics, error: metricsError } = await supabase
-        .from('customer_metrics')
-        .select('lifetime_value')
-        .not('lifetime_value', 'is', null);
-
-      if (metricsError) throw metricsError;
-
-      // Calculate average customer lifetime value
-      const averageClv = customerMetrics?.length 
-        ? customerMetrics.reduce((sum, metric) => sum + Number(metric.lifetime_value), 0) / customerMetrics.length 
-        : 0;
-
-      // Calculate average processing time
-      const ordersWithProcessingTime = currentOrders?.filter(order => order.processing_time) || [];
-      const averageProcessingTime = ordersWithProcessingTime.length
-        ? ordersWithProcessingTime.reduce((sum, order) => {
-            const hours = order.processing_time?.hours || 0;
-            const minutes = order.processing_time?.minutes || 0;
-            return sum + (hours + minutes / 60);
-          }, 0) / ordersWithProcessingTime.length
-        : 0;
-
       // Calculate top selling product
       const productSales: Record<string, { name: string; totalSold: number }> = {};
       currentOrders?.forEach(order => {
@@ -203,86 +171,10 @@ const Dashboard = () => {
         percentageChange: percentageChange.toFixed(1),
         profitMargin: Number(profitMargin.toFixed(1)),
         profit: netProfit,
-        customerLifetimeValue: averageClv,
-        averageProcessingTime: `${Math.floor(averageProcessingTime)}h ${Math.round((averageProcessingTime % 1) * 60)}m`,
+        advertisingCosts,
         topSellingProduct: topProduct,
         shipping: { confirmed, toShip, inTransit, delivered }
       };
-    },
-  });
-
-  const { data: salesData } = useQuery({
-    queryKey: ["salesChart", timePeriod],
-    queryFn: async () => {
-      const { start, end } = getDateRange();
-      
-      // Fetch orders with their items for the period
-      const { data: orders, error: ordersError } = await supabase
-        .from('orders')
-        .select(`
-          created_at, 
-          total_amount,
-          order_items (
-            quantity,
-            price_at_time,
-            product:products (
-              cost
-            )
-          )
-        `)
-        .gte('created_at', start.toISOString())
-        .lte('created_at', end.toISOString())
-        .order('created_at', { ascending: true });
-
-      if (ordersError) throw ordersError;
-
-      // Fetch business costs for the period
-      const { data: businessCosts, error: costsError } = await supabase
-        .from('business_costs')
-        .select('*')
-        .gte('date', start.toISOString())
-        .lte('date', end.toISOString());
-
-      if (costsError) throw costsError;
-
-      if (!orders) return [];
-
-      const groupedData: Record<string, { name: string; sales: number; profit: number }> = {};
-      
-      orders.forEach(order => {
-        const date = format(new Date(order.created_at), 'MMM dd');
-        if (!groupedData[date]) {
-          groupedData[date] = { name: date, sales: 0, profit: 0 };
-        }
-        
-        const totalAmount = Number(order.total_amount);
-        groupedData[date].sales += totalAmount;
-
-        // Calculate product costs for this order
-        const productCosts = order.order_items?.reduce((total, item) => {
-          return total + (Number(item.product?.cost || 0) * item.quantity);
-        }, 0) || 0;
-
-        // Get business costs for this date
-        const dateCosts = businessCosts?.filter(cost => 
-          format(new Date(cost.date), 'MMM dd') === date
-        ) || [];
-
-        const advertisingCosts = calculateTotalCostsByType(dateCosts, 'advertising', new Date(order.created_at), new Date(order.created_at));
-        const shippingCosts = calculateTotalCostsByType(dateCosts, 'shipping', new Date(order.created_at), new Date(order.created_at));
-
-        // Calculate net profit
-        const profit = calculateNetProfit(
-          totalAmount,
-          productCosts,
-          advertisingCosts,
-          shippingCosts
-        );
-
-        groupedData[date].profit += profit;
-      });
-
-      return Object.values(groupedData);
     },
   });
 
