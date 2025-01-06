@@ -10,6 +10,8 @@ import { useToast } from "@/hooks/use-toast";
 import { CustomerInfoFields } from "./CustomerInfoFields";
 import { ProductSelection } from "./ProductSelection";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Product {
   id: string;
@@ -28,10 +30,29 @@ export const OrderForm = ({ products, isSubmitting, onSubmit }: OrderFormProps) 
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [paymentMethod, setPaymentMethod] = useState<'cod' | 'online_banking'>('online_banking');
+  const [shippingCost, setShippingCost] = useState(0);
   const { formatPrice } = useCurrency();
   const { toast } = useToast();
 
-  const shippingCost = paymentMethod === 'cod' ? 15 : 0;
+  // Fetch user role to determine if they're an admin
+  const { data: userRole } = useQuery({
+    queryKey: ["userRole"],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return null;
+
+      const { data, error } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user.id)
+        .single();
+
+      if (error) throw error;
+      return data?.role;
+    }
+  });
+
+  const isAdmin = userRole === 'admin';
   const subtotal = selectedProduct ? selectedProduct.price * quantity : 0;
   const totalAmount = subtotal + shippingCost;
 
@@ -91,14 +112,27 @@ export const OrderForm = ({ products, isSubmitting, onSubmit }: OrderFormProps) 
             >
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="online_banking" id="online_banking" />
-                <Label htmlFor="online_banking">Online Banking (Free Shipping)</Label>
+                <Label htmlFor="online_banking">Online Banking</Label>
               </div>
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="cod" id="cod" />
-                <Label htmlFor="cod">Cash on Delivery (RM15 Shipping)</Label>
+                <Label htmlFor="cod">Cash on Delivery</Label>
               </div>
             </RadioGroup>
           </div>
+
+          {isAdmin && (
+            <div className="space-y-2 text-left">
+              <Label htmlFor="shippingCost">Shipping Cost</Label>
+              <Input
+                id="shippingCost"
+                type="number"
+                step="0.01"
+                value={shippingCost}
+                onChange={(e) => setShippingCost(Number(e.target.value))}
+              />
+            </div>
+          )}
 
           <div className="space-y-2 text-left">
             <Label>Order Summary</Label>

@@ -28,7 +28,7 @@ export const useSubmitOrder = () => {
           district: orderData.district,
           state: orderData.state,
           postcode: orderData.postcode,
-          platform: orderData.paymentMethod // Store payment method in platform field
+          platform: orderData.paymentMethod
         })
         .select()
         .single();
@@ -47,14 +47,15 @@ export const useSubmitOrder = () => {
 
       if (itemError) throw itemError;
 
-      // Create a shipping cost record if COD
-      if (orderData.paymentMethod === 'cod') {
+      // Create a shipping cost record if shipping cost is greater than 0
+      if (orderData.totalAmount > orderData.priceAtTime * orderData.quantity) {
+        const shippingCost = orderData.totalAmount - (orderData.priceAtTime * orderData.quantity);
         const { error: costError } = await supabase
           .from("business_costs")
           .insert({
             user_id: user.id,
             cost_type: 'shipping',
-            amount: 15,
+            amount: shippingCost,
             description: `Shipping cost for order ${order.order_number}`,
             date: new Date().toISOString().split('T')[0]
           });
