@@ -31,6 +31,35 @@ export const TeamInvites = () => {
     },
   });
 
+  const deleteInvite = useMutation({
+    mutationFn: async ({ id }: { id: string }) => {
+      const { error } = await supabase
+        .from('team_invites')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        console.error('Error deleting invite:', error);
+        throw error;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['team-invites'] });
+      toast({
+        title: "Success",
+        description: "Team invite deleted successfully!",
+      });
+    },
+    onError: (error) => {
+      console.error('Mutation error:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete team invite. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
   const acceptInvite = useMutation({
     mutationFn: async ({ email, role }: { email: string; role: UserRole }) => {
       // First update the invite status
@@ -79,6 +108,22 @@ export const TeamInvites = () => {
 
   const sendInvite = useMutation({
     mutationFn: async ({ email, role }: { email: string; role: UserRole }) => {
+      // Check if there's already a pending invite for this email
+      const { data: existingInvites, error: checkError } = await supabase
+        .from('team_invites')
+        .select('*')
+        .eq('email', email)
+        .eq('status', 'pending');
+      
+      if (checkError) {
+        console.error('Error checking existing invites:', checkError);
+        throw checkError;
+      }
+
+      if (existingInvites && existingInvites.length > 0) {
+        throw new Error('There is already a pending invite for this email');
+      }
+
       // First, create the invite in the database
       const { data: invite, error: dbError } = await supabase
         .from('team_invites')
@@ -124,7 +169,7 @@ export const TeamInvites = () => {
       console.error('Mutation error:', error);
       toast({
         title: "Error",
-        description: "Failed to send team invite. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to send team invite. Please try again.",
         variant: "destructive",
       });
     },
@@ -147,6 +192,7 @@ export const TeamInvites = () => {
         <PendingInvitesList 
           pendingInvites={pendingInvites} 
           acceptInvite={acceptInvite}
+          deleteInvite={deleteInvite}
         />
       </div>
     </div>
