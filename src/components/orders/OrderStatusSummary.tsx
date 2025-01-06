@@ -1,7 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
-import { CirclePlus, CheckCircle, Truck, RotateCcw, Loader2, LayoutGrid } from "lucide-react";
+import { CirclePlus, CheckCircle, Truck, RotateCcw, Loader2 } from "lucide-react";
 import { useEffect } from "react";
 
 interface StatusCount {
@@ -66,14 +66,6 @@ export function OrderStatusSummary({ onStatusClick, selectedStatus }: OrderStatu
 
   const statusConfigs = [
     {
-      status: "all",
-      label: "All Orders",
-      icon: LayoutGrid,
-      color: "text-gray-900",
-      bgColor: "bg-white",
-      iconColor: "text-purple-500",
-    },
-    {
       status: "new",
       label: "New Orders",
       icon: CirclePlus,
@@ -124,19 +116,12 @@ export function OrderStatusSummary({ onStatusClick, selectedStatus }: OrderStatu
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mb-6">
+    <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
       {statusConfigs.map((config) => {
-        let count;
-        if (config.status === "all") {
-          // Sum up all orders
-          count = statusCounts?.reduce((sum, status) => sum + status.count, 0) || 0;
-        } else if (config.status === "new") {
-          // For the "new" status, include both "new" and "pending" counts
-          count = statusCounts?.filter(s => s.status === "new" || s.status === "pending")
-            .reduce((sum, s) => sum + s.count, 0) || 0;
-        } else {
-          count = statusCounts?.find(s => s.status === config.status)?.count || 0;
-        }
+        // For the "new" status, include both "new" and "pending" counts
+        const count = config.status === "new"
+          ? (statusCounts?.filter(s => s.status === "new" || s.status === "pending").reduce((sum, s) => sum + s.count, 0) || 0)
+          : (statusCounts?.find(s => s.status === config.status)?.count || 0);
         
         const isSelected = selectedStatus === config.status;
         
