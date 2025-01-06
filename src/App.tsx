@@ -12,7 +12,7 @@ import SubmitOrder from "@/pages/SubmitOrder";
 import SignIn from "@/pages/SignIn";
 import SignUp from "@/pages/SignUp";
 import Costs from "@/pages/Costs";
-import "./App.css";
+import AdvertisingReport from "@/pages/AdvertisingReport";
 
 const queryClient = new QueryClient();
 
@@ -33,6 +33,7 @@ function App() {
               <Route path="orders" element={<OrderList />} />
               <Route path="submit-order" element={<SubmitOrder />} />
               <Route path="costs" element={<Costs />} />
+              <Route path="advertising" element={<AdvertisingReport />} />
             </Route>
           </Routes>
         </Router>
