@@ -19,12 +19,19 @@ export const AdminCheck = ({ children }: AdminCheckProps) => {
   useEffect(() => {
     const checkAdminStatus = async () => {
       try {
-        // Reset loading state
+        // Reset states
         setLoading(true);
+        setIsAdmin(false);
         
-        // Check if we have a valid user
-        if (!user?.id) {
+        // Validate user exists and has an ID
+        if (!user) {
           console.log("No authenticated user found");
+          setLoading(false);
+          return;
+        }
+
+        if (!user.id) {
+          console.log("User found but no ID present");
           setLoading(false);
           return;
         }
@@ -38,7 +45,9 @@ export const AdminCheck = ({ children }: AdminCheckProps) => {
           .eq('user_id', user.id)
           .maybeSingle();
 
-        if (!directRoleError && directRoleCheck?.role === 'admin') {
+        if (directRoleError) {
+          console.error("Direct role check failed:", directRoleError);
+        } else if (directRoleCheck?.role === 'admin') {
           console.log("Found admin role directly:", directRoleCheck);
           setIsAdmin(true);
           setLoading(false);
@@ -46,49 +55,55 @@ export const AdminCheck = ({ children }: AdminCheckProps) => {
         }
 
         // If no direct match found and we have an email, try through profiles
-        if (user.email) {
-          console.log("Checking admin status through email:", user.email);
-          
-          const { data: profileData, error: profileError } = await supabase
-            .from('profiles')
-            .select('id')
-            .eq('email', user.email)
-            .maybeSingle();
+        if (!user.email) {
+          console.log("No email found for user");
+          setLoading(false);
+          return;
+        }
 
-          if (profileError) {
-            console.error("Profile lookup error:", profileError);
-            toast({
-              title: "Error",
-              description: "Failed to verify user profile",
-              variant: "destructive",
-            });
-            setLoading(false);
-            return;
-          }
+        console.log("Checking admin status through email:", user.email);
+        
+        const { data: profileData, error: profileError } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('email', user.email)
+          .maybeSingle();
 
-          if (profileData?.id) {
-            console.log("Found profile:", profileData);
-            
-            const { data: roleData, error: roleError } = await supabase
-              .from('user_roles')
-              .select('role')
-              .eq('user_id', profileData.id)
-              .maybeSingle();
+        if (profileError) {
+          console.error("Profile lookup error:", profileError);
+          toast({
+            title: "Error",
+            description: "Failed to verify user profile",
+            variant: "destructive",
+          });
+          setLoading(false);
+          return;
+        }
 
-            if (roleError) {
-              console.error("Role lookup error:", roleError);
-              toast({
-                title: "Error",
-                description: "Failed to verify admin status",
-                variant: "destructive",
-              });
-            } else {
-              console.log("Role check result:", roleData);
-              setIsAdmin(roleData?.role === 'admin');
-            }
-          } else {
-            console.log("No profile found for email:", user.email);
-          }
+        if (!profileData?.id) {
+          console.log("No profile found for email:", user.email);
+          setLoading(false);
+          return;
+        }
+
+        console.log("Found profile:", profileData);
+        
+        const { data: roleData, error: roleError } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', profileData.id)
+          .maybeSingle();
+
+        if (roleError) {
+          console.error("Role lookup error:", roleError);
+          toast({
+            title: "Error",
+            description: "Failed to verify admin status",
+            variant: "destructive",
+          });
+        } else {
+          console.log("Role check result:", roleData);
+          setIsAdmin(roleData?.role === 'admin');
         }
       } catch (error) {
         console.error("Unexpected error during admin check:", error);
