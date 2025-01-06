@@ -31,10 +31,16 @@ export const OrderStatusAction = ({ orderId, currentStatus }: OrderStatusActionP
   ];
 
   const handleStatusChange = async (newStatus: string) => {
-    if (newStatus === selectedStatus) return;
+    if (newStatus === selectedStatus || isLoading) return;
     
     setIsLoading(true);
+    const previousStatus = selectedStatus;
+
     try {
+      // Optimistically update the UI
+      setSelectedStatus(newStatus);
+
+      // Update in Supabase
       const { error } = await supabase
         .from('orders')
         .update({ status: newStatus })
@@ -42,11 +48,14 @@ export const OrderStatusAction = ({ orderId, currentStatus }: OrderStatusActionP
 
       if (error) throw error;
 
-      setSelectedStatus(newStatus);
+      // Force immediate cache invalidation
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["orderStatusCounts"] }),
+        queryClient.invalidateQueries({ queryKey: ["orders"] })
+      ]);
 
-      // Invalidate queries to trigger refetch
-      await queryClient.invalidateQueries({ queryKey: ["orderStatusCounts"] });
-      await queryClient.invalidateQueries({ queryKey: ["orders"] });
+      // Log successful update
+      console.log(`Status updated: Order ${orderId} changed from ${previousStatus} to ${newStatus}`);
 
       toast({
         title: "Status Updated",
@@ -54,13 +63,18 @@ export const OrderStatusAction = ({ orderId, currentStatus }: OrderStatusActionP
       });
     } catch (error) {
       console.error('Error updating status:', error);
+      
+      // Revert UI state
+      setSelectedStatus(previousStatus);
+      
       toast({
         title: "Error",
-        description: "Failed to update order status",
+        description: "Failed to update order status. Please try again.",
         variant: "destructive",
       });
-      // Revert the selected status on error
-      setSelectedStatus(currentStatus);
+
+      // Log failed update attempt
+      console.error(`Failed status update: Order ${orderId} from ${previousStatus} to ${newStatus}`);
     } finally {
       setIsLoading(false);
     }

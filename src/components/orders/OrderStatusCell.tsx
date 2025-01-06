@@ -1,6 +1,7 @@
 import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { Loader2 } from "lucide-react";
 
 interface OrderStatusCellProps {
   status: string;
@@ -9,6 +10,7 @@ interface OrderStatusCellProps {
 
 export const OrderStatusCell = ({ status: initialStatus, orderId }: OrderStatusCellProps) => {
   const [currentStatus, setCurrentStatus] = useState(initialStatus);
+  const [isUpdating, setIsUpdating] = useState(false);
 
   useEffect(() => {
     // Update local state when prop changes
@@ -28,12 +30,12 @@ export const OrderStatusCell = ({ status: initialStatus, orderId }: OrderStatusC
         (payload: any) => {
           if (payload.new && payload.new.status) {
             setCurrentStatus(payload.new.status);
+            setIsUpdating(false);
           }
         }
       )
       .subscribe();
 
-    // Cleanup subscription on unmount
     return () => {
       void supabase.removeChannel(channel);
     };
@@ -54,10 +56,11 @@ export const OrderStatusCell = ({ status: initialStatus, orderId }: OrderStatusC
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium capitalize",
+        "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium capitalize gap-1",
         getStatusColor(currentStatus)
       )}
     >
+      {isUpdating && <Loader2 className="h-3 w-3 animate-spin" />}
       {currentStatus}
     </span>
   );
