@@ -1,9 +1,17 @@
 import { useQuery } from "@tanstack/react-query";
-import { Loader2, FileText, Printer } from "lucide-react";
+import { Loader2, FileText, Printer, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrency } from "@/hooks/use-currency";
 import { format } from "date-fns";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 interface Invoice {
   id: string;
@@ -12,6 +20,14 @@ interface Invoice {
   customer_name: string;
   total_amount: number;
   status: string;
+  order_items: {
+    id: string;
+    quantity: number;
+    price_at_time: number;
+    product: {
+      name: string;
+    };
+  }[];
 }
 
 const Invoices = () => {
@@ -28,7 +44,15 @@ const Invoices = () => {
           created_at,
           customer_name,
           total_amount,
-          status
+          status,
+          order_items (
+            id,
+            quantity,
+            price_at_time,
+            product (
+              name
+            )
+          )
         `)
         .order("created_at", { ascending: false });
 
@@ -49,22 +73,54 @@ const Invoices = () => {
               .header { text-align: center; margin-bottom: 30px; }
               .invoice-details { margin-bottom: 20px; }
               .customer-details { margin-bottom: 20px; }
-              .amount { font-size: 1.2em; font-weight: bold; }
+              .items-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+              .items-table th, .items-table td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+              .items-table th { background-color: #f5f5f5; }
+              .total { font-size: 1.2em; font-weight: bold; text-align: right; }
+              .company-info { text-align: center; margin-bottom: 20px; }
+              @media print {
+                button { display: none; }
+              }
             </style>
           </head>
           <body>
+            <div class="company-info">
+              <h1>Your Company Name</h1>
+              <p>123 Business Street<br/>City, State 12345<br/>Phone: (123) 456-7890</p>
+            </div>
             <div class="header">
-              <h1>Invoice</h1>
-              <h2>${invoice.order_number}</h2>
+              <h2>Invoice</h2>
+              <h3>${invoice.order_number}</h3>
             </div>
             <div class="invoice-details">
-              <p>Date: ${format(new Date(invoice.created_at), "PPP")}</p>
+              <p><strong>Date:</strong> ${format(new Date(invoice.created_at), "PPP")}</p>
+              <p><strong>Status:</strong> ${invoice.status}</p>
             </div>
             <div class="customer-details">
-              <h3>Customer Details</h3>
-              <p>Name: ${invoice.customer_name}</p>
+              <h3>Bill To:</h3>
+              <p>${invoice.customer_name}</p>
             </div>
-            <div class="amount">
+            <table class="items-table">
+              <thead>
+                <tr>
+                  <th>Item</th>
+                  <th>Quantity</th>
+                  <th>Price</th>
+                  <th>Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${invoice.order_items?.map((item) => `
+                  <tr>
+                    <td>${item.product?.name || 'Unknown Product'}</td>
+                    <td>${item.quantity}</td>
+                    <td>${formatPrice(item.price_at_time)}</td>
+                    <td>${formatPrice(item.quantity * item.price_at_time)}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+            <div class="total">
               <p>Total Amount: ${formatPrice(invoice.total_amount)}</p>
             </div>
           </body>
@@ -90,61 +146,42 @@ const Invoices = () => {
       </h1>
 
       <div className="rounded-md border">
-        <div className="relative w-full overflow-auto">
-          <table className="w-full caption-bottom text-sm">
-            <thead className="[&_tr]:border-b">
-              <tr className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
-                <th className="h-12 px-4 text-left align-middle font-medium">
-                  Invoice Number
-                </th>
-                <th className="h-12 px-4 text-left align-middle font-medium">
-                  Date
-                </th>
-                <th className="h-12 px-4 text-left align-middle font-medium">
-                  Customer
-                </th>
-                <th className="h-12 px-4 text-left align-middle font-medium">
-                  Amount
-                </th>
-                <th className="h-12 px-4 text-left align-middle font-medium">
-                  Status
-                </th>
-                <th className="h-12 px-4 text-left align-middle font-medium">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="[&_tr:last-child]:border-0">
-              {invoices?.map((invoice) => (
-                <tr
-                  key={invoice.id}
-                  className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
-                >
-                  <td className="p-4 align-middle">
-                    <div className="flex items-center gap-2">
-                      <FileText className="h-4 w-4" />
-                      {invoice.order_number}
-                    </div>
-                  </td>
-                  <td className="p-4 align-middle">
-                    {format(new Date(invoice.created_at), "PPP")}
-                  </td>
-                  <td className="p-4 align-middle">{invoice.customer_name}</td>
-                  <td className="p-4 align-middle">
-                    {formatPrice(invoice.total_amount)}
-                  </td>
-                  <td className="p-4 align-middle">
-                    <span
-                      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                        invoice.status === "completed"
-                          ? "bg-green-100 text-green-800"
-                          : "bg-yellow-100 text-yellow-800"
-                      }`}
-                    >
-                      {invoice.status}
-                    </span>
-                  </td>
-                  <td className="p-4 align-middle">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Invoice Number</TableHead>
+              <TableHead>Date</TableHead>
+              <TableHead>Customer</TableHead>
+              <TableHead>Amount</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {invoices?.map((invoice) => (
+              <TableRow key={invoice.id}>
+                <TableCell>
+                  <div className="flex items-center gap-2">
+                    <FileText className="h-4 w-4" />
+                    {invoice.order_number}
+                  </div>
+                </TableCell>
+                <TableCell>{format(new Date(invoice.created_at), "PPP")}</TableCell>
+                <TableCell>{invoice.customer_name}</TableCell>
+                <TableCell>{formatPrice(invoice.total_amount)}</TableCell>
+                <TableCell>
+                  <span
+                    className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                      invoice.status === "completed"
+                        ? "bg-green-100 text-green-800"
+                        : "bg-yellow-100 text-yellow-800"
+                    }`}
+                  >
+                    {invoice.status}
+                  </span>
+                </TableCell>
+                <TableCell>
+                  <div className="flex items-center gap-2">
                     <Button
                       variant="outline"
                       size="sm"
@@ -153,12 +190,19 @@ const Invoices = () => {
                       <Printer className="h-4 w-4 mr-2" />
                       Print
                     </Button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                    >
+                      <Mail className="h-4 w-4 mr-2" />
+                      Email
+                    </Button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       </div>
     </div>
   );

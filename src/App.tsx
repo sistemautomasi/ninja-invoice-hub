@@ -13,6 +13,7 @@ import SignIn from "@/pages/SignIn";
 import SignUp from "@/pages/SignUp";
 import Costs from "@/pages/Costs";
 import AdvertisingReport from "@/pages/AdvertisingReport";
+import Invoices from "@/pages/Invoices";
 
 const queryClient = new QueryClient();
 
@@ -34,6 +35,7 @@ function App() {
               <Route path="submit-order" element={<SubmitOrder />} />
               <Route path="costs" element={<Costs />} />
               <Route path="advertising" element={<AdvertisingReport />} />
+              <Route path="invoices" element={<Invoices />} />
             </Route>
           </Routes>
         </Router>
