@@ -22,6 +22,20 @@ export const useDirectAddUser = () => {
 
       console.log("Checking admin status for user:", user.email);
 
+      // First check if user exists in user_roles directly with user.id
+      const { data: directAdminCheck, error: directAdminError } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id)
+        .single();
+
+      if (!directAdminError && directAdminCheck?.role === 'admin') {
+        console.log("Found admin status directly:", directAdminCheck);
+        setIsAdmin(true);
+        return;
+      }
+
+      // If not found directly, try through profiles
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select('id')
@@ -32,8 +46,6 @@ export const useDirectAddUser = () => {
         console.error('Profile check error:', profileError);
         return;
       }
-
-      console.log("Profile data:", profileData);
 
       if (!profileData?.id) {
         console.log("No profile found for user");
