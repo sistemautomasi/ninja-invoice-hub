@@ -8,6 +8,7 @@ import { Loader2 } from "lucide-react";
 import { CostSummaryCards } from "@/components/costs/CostSummaryCards";
 import { AddCostForm } from "@/components/costs/AddCostForm";
 import { CostList } from "@/components/costs/CostList";
+import { ShippingRatesCard } from "@/components/costs/ShippingRatesCard";
 import type { Cost } from "@/types/costs";
 
 const Costs = () => {
@@ -25,6 +26,7 @@ const Costs = () => {
       const { data, error } = await supabase
         .from("business_costs")
         .select("*")
+        .not('cost_type', 'in', '("shipping_cod","shipping_online")')
         .order("date", { ascending: false });
       
       if (error) throw error;
@@ -130,12 +132,14 @@ const Costs = () => {
     <div className="space-y-6">
       <h1 className="text-3xl font-bold text-left">Business Costs</h1>
 
+      <ShippingRatesCard />
+
       <CostSummaryCards costs={costs} />
 
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle className="text-left">Cost History</CardTitle>
+            <CardTitle className="text-left">Advertising Costs</CardTitle>
             {!isAdding && (
               <Button onClick={() => setIsAdding(true)}>
                 Add Cost
