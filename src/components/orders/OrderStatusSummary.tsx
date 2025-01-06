@@ -1,7 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
-import { CirclePlus, CheckCircle, Truck, RotateCcw, Loader2 } from "lucide-react";
+import { CirclePlus, CheckCircle, Truck, RotateCcw, CheckSquare, XSquare } from "lucide-react";
 import { useEffect } from "react";
 
 interface StatusCount {
@@ -29,7 +29,6 @@ export function OrderStatusSummary({ onStatusClick, selectedStatus }: OrderStatu
       if (!data) return [];
 
       const counts = data.reduce((acc: Record<string, number>, order) => {
-        // Count 'pending' orders as 'new'
         const status = order.status === 'pending' ? 'new' : order.status;
         acc[status] = (acc[status] || 0) + 1;
         return acc;
@@ -72,7 +71,7 @@ export function OrderStatusSummary({ onStatusClick, selectedStatus }: OrderStatu
       color: "text-gray-900",
       bgColor: "bg-white",
       iconColor: "text-purple-500",
-      iconBgColor: "bg-purple-50", // Light purple background
+      iconBgColor: "bg-purple-50",
     },
     {
       status: "confirmed",
@@ -81,7 +80,7 @@ export function OrderStatusSummary({ onStatusClick, selectedStatus }: OrderStatu
       color: "text-gray-900",
       bgColor: "bg-white",
       iconColor: "text-green-500",
-      iconBgColor: "bg-green-50", // Light green background
+      iconBgColor: "bg-green-50",
     },
     {
       status: "shipped",
@@ -90,7 +89,25 @@ export function OrderStatusSummary({ onStatusClick, selectedStatus }: OrderStatu
       color: "text-gray-900",
       bgColor: "bg-white",
       iconColor: "text-orange-500",
-      iconBgColor: "bg-orange-50", // Light orange background
+      iconBgColor: "bg-orange-50",
+    },
+    {
+      status: "completed",
+      label: "Completed",
+      icon: CheckSquare,
+      color: "text-gray-900",
+      bgColor: "bg-white",
+      iconColor: "text-purple-500",
+      iconBgColor: "bg-purple-50",
+    },
+    {
+      status: "cancelled",
+      label: "Cancelled",
+      icon: XSquare,
+      color: "text-gray-900",
+      bgColor: "bg-white",
+      iconColor: "text-red-500",
+      iconBgColor: "bg-red-50",
     },
     {
       status: "returned",
@@ -99,7 +116,7 @@ export function OrderStatusSummary({ onStatusClick, selectedStatus }: OrderStatu
       color: "text-gray-900",
       bgColor: "bg-white",
       iconColor: "text-red-500",
-      iconBgColor: "bg-red-50", // Light red background
+      iconBgColor: "bg-red-50",
     },
   ];
 
@@ -120,7 +137,7 @@ export function OrderStatusSummary({ onStatusClick, selectedStatus }: OrderStatu
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+    <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-6 mb-6">
       {statusConfigs.map((config) => {
         const count = config.status === "new"
           ? (statusCounts?.filter(s => s.status === "new" || s.status === "pending").reduce((sum, s) => sum + s.count, 0) || 0)
