@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,6 +10,7 @@ interface Product {
   description: string | null;
   price: number;
   stock_quantity: number;
+  cost: number;
 }
 
 interface ProductFormProps {
@@ -48,16 +48,29 @@ export const ProductForm = ({ selectedProduct, onSubmit, onCancel }: ProductForm
             defaultValue={selectedProduct?.description || ""}
           />
         </div>
-        <div className="space-y-2">
-          <Label htmlFor="price">Price</Label>
-          <Input
-            id="price"
-            name="price"
-            type="number"
-            step="0.01"
-            required
-            defaultValue={selectedProduct?.price}
-          />
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="price">Price</Label>
+            <Input
+              id="price"
+              name="price"
+              type="number"
+              step="0.01"
+              required
+              defaultValue={selectedProduct?.price}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="cost">Cost</Label>
+            <Input
+              id="cost"
+              name="cost"
+              type="number"
+              step="0.01"
+              required
+              defaultValue={selectedProduct?.cost || 0}
+            />
+          </div>
         </div>
         <div className="space-y-2">
           <Label htmlFor="stock_quantity">Stock Quantity</Label>
