@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { startOfDay, subDays, startOfMonth, endOfMonth, format, subMonths } from "date-fns";
+import { startOfDay, subDays, startOfMonth, endOfMonth, format, subMonths, differenceInDays } from "date-fns";
 import DashboardStats from "@/components/dashboard/DashboardStats";
 import ShippingOverview from "@/components/dashboard/ShippingOverview";
 import SalesChart from "@/components/dashboard/SalesChart";
@@ -40,7 +40,11 @@ const Dashboard = () => {
     queryKey: ["orderStats", timePeriod],
     queryFn: async () => {
       const { start, end } = getDateRange();
-      const previousStart = subDays(start, end.getTime() - start.getTime());
+      
+      // Calculate previous period with proper day difference
+      const periodDays = differenceInDays(end, start) || 1; // Ensure at least 1 day
+      const previousStart = subDays(start, periodDays);
+      const previousEnd = start;
       
       // Get current period orders
       const { data: currentOrders, error: currentError } = await supabase
@@ -51,12 +55,12 @@ const Dashboard = () => {
 
       if (currentError) throw currentError;
 
-      // Get previous period orders for comparison
+      // Get previous period orders
       const { data: previousOrders, error: previousError } = await supabase
         .from('orders')
         .select('total_amount')
         .gte('created_at', previousStart.toISOString())
-        .lt('created_at', start.toISOString());
+        .lt('created_at', previousEnd.toISOString());
 
       if (previousError) throw previousError;
 
