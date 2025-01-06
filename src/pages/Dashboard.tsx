@@ -25,6 +25,7 @@ interface OrderWithItems {
     product: {
       id: string;
       name: string;
+      cost: number;
     } | null;
   }[] | null;
 }
@@ -83,7 +84,8 @@ const Dashboard = () => {
             price_at_time,
             product:products (
               id,
-              name
+              name,
+              cost
             )
           )
         `)
@@ -110,13 +112,23 @@ const Dashboard = () => {
 
       if (metricsError) throw metricsError;
 
-      // Calculate totals and metrics
-      const currentTotal = currentOrders?.reduce((sum, order) => sum + Number(order.total_amount), 0) || 0;
-      const previousTotal = previousOrders?.reduce((sum, order) => sum + Number(order.total_amount), 0) || 0;
-      
-      // Calculate profit margin (assuming 30% cost of goods)
-      const costOfGoods = currentTotal * 0.7;
-      const profitMargin = ((currentTotal - costOfGoods) / currentTotal) * 100;
+      // Calculate total revenue and total cost
+      let totalRevenue = 0;
+      let totalCost = 0;
+
+      currentOrders?.forEach(order => {
+        totalRevenue += Number(order.total_amount);
+        // Calculate total cost from order items
+        order.order_items?.forEach(item => {
+          if (item.product) {
+            totalCost += Number(item.product.cost) * item.quantity;
+          }
+        });
+      });
+
+      // Calculate profit margin using actual costs
+      const profit = totalRevenue - totalCost;
+      const profitMargin = totalRevenue > 0 ? (profit / totalRevenue) * 100 : 0;
 
       // Calculate average customer lifetime value
       const averageClv = customerMetrics?.length 
@@ -161,10 +173,10 @@ const Dashboard = () => {
         : ((currentTotal - previousTotal) / previousTotal) * 100;
 
       return {
-        totalSales: currentTotal,
+        totalSales: totalRevenue,
         ordersCount: currentOrders?.length || 0,
         percentageChange: percentageChange.toFixed(1),
-        profitMargin,
+        profitMargin: Number(profitMargin.toFixed(1)),
         customerLifetimeValue: averageClv,
         averageProcessingTime: `${Math.floor(averageProcessingTime)}h ${Math.round((averageProcessingTime % 1) * 60)}m`,
         topSellingProduct: topProduct,
