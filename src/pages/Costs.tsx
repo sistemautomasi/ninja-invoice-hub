@@ -42,6 +42,7 @@ const Costs = () => {
       const cost = {
         user_id: user.id,
         cost_type: String(formData.get("type")),
+        platform: String(formData.get("platform")) || null,
         amount: Number(formData.get("amount")),
         description: String(formData.get("description")),
         date: String(formData.get("date")),
