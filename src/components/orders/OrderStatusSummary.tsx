@@ -1,7 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
-import { CirclePlus, CheckCircle, Truck, RotateCcw, Loader2 } from "lucide-react";
+import { Package, CheckCircle, Truck, Check, X, ArrowLeftRight, Loader2 } from "lucide-react";
 import { useEffect } from "react";
 
 interface StatusCount {
@@ -68,34 +68,50 @@ export function OrderStatusSummary({ onStatusClick, selectedStatus }: OrderStatu
     {
       status: "new",
       label: "New Orders",
-      icon: CirclePlus,
-      color: "text-gray-900",
-      bgColor: "bg-white",
-      iconColor: "text-blue-500",
+      icon: Package,
+      color: "text-blue-600",
+      bgColor: "bg-blue-50",
+      lightBgColor: "hover:bg-blue-50/80",
     },
     {
       status: "confirmed",
       label: "Confirmed",
       icon: CheckCircle,
-      color: "text-gray-900",
-      bgColor: "bg-white",
-      iconColor: "text-blue-500",
+      color: "text-purple-600",
+      bgColor: "bg-purple-50",
+      lightBgColor: "hover:bg-purple-50/80",
     },
     {
       status: "shipped",
-      label: "Shipped",
+      label: "Shipping",
       icon: Truck,
-      color: "text-gray-900",
-      bgColor: "bg-white",
-      iconColor: "text-blue-500",
+      color: "text-yellow-600",
+      bgColor: "bg-yellow-50",
+      lightBgColor: "hover:bg-yellow-50/80",
+    },
+    {
+      status: "completed",
+      label: "Completed",
+      icon: Check,
+      color: "text-green-600",
+      bgColor: "bg-green-50",
+      lightBgColor: "hover:bg-green-50/80",
+    },
+    {
+      status: "cancelled",
+      label: "Cancelled",
+      icon: X,
+      color: "text-red-600",
+      bgColor: "bg-red-50",
+      lightBgColor: "hover:bg-red-50/80",
     },
     {
       status: "returned",
       label: "Returned",
-      icon: RotateCcw,
-      color: "text-gray-900",
-      bgColor: "bg-white",
-      iconColor: "text-blue-500",
+      icon: ArrowLeftRight,
+      color: "text-orange-600",
+      bgColor: "bg-orange-50",
+      lightBgColor: "hover:bg-orange-50/80",
     },
   ];
 
@@ -116,7 +132,7 @@ export function OrderStatusSummary({ onStatusClick, selectedStatus }: OrderStatu
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
       {statusConfigs.map((config) => {
         // For the "new" status, include both "new" and "pending" counts
         const count = config.status === "new"
@@ -130,22 +146,23 @@ export function OrderStatusSummary({ onStatusClick, selectedStatus }: OrderStatu
             key={config.status}
             className={`
               relative overflow-hidden cursor-pointer transition-all
-              ${config.bgColor} shadow-sm hover:shadow-md
-              ${isSelected ? 'ring-1 ring-gray-200' : ''}
+              ${config.bgColor} border-0 shadow-none
+              ${isSelected ? 'ring-2 ring-gray-200' : ''}
+              ${config.lightBgColor}
             `}
             onClick={() => onStatusClick(config.status)}
           >
-            <div className="p-6">
-              <div className="flex flex-col">
-                <h3 className="text-sm font-medium text-gray-500 mb-1">
-                  {config.label}
-                </h3>
-                <div className="flex items-center justify-between">
-                  <p className="text-2xl font-semibold text-gray-900">
-                    {count}
-                  </p>
-                  <config.icon className={`h-5 w-5 ${config.iconColor}`} />
+            <div className="p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <config.icon className={`h-5 w-5 ${config.color}`} />
+                  <h3 className="text-sm font-medium text-gray-600">
+                    {config.label}
+                  </h3>
                 </div>
+                <p className="text-xl font-semibold text-gray-900">
+                  {count}
+                </p>
               </div>
             </div>
           </Card>
