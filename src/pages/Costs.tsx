@@ -18,6 +18,9 @@ const Costs = () => {
   const { data: costs, isLoading } = useQuery({
     queryKey: ["costs"],
     queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
+
       const { data, error } = await supabase
         .from("business_costs")
         .select("*")
@@ -30,7 +33,11 @@ const Costs = () => {
 
   const addCost = useMutation({
     mutationFn: async (formData: FormData) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
+
       const cost = {
+        user_id: user.id, // Set the user_id
         cost_type: String(formData.get("type")),
         amount: Number(formData.get("amount")),
         description: String(formData.get("description")),
@@ -51,7 +58,8 @@ const Costs = () => {
         description: "Cost added successfully",
       });
     },
-    onError: () => {
+    onError: (error) => {
+      console.error("Error adding cost:", error);
       toast({
         title: "Error",
         description: "Failed to add cost",
