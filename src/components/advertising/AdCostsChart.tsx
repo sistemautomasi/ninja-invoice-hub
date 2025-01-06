@@ -1,35 +1,34 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { startOfDay, subDays, format } from "date-fns";
+import { 
+  LineChart, 
+  Line, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  Legend, 
+  ResponsiveContainer 
+} from 'recharts';
 import { Loader2 } from "lucide-react";
+import { CustomTooltip } from "./components/CustomTooltip";
+import { 
+  getDateRange, 
+  processAdCostsData, 
+  chartColors, 
+  formatPlatformName 
+} from "./utils/chartUtils";
 
 interface AdCostsChartProps {
   selectedPeriod: string;
 }
 
 export const AdCostsChart = ({ selectedPeriod }: AdCostsChartProps) => {
-  const getDateRange = () => {
-    const now = new Date();
-    const today = startOfDay(now);
-    
-    switch (selectedPeriod) {
-      case "today":
-        return { start: today, end: now };
-      case "last7days":
-        return { start: subDays(now, 7), end: now };
-      case "last30days":
-        return { start: subDays(now, 30), end: now };
-      default:
-        return { start: today, end: now };
-    }
-  };
-
   const { data: adCosts, isLoading } = useQuery({
     queryKey: ["adCosts", selectedPeriod],
     queryFn: async () => {
-      const { start, end } = getDateRange();
+      const { start, end } = getDateRange(selectedPeriod);
       
       const { data, error } = await supabase
         .from('business_costs')
@@ -40,28 +39,7 @@ export const AdCostsChart = ({ selectedPeriod }: AdCostsChartProps) => {
         .order('date', { ascending: true });
 
       if (error) throw error;
-
-      // Group costs by date and platform
-      const groupedData = data.reduce((acc: any[], cost) => {
-        const date = format(new Date(cost.date), 'MMM dd');
-        const existingDate = acc.find(item => item.date === date);
-
-        if (existingDate) {
-          existingDate[cost.platform || 'Other'] = (existingDate[cost.platform || 'Other'] || 0) + Number(cost.amount);
-          existingDate.total = (existingDate.total || 0) + Number(cost.amount);
-        } else {
-          const newEntry = {
-            date,
-            [cost.platform || 'Other']: Number(cost.amount),
-            total: Number(cost.amount)
-          };
-          acc.push(newEntry);
-        }
-
-        return acc;
-      }, []);
-
-      return groupedData;
+      return processAdCostsData(data);
     },
   });
 
@@ -82,51 +60,6 @@ export const AdCostsChart = ({ selectedPeriod }: AdCostsChartProps) => {
       ) || []
     )
   );
-
-  // Updated colors with higher contrast and vibrancy
-  const colors = {
-    facebook: "#1877F2",
-    tiktok: "#FF0050",
-    google: "#EA4335",
-    instagram: "#E4405F",
-    Other: "#64748B",
-    total: "#8B5CF6" // Vibrant purple for total
-  };
-
-  const formatPlatformName = (platform: string) => {
-    const names: Record<string, string> = {
-      facebook: "Facebook Ads",
-      tiktok: "TikTok Ads",
-      google: "Google Ads",
-      instagram: "Instagram Ads",
-      Other: "Other Platforms",
-      total: "Total Spend"
-    };
-    return names[platform] || platform;
-  };
-
-  const CustomTooltip = ({ active, payload, label }: any) => {
-    if (active && payload && payload.length) {
-      return (
-        <div className="bg-white p-4 border border-gray-200 rounded-lg shadow-lg">
-          <p className="font-semibold text-gray-900 mb-3 border-b pb-2">{label}</p>
-          {payload.map((entry: any, index: number) => (
-            <div key={index} className="flex items-center gap-3 py-1">
-              <div 
-                className="w-4 h-4 rounded-full shadow-sm" 
-                style={{ backgroundColor: entry.color }}
-              />
-              <span className="text-gray-600 font-medium">{formatPlatformName(entry.name)}:</span>
-              <span className="font-semibold text-gray-900">
-                ${Number(entry.value).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-              </span>
-            </div>
-          ))}
-        </div>
-      );
-    }
-    return null;
-  };
 
   return (
     <Card className="mt-6">
@@ -178,7 +111,7 @@ export const AdCostsChart = ({ selectedPeriod }: AdCostsChartProps) => {
                   type="monotone"
                   dataKey={platform}
                   name={platform}
-                  stroke={colors[platform as keyof typeof colors] || "#666666"}
+                  stroke={chartColors[platform as keyof typeof chartColors] || "#666666"}
                   strokeWidth={2.5}
                   dot={{ 
                     r: 4, 
@@ -196,7 +129,7 @@ export const AdCostsChart = ({ selectedPeriod }: AdCostsChartProps) => {
                 type="monotone"
                 dataKey="total"
                 name="total"
-                stroke={colors.total}
+                stroke={chartColors.total}
                 strokeWidth={3}
                 dot={{ 
                   r: 5, 
