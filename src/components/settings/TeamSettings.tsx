@@ -26,7 +26,7 @@ export const TeamSettings = () => {
       }
 
       try {
-        console.log("Checking admin status for user:", user.email);
+        console.log("Checking admin status for user ID:", user.id);
         
         // First check if user exists in user_roles directly with user.id
         const { data: roleData, error: roleError } = await supabase
@@ -42,41 +42,51 @@ export const TeamSettings = () => {
           return;
         }
 
-        // If no direct match, check through profiles
-        const { data: profileData, error: profileError } = await supabase
-          .from('profiles')
-          .select('id')
-          .eq('email', user.email)
-          .single();
-
-        if (profileError) {
-          console.error('Profile check error:', profileError);
-          toast({
-            title: "Error",
-            description: "Failed to verify user profile",
-            variant: "destructive",
-          });
-          setLoading(false);
-          return;
+        if (roleError) {
+          console.log("Direct role check failed, trying through email:", roleError);
         }
 
-        if (profileData?.id) {
-          const { data: adminData, error: adminError } = await supabase
-            .from('user_roles')
-            .select('role')
-            .eq('user_id', profileData.id)
-            .single();
+        // If no direct match and user has email, check through profiles
+        if (user.email) {
+          console.log("Checking admin status through email:", user.email);
+          const { data: profileData, error: profileError } = await supabase
+            .from('profiles')
+            .select('id')
+            .eq('email', user.email)
+            .maybeSingle();
 
-          if (adminError) {
-            console.error('Admin check error:', adminError);
+          if (profileError) {
+            console.error('Profile check error:', profileError);
             toast({
               title: "Error",
-              description: "Failed to verify admin status",
+              description: "Failed to verify user profile",
               variant: "destructive",
             });
+            setLoading(false);
+            return;
+          }
+
+          if (profileData?.id) {
+            console.log("Found profile:", profileData);
+            const { data: adminData, error: adminError } = await supabase
+              .from('user_roles')
+              .select('role')
+              .eq('user_id', profileData.id)
+              .maybeSingle();
+
+            if (adminError) {
+              console.error('Admin check error:', adminError);
+              toast({
+                title: "Error",
+                description: "Failed to verify admin status",
+                variant: "destructive",
+              });
+            } else {
+              console.log("Admin check result:", adminData);
+              setAdminStatus(adminData?.role === 'admin');
+            }
           } else {
-            console.log("Admin check result:", adminData);
-            setAdminStatus(adminData?.role === 'admin');
+            console.log("No profile found for email:", user.email);
           }
         }
       } catch (error) {
