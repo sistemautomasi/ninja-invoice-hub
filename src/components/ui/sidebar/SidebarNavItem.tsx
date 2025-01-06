@@ -8,9 +8,12 @@ export interface SidebarNavItemProps {
   label: string;
   href: string;
   isLogout?: boolean;
+  onClick?: () => void;
+  disabled?: boolean;
+  isCollapsed?: boolean;
 }
 
-export const SidebarNavItem = ({ icon: Icon, label, href, isLogout }: SidebarNavItemProps) => {
+export const SidebarNavItem = ({ icon: Icon, label, href, isCollapsed }: SidebarNavItemProps) => {
   const location = useLocation();
   const isActive = location.pathname === href;
 
@@ -24,7 +27,7 @@ export const SidebarNavItem = ({ icon: Icon, label, href, isLogout }: SidebarNav
         )}
       >
         <Icon className="h-4 w-4" />
-        {label}
+        {!isCollapsed && label}
       </Button>
     </Link>
   );
