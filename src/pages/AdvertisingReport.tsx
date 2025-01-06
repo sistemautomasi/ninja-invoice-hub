@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,8 @@ import { Loader2 } from "lucide-react";
 import TimePeriodSelect from "@/components/dashboard/TimePeriodSelect";
 import { AddAdMetricsForm } from "@/components/advertising/AddAdMetricsForm";
 import { AdMetricsTable } from "@/components/advertising/AdMetricsTable";
+import { AdMetricsSummary } from "@/components/advertising/AdMetricsSummary";
+import { useAdvertisingMetrics } from "@/hooks/use-advertising-metrics";
 
 const AdvertisingReport = () => {
   const { toast } = useToast();
@@ -15,7 +17,9 @@ const AdvertisingReport = () => {
   const [isAdding, setIsAdding] = useState(false);
   const [selectedPeriod, setSelectedPeriod] = useState("last7days");
 
-  const { data: metrics, isLoading } = useQuery({
+  const { data: overallMetrics, isLoading } = useAdvertisingMetrics(selectedPeriod);
+
+  const { data: metrics, isLoading: isLoadingMetrics } = useQuery({
     queryKey: ["adMetrics", selectedPeriod],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -30,34 +34,6 @@ const AdvertisingReport = () => {
       return data;
     },
   });
-
-  // Calculate overall metrics with net revenue
-  const calculateOverallMetrics = () => {
-    if (!metrics || metrics.length === 0) {
-      return {
-        roas: 0,
-        costPerPurchase: 0,
-        ctr: 0,
-        netRevenue: 0
-      };
-    }
-
-    const totalRevenue = metrics.reduce((sum, metric) => sum + Number(metric.revenue), 0);
-    const totalAdSpend = metrics.reduce((sum, metric) => sum + Number(metric.ad_spend), 0);
-    const totalConversions = metrics.reduce((sum, metric) => sum + metric.conversions, 0);
-    const totalClicks = metrics.reduce((sum, metric) => sum + metric.clicks, 0);
-    const totalImpressions = metrics.reduce((sum, metric) => sum + metric.impressions, 0);
-    const netRevenue = totalRevenue - totalAdSpend;
-
-    return {
-      roas: totalAdSpend > 0 ? ((netRevenue / totalAdSpend) * 100) : 0,
-      costPerPurchase: totalConversions > 0 ? (totalAdSpend / totalConversions) : 0,
-      ctr: totalImpressions > 0 ? ((totalClicks / totalImpressions) * 100) : 0,
-      netRevenue
-    };
-  };
-
-  const overallMetrics = calculateOverallMetrics();
 
   const addMetrics = useMutation({
     mutationFn: async (formData: FormData) => {
@@ -100,7 +76,7 @@ const AdvertisingReport = () => {
     },
   });
 
-  if (isLoading) {
+  if (isLoading || isLoadingMetrics) {
     return (
       <div className="flex items-center justify-center h-64">
         <Loader2 className="w-8 h-8 animate-spin" />
@@ -118,63 +94,12 @@ const AdvertisingReport = () => {
         />
       </div>
 
-      <div className="grid gap-4 md:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">ROAS</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {overallMetrics.roas.toFixed(2)}%
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Return on Ad Spend (Net Revenue/Ad Spend)
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Net Revenue</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              ${overallMetrics.netRevenue.toFixed(2)}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Sales minus Ad Spend
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Cost per Purchase</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              ${overallMetrics.costPerPurchase.toFixed(2)}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Average cost per conversion
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">CTR</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {overallMetrics.ctr.toFixed(2)}%
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Click-through Rate
-            </p>
-          </CardContent>
-        </Card>
-      </div>
+      <AdMetricsSummary metrics={{
+        roas: overallMetrics?.roas || 0,
+        netRevenue: overallMetrics?.netRevenue || 0,
+        costPerPurchase: overallMetrics?.costPerPurchase || 0,
+        ctr: overallMetrics?.ctr || 0,
+      }} />
 
       <Card>
         <CardHeader>
