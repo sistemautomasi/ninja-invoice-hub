@@ -23,7 +23,9 @@ const DashboardStats = ({ stats }: DashboardStatsProps) => {
           <DollarSign className="h-4 w-4 text-primary" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold truncate">{formatPrice(stats?.totalSales || 0)}</div>
+          <div className="text-2xl font-bold flex flex-col items-start">
+            {formatPrice(stats?.totalSales || 0)}
+          </div>
           <p className={`text-xs mt-1 ${Number(stats?.percentageChange) >= 0 ? 'text-success' : 'text-destructive'}`}>
             {stats?.percentageChange}% from previous period
           </p>
@@ -36,7 +38,9 @@ const DashboardStats = ({ stats }: DashboardStatsProps) => {
           <Package className="h-4 w-4 text-success" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{stats?.ordersCount || 0}</div>
+          <div className="text-2xl font-bold flex flex-col items-start">
+            {stats?.ordersCount || 0}
+          </div>
           <p className="text-xs mt-1 text-muted-foreground whitespace-nowrap">
             Today's total orders
           </p>
@@ -49,7 +53,9 @@ const DashboardStats = ({ stats }: DashboardStatsProps) => {
           <TrendingUp className="h-4 w-4 text-secondary" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold truncate">{formatPrice(stats?.totalSales || 0)}</div>
+          <div className="text-2xl font-bold flex flex-col items-start">
+            {formatPrice(stats?.totalSales || 0)}
+          </div>
           <p className="text-xs mt-1 text-muted-foreground whitespace-nowrap">
             Daily revenue
           </p>
@@ -62,7 +68,7 @@ const DashboardStats = ({ stats }: DashboardStatsProps) => {
           <ShoppingCart className="h-4 w-4 text-orange-500" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold truncate">
+          <div className="text-2xl font-bold flex flex-col items-start">
             {formatPrice(stats?.averageOrderValue || 0)}
           </div>
           <p className="text-xs mt-1 text-muted-foreground whitespace-nowrap">
@@ -77,7 +83,9 @@ const DashboardStats = ({ stats }: DashboardStatsProps) => {
           <Users className="h-4 w-4 text-purple-500" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{stats?.uniqueCustomers || 0}</div>
+          <div className="text-2xl font-bold flex flex-col items-start">
+            {stats?.uniqueCustomers || 0}
+          </div>
           <p className="text-xs mt-1 text-muted-foreground whitespace-nowrap">
             Active customers
           </p>
