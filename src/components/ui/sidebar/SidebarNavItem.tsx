@@ -1,76 +1,51 @@
+import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { LucideIcon } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import {
+  LayoutDashboard,
+  ClipboardList,
+  FileText,
+  Settings,
+  ShoppingCart,
+  DollarSign,
+  BarChart3,
+  Link2,
+} from "lucide-react";
+
+const icons = {
+  dashboard: LayoutDashboard,
+  orders: ClipboardList,
+  products: ShoppingCart,
+  costs: DollarSign,
+  advertising: BarChart3,
+  invoices: FileText,
+  integrations: Link2,
+  settings: Settings,
+};
 
 interface SidebarNavItemProps {
-  icon: LucideIcon;
+  path: string;
   label: string;
-  href: string;
-  isCollapsed: boolean;
-  isLogout?: boolean;
+  icon: keyof typeof icons;
 }
 
-export const SidebarNavItem = ({
-  icon: Icon,
-  label,
-  href,
-  isCollapsed,
-  isLogout = false,
-}: SidebarNavItemProps) => {
-  const navigate = useNavigate();
+export const SidebarNavItem = ({ path, label, icon }: SidebarNavItemProps) => {
+  const location = useLocation();
+  const Icon = icons[icon];
+  const isActive = location.pathname === path;
 
-  const handleLogout = async () => {
-    try {
-      // First, clear all local storage
-      localStorage.clear();
-      
-      // Sign out from Supabase
-      const { error } = await supabase.auth.signOut();
-      
-      if (error) {
-        console.error("Error during signout:", error);
-        // Even if there's an error, we'll redirect to signin
-      }
-      
-      toast.success("Logged out successfully");
-      navigate("/signin");
-    } catch (error) {
-      console.error("Unexpected error during logout:", error);
-      // Ensure we still clear everything and redirect
-      localStorage.clear();
-      navigate("/signin");
-    }
-  };
-
-  if (isLogout) {
-    return (
-      <button
-        onClick={handleLogout}
+  return (
+    <Link to={path}>
+      <Button
+        variant="ghost"
         className={cn(
-          "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
-          "text-muted-foreground hover:bg-muted hover:text-foreground"
+          "w-full justify-start gap-2",
+          isActive && "bg-muted"
         )}
       >
         <Icon className="h-4 w-4" />
-        {!isCollapsed && <span>{label}</span>}
-      </button>
-    );
-  }
-
-  return (
-    <Link
-      to={href}
-      className={cn(
-        "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
-        location.pathname === href
-          ? "bg-primary text-primary-foreground"
-          : "text-muted-foreground hover:bg-muted hover:text-foreground"
-      )}
-    >
-      <Icon className="h-4 w-4" />
-      {!isCollapsed && <span>{label}</span>}
+        {label}
+      </Button>
     </Link>
   );
 };
