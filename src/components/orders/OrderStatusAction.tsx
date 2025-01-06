@@ -5,87 +5,25 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
-import { useQueryClient } from "@tanstack/react-query";
-import { useState, useEffect } from "react";
 import { Loader2 } from "lucide-react";
+import { useOrderStatus } from "@/hooks/use-order-status";
+import { useUpdateOrderStatus } from "@/hooks/use-update-order-status";
+import { statusOptions } from "@/utils/orderStatusUtils";
 
 interface OrderStatusActionProps {
   orderId: string;
   currentStatus: string;
 }
 
-export const OrderStatusAction = ({ orderId, currentStatus }: OrderStatusActionProps) => {
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
-  const [isLoading, setIsLoading] = useState(false);
-  const [selectedStatus, setSelectedStatus] = useState(currentStatus);
-
-  // Keep local state in sync with prop changes
-  useEffect(() => {
-    console.log(`Action dropdown received new status: ${currentStatus}`);
-    setSelectedStatus(currentStatus);
-  }, [currentStatus]);
-
-  const statusOptions = [
-    { value: "pending", label: "Pending" },
-    { value: "confirmed", label: "Confirmed" },
-    { value: "shipped", label: "Shipped" },
-    { value: "cancelled", label: "Cancelled" },
-    { value: "returned", label: "Returned" },
-  ];
-
-  const handleStatusChange = async (newStatus: string) => {
-    if (newStatus === selectedStatus || isLoading) return;
-    
-    setIsLoading(true);
-    console.log(`Attempting to update order ${orderId} status from ${selectedStatus} to ${newStatus}`);
-
-    try {
-      const { error } = await supabase
-        .from('orders')
-        .update({ status: newStatus })
-        .eq('id', orderId);
-
-      if (error) throw error;
-
-      // Force immediate cache invalidation
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ["orderStatusCounts"] }),
-        queryClient.invalidateQueries({ queryKey: ["orders"] })
-      ]);
-
-      // Update local state after successful database update
-      setSelectedStatus(newStatus);
-
-      toast({
-        title: "Status Updated",
-        description: `Order status has been changed to ${newStatus}`,
-      });
-
-      console.log(`Successfully updated order ${orderId} status to ${newStatus}`);
-    } catch (error) {
-      console.error('Error updating status:', error);
-      
-      // Revert UI state
-      setSelectedStatus(currentStatus);
-      
-      toast({
-        title: "Error",
-        description: "Failed to update order status. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+export const OrderStatusAction = ({ orderId, currentStatus: initialStatus }: OrderStatusActionProps) => {
+  const { currentStatus } = useOrderStatus(orderId, initialStatus);
+  const { updateStatus, isLoading } = useUpdateOrderStatus(orderId, currentStatus);
 
   return (
     <div className="relative">
       <Select
-        value={selectedStatus}
-        onValueChange={handleStatusChange}
+        value={currentStatus}
+        onValueChange={updateStatus}
         disabled={isLoading}
       >
         <SelectTrigger className="w-[140px]">
