@@ -65,7 +65,8 @@ export const useAdvertisingMetrics = (selectedPeriod: string) => {
       const totalSales = orders?.reduce((sum, order) => sum + Number(order.total_amount), 0) || 0;
       const totalAdCosts = adCosts?.reduce((sum, cost) => sum + Number(cost.amount), 0) || 0;
       const netRevenue = totalSales - totalAdCosts;
-      const roas = totalAdCosts > 0 ? (netRevenue / totalAdCosts) * 100 : 0;
+      // Calculate ROAS as a ratio (not percentage)
+      const roas = totalAdCosts > 0 ? totalSales / totalAdCosts : 0;
 
       // Calculate CTR and cost per purchase
       const totalImpressions = adMetrics?.reduce((sum, metric) => sum + metric.impressions, 0) || 0;

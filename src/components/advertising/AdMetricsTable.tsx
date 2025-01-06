@@ -54,7 +54,8 @@ export const AdMetricsTable = ({ metrics }: AdMetricsTableProps) => {
       <TableBody>
         {metrics.map((metric) => {
           const netRevenue = metric.revenue - metric.ad_spend;
-          const roas = ((netRevenue / metric.ad_spend) * 100).toFixed(2);
+          // Calculate ROAS as a ratio (not percentage)
+          const roas = metric.ad_spend > 0 ? (metric.revenue / metric.ad_spend).toFixed(2) : '0';
           const cpp = (metric.ad_spend / metric.conversions).toFixed(2);
           const ctr = ((metric.clicks / metric.impressions) * 100).toFixed(2);
 
@@ -66,7 +67,7 @@ export const AdMetricsTable = ({ metrics }: AdMetricsTableProps) => {
               <TableCell className="text-right">${metric.ad_spend.toFixed(2)}</TableCell>
               <TableCell className="text-right">${metric.revenue.toFixed(2)}</TableCell>
               <TableCell className="text-right">${netRevenue.toFixed(2)}</TableCell>
-              <TableCell className="text-right">{roas}%</TableCell>
+              <TableCell className="text-right">{roas}x</TableCell>
               <TableCell className="text-right">{metric.impressions.toLocaleString()}</TableCell>
               <TableCell className="text-right">{metric.clicks.toLocaleString()}</TableCell>
               <TableCell className="text-right">{metric.conversions}</TableCell>

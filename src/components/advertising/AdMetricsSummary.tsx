@@ -18,10 +18,10 @@ export const AdMetricsSummary = ({ metrics }: AdMetricsSummaryProps) => {
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">
-            {metrics.roas.toFixed(2)}%
+            {metrics.roas.toFixed(2)}x
           </div>
           <p className="text-xs text-muted-foreground">
-            Return on Ad Spend (Net Revenue/Ad Spend)
+            Return on Ad Spend (Sales/Ad Spend)
           </p>
         </CardContent>
       </Card>
