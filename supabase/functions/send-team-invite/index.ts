@@ -35,6 +35,20 @@ const handler = async (req: Request): Promise<Response> => {
     
     console.log("Sign up URL:", signUpUrl)
     
+    // For testing, if the recipient is not sistemautomasi2@gmail.com, show a clear error
+    if (to !== 'sistemautomasi2@gmail.com') {
+      console.error("Cannot send to emails other than sistemautomasi2@gmail.com until domain is verified")
+      return new Response(
+        JSON.stringify({
+          error: "During testing, you can only send emails to sistemautomasi2@gmail.com. Please verify your domain at resend.com/domains to send to other email addresses."
+        }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 400,
+        }
+      )
+    }
+    
     const emailHtml = `
       <h2>You've been invited to join the team!</h2>
       <p>You've been invited to join with the role of ${role}.</p>
