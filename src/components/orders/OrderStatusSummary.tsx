@@ -65,48 +65,27 @@ export function OrderStatusSummary({ onStatusClick, selectedStatus }: OrderStatu
   const statusConfigs = [
     {
       status: "pending",
-      label: "New Orders",
+      label: "Total Sales",
       icon: CirclePlus,
-      color: "text-blue-500",
-      bgColor: "bg-blue-50",
-      hoverBg: "hover:bg-blue-100",
-      iconBg: "bg-blue-500",
+      color: "text-gray-900",
+      bgColor: "bg-white",
+      iconColor: "text-blue-500",
     },
     {
       status: "confirmed",
-      label: "Confirmed",
+      label: "Orders",
       icon: CheckCircle,
-      color: "text-emerald-500",
-      bgColor: "bg-emerald-50",
-      hoverBg: "hover:bg-emerald-100",
-      iconBg: "bg-emerald-500",
+      color: "text-gray-900",
+      bgColor: "bg-white",
+      iconColor: "text-blue-500",
     },
     {
       status: "shipped",
-      label: "Shipped",
+      label: "Revenue",
       icon: Truck,
-      color: "text-amber-500",
-      bgColor: "bg-amber-50",
-      hoverBg: "hover:bg-amber-100",
-      iconBg: "bg-amber-500",
-    },
-    {
-      status: "cancelled",
-      label: "Cancelled",
-      icon: XCircle,
-      color: "text-rose-500",
-      bgColor: "bg-rose-50",
-      hoverBg: "hover:bg-rose-100",
-      iconBg: "bg-rose-500",
-    },
-    {
-      status: "returned",
-      label: "Returned",
-      icon: RotateCcw,
-      color: "text-violet-500",
-      bgColor: "bg-violet-50",
-      hoverBg: "hover:bg-violet-100",
-      iconBg: "bg-violet-500",
+      color: "text-gray-900",
+      bgColor: "bg-white",
+      iconColor: "text-blue-500",
     },
   ];
 
@@ -127,7 +106,7 @@ export function OrderStatusSummary({ onStatusClick, selectedStatus }: OrderStatu
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
       {statusConfigs.map((config) => {
         const count = statusCounts?.find(s => s.status === config.status)?.count || 0;
         const isSelected = selectedStatus === config.status;
@@ -136,23 +115,25 @@ export function OrderStatusSummary({ onStatusClick, selectedStatus }: OrderStatu
           <Card
             key={config.status}
             className={`
-              relative overflow-hidden cursor-pointer transition-all duration-300
-              ${config.bgColor} border-none shadow-lg
-              ${config.hoverBg} hover:scale-105 hover:-translate-y-1
-              ${isSelected ? 'ring-2 ring-offset-2 ' + config.color + ' scale-105 -translate-y-1' : ''}
+              relative overflow-hidden cursor-pointer transition-all
+              ${config.bgColor} shadow-sm hover:shadow-md
+              ${isSelected ? 'ring-1 ring-gray-200' : ''}
             `}
             onClick={() => onStatusClick(config.status)}
           >
-            <div className="p-4">
-              <div className="flex flex-col items-center text-center">
-                <div className={`rounded-full p-3 ${config.iconBg} mb-3`}>
-                  <config.icon className="h-6 w-6 text-white" />
-                </div>
-                <h3 className="text-sm font-medium text-gray-600 mb-2">
+            <div className="p-6">
+              <div className="flex flex-col">
+                <h3 className="text-sm font-medium text-gray-500 mb-1">
                   {config.label}
                 </h3>
-                <p className={`text-3xl font-bold ${config.color}`}>
-                  {count}
+                <div className="flex items-center justify-between">
+                  <p className="text-2xl font-semibold text-gray-900">
+                    RM {count}.00
+                  </p>
+                  <config.icon className={`h-5 w-5 ${config.iconColor}`} />
+                </div>
+                <p className="text-sm text-green-500 mt-2">
+                  0.0% from previous period
                 </p>
               </div>
             </div>
