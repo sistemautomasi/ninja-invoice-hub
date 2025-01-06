@@ -14,6 +14,7 @@ const Costs = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isAdding, setIsAdding] = useState(false);
+  const [editingCost, setEditingCost] = useState<Cost | undefined>();
 
   const { data: costs, isLoading } = useQuery({
     queryKey: ["costs"],
@@ -37,32 +38,42 @@ const Costs = () => {
       if (!user) throw new Error("Not authenticated");
 
       const cost = {
-        user_id: user.id, // Set the user_id
+        user_id: user.id,
         cost_type: String(formData.get("type")),
         amount: Number(formData.get("amount")),
         description: String(formData.get("description")),
         date: String(formData.get("date")),
       };
 
-      const { error } = await supabase
-        .from("business_costs")
-        .insert([cost]);
+      if (editingCost) {
+        const { error } = await supabase
+          .from("business_costs")
+          .update(cost)
+          .eq("id", editingCost.id);
 
-      if (error) throw error;
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from("business_costs")
+          .insert([cost]);
+
+        if (error) throw error;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["costs"] });
       setIsAdding(false);
+      setEditingCost(undefined);
       toast({
         title: "Success",
-        description: "Cost added successfully",
+        description: editingCost ? "Cost updated successfully" : "Cost added successfully",
       });
     },
     onError: (error) => {
-      console.error("Error adding cost:", error);
+      console.error("Error managing cost:", error);
       toast({
         title: "Error",
-        description: "Failed to add cost",
+        description: editingCost ? "Failed to update cost" : "Failed to add cost",
         variant: "destructive",
       });
     },
@@ -97,7 +108,14 @@ const Costs = () => {
     e.preventDefault();
     const form = e.target as HTMLFormElement;
     addCost.mutate(new FormData(form));
-    form.reset();
+    if (!editingCost) {
+      form.reset();
+    }
+  };
+
+  const handleEdit = (cost: Cost) => {
+    setEditingCost(cost);
+    setIsAdding(true);
   };
 
   if (isLoading) {
@@ -118,9 +136,22 @@ const Costs = () => {
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle className="text-left">Cost History</CardTitle>
-            <Button onClick={() => setIsAdding(!isAdding)}>
-              {isAdding ? "Cancel" : "Add Cost"}
-            </Button>
+            {!isAdding && (
+              <Button onClick={() => setIsAdding(true)}>
+                Add Cost
+              </Button>
+            )}
+            {isAdding && (
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  setIsAdding(false);
+                  setEditingCost(undefined);
+                }}
+              >
+                Cancel
+              </Button>
+            )}
           </div>
         </CardHeader>
         <CardContent>
@@ -129,6 +160,7 @@ const Costs = () => {
               <AddCostForm 
                 onSubmit={handleSubmit}
                 isLoading={addCost.isPending}
+                editingCost={editingCost}
               />
             </div>
           )}
@@ -136,6 +168,7 @@ const Costs = () => {
           <CostList 
             costs={costs}
             onDelete={(id) => deleteCost.mutate(id)}
+            onEdit={handleEdit}
             isDeleting={deleteCost.isPending}
           />
         </CardContent>

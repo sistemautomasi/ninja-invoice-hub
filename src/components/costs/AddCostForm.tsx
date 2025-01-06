@@ -2,15 +2,30 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
+import { Cost } from "@/types/costs";
+import { useEffect } from "react";
 
 interface AddCostFormProps {
   onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
   isLoading: boolean;
+  editingCost?: Cost;
 }
 
-export const AddCostForm = ({ onSubmit, isLoading }: AddCostFormProps) => {
+export const AddCostForm = ({ onSubmit, isLoading, editingCost }: AddCostFormProps) => {
+  useEffect(() => {
+    if (editingCost) {
+      const form = document.getElementById('costForm') as HTMLFormElement;
+      if (form) {
+        form.type.value = editingCost.cost_type;
+        form.amount.value = editingCost.amount.toString();
+        form.date.value = editingCost.date;
+        form.description.value = editingCost.description || '';
+      }
+    }
+  }, [editingCost]);
+
   return (
-    <form onSubmit={onSubmit} className="space-y-4">
+    <form id="costForm" onSubmit={onSubmit} className="space-y-4">
       <div className="grid gap-4 md:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="type">Cost Type</Label>
@@ -57,7 +72,7 @@ export const AddCostForm = ({ onSubmit, isLoading }: AddCostFormProps) => {
         {isLoading && (
           <Loader2 className="w-4 h-4 mr-2 animate-spin" />
         )}
-        Add Cost
+        {editingCost ? 'Update Cost' : 'Add Cost'}
       </Button>
     </form>
   );

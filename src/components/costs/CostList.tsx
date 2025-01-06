@@ -1,15 +1,16 @@
 import { Button } from "@/components/ui/button";
-import { X, Loader2 } from "lucide-react";
+import { X, Loader2, Pencil } from "lucide-react";
 import { useCurrency } from "@/hooks/use-currency";
 import { Cost } from "@/types/costs";
 
 interface CostListProps {
   costs: Cost[] | undefined;
   onDelete: (id: string) => void;
+  onEdit: (cost: Cost) => void;
   isDeleting: boolean;
 }
 
-export const CostList = ({ costs, onDelete, isDeleting }: CostListProps) => {
+export const CostList = ({ costs, onDelete, onEdit, isDeleting }: CostListProps) => {
   const { formatPrice } = useCurrency();
 
   return (
@@ -32,18 +33,27 @@ export const CostList = ({ costs, onDelete, isDeleting }: CostListProps) => {
           </div>
           <div className="flex items-center gap-4">
             <span className="font-medium">{formatPrice(cost.amount)}</span>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => onDelete(cost.id)}
-              disabled={isDeleting}
-            >
-              {isDeleting ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                <X className="w-4 h-4" />
-              )}
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => onEdit(cost)}
+              >
+                <Pencil className="w-4 h-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => onDelete(cost.id)}
+                disabled={isDeleting}
+              >
+                {isDeleting ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <X className="w-4 h-4" />
+                )}
+              </Button>
+            </div>
           </div>
         </div>
       ))}
