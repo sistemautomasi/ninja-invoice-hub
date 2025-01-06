@@ -43,26 +43,34 @@ const Dashboard = () => {
     queryFn: async () => {
       const { start, end } = getDateRange();
       
-      // Calculate previous period with proper day difference
+      // Calculate previous period
       const periodDays = differenceInDays(end, start) || 1;
       const previousStart = subDays(start, periodDays);
       const previousEnd = start;
       
-      // Get current period orders with customer info
+      // Fetch orders with items for the current period
       const { data: currentOrders, error: currentError } = await supabase
         .from('orders')
         .select(`
+          id,
           total_amount,
           status,
-          customer_name,
-          email
+          processing_time,
+          order_items (
+            quantity,
+            price_at_time,
+            product:products (
+              id,
+              name
+            )
+          )
         `)
         .gte('created_at', start.toISOString())
         .lte('created_at', end.toISOString());
 
       if (currentError) throw currentError;
 
-      // Get previous period orders
+      // Fetch previous period orders
       const { data: previousOrders, error: previousError } = await supabase
         .from('orders')
         .select('total_amount')
@@ -71,18 +79,54 @@ const Dashboard = () => {
 
       if (previousError) throw previousError;
 
+      // Fetch customer metrics for CLV
+      const { data: customerMetrics, error: metricsError } = await supabase
+        .from('customer_metrics')
+        .select('lifetime_value')
+        .not('lifetime_value', 'is', null);
+
+      if (metricsError) throw metricsError;
+
       // Calculate totals and metrics
       const currentTotal = currentOrders?.reduce((sum, order) => sum + Number(order.total_amount), 0) || 0;
       const previousTotal = previousOrders?.reduce((sum, order) => sum + Number(order.total_amount), 0) || 0;
       
-      // Calculate unique customers
-      const uniqueCustomers = new Set(currentOrders?.map(order => order.email)).size;
-      
-      // Calculate average order value
-      const averageOrderValue = currentOrders?.length 
-        ? currentTotal / currentOrders.length 
+      // Calculate profit margin (assuming 30% cost of goods)
+      const costOfGoods = currentTotal * 0.7;
+      const profitMargin = ((currentTotal - costOfGoods) / currentTotal) * 100;
+
+      // Calculate average customer lifetime value
+      const averageClv = customerMetrics?.length 
+        ? customerMetrics.reduce((sum, metric) => sum + Number(metric.lifetime_value), 0) / customerMetrics.length 
         : 0;
-      
+
+      // Calculate average processing time
+      const ordersWithProcessingTime = currentOrders?.filter(order => order.processing_time) || [];
+      const averageProcessingTime = ordersWithProcessingTime.length
+        ? ordersWithProcessingTime.reduce((sum, order) => {
+            const hours = order.processing_time?.hours || 0;
+            const minutes = order.processing_time?.minutes || 0;
+            return sum + (hours + minutes / 60);
+          }, 0) / ordersWithProcessingTime.length
+        : 0;
+
+      // Calculate top selling product
+      const productSales: Record<string, { name: string; totalSold: number }> = {};
+      currentOrders?.forEach(order => {
+        order.order_items?.forEach(item => {
+          if (item.product) {
+            const { id, name } = item.product;
+            if (!productSales[id]) {
+              productSales[id] = { name, totalSold: 0 };
+            }
+            productSales[id].totalSold += item.quantity;
+          }
+        });
+      });
+
+      const topProduct = Object.values(productSales)
+        .sort((a, b) => b.totalSold - a.totalSold)[0] || null;
+
       // Calculate shipping stats
       const confirmed = currentOrders?.filter(order => order.status === 'pending').length || 0;
       const toShip = currentOrders?.filter(order => order.status === 'confirmed').length || 0;
@@ -97,8 +141,10 @@ const Dashboard = () => {
         totalSales: currentTotal,
         ordersCount: currentOrders?.length || 0,
         percentageChange: percentageChange.toFixed(1),
-        averageOrderValue,
-        uniqueCustomers,
+        profitMargin,
+        customerLifetimeValue: averageClv,
+        averageProcessingTime: `${Math.floor(averageProcessingTime)}h ${Math.round((averageProcessingTime % 1) * 60)}m`,
+        topSellingProduct: topProduct,
         shipping: { confirmed, toShip, inTransit, delivered }
       };
     },
