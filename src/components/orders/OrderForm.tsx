@@ -12,6 +12,7 @@ import { ProductSelection } from "./ProductSelection";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { ShippingCostSection } from "./ShippingCostSection";
 
 interface Product {
   id: string;
@@ -95,32 +96,6 @@ export const OrderForm = ({ products, isSubmitting, onSubmit }: OrderFormProps) 
     });
   };
 
-  // Fetch shipping rates based on payment method
-  const { data: shippingRates } = useQuery({
-    queryKey: ["shippingRates", paymentMethod],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("business_costs")
-        .select("amount")
-        .eq("cost_type", paymentMethod === 'cod' ? 'shipping_cod' : 'shipping_online')
-        .maybeSingle();
-
-      if (error) {
-        console.error("Error fetching shipping rates:", error);
-        return null;
-      }
-
-      return data?.amount || 0;
-    }
-  });
-
-  // Update shipping cost when payment method changes or rates are fetched
-  React.useEffect(() => {
-    if (shippingRates !== null && shippingRates !== undefined) {
-      setShippingCost(Number(shippingRates));
-    }
-  }, [shippingRates, paymentMethod]);
-
   return (
     <Card className="w-full border-none shadow-none">
       <CardHeader className="px-0">
@@ -157,18 +132,12 @@ export const OrderForm = ({ products, isSubmitting, onSubmit }: OrderFormProps) 
             </RadioGroup>
           </div>
 
-          {isAdmin && (
-            <div className="space-y-2 text-left">
-              <Label htmlFor="shippingCost">Shipping Cost</Label>
-              <Input
-                id="shippingCost"
-                type="number"
-                step="0.01"
-                value={shippingCost}
-                onChange={(e) => setShippingCost(Number(e.target.value))}
-              />
-            </div>
-          )}
+          <ShippingCostSection
+            isAdmin={isAdmin}
+            paymentMethod={paymentMethod}
+            shippingCost={shippingCost}
+            onShippingCostChange={setShippingCost}
+          />
 
           <div className="space-y-2 text-left">
             <Label>Order Summary</Label>
