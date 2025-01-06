@@ -21,6 +21,14 @@ interface CostListProps {
 export const CostList = ({ costs, onDelete, onEdit, isDeleting }: CostListProps) => {
   const { formatPrice } = useCurrency();
 
+  if (!costs || costs.length === 0) {
+    return (
+      <div className="text-center text-muted-foreground py-4">
+        No advertising costs found
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4">
       <Table>
