@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Database } from "@/integrations/supabase/types";
 import { useUser } from "@supabase/auth-helpers-react";
+import { useEffect, useState } from "react";
 
 type UserRole = Database["public"]["Enums"]["user_role"];
 
@@ -10,17 +11,13 @@ export const useDirectAddUser = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const user = useUser();
+  const [isAdmin, setIsAdmin] = useState<boolean>(false);
 
-  const addUser = useMutation({
-    mutationFn: async ({ email, role }: { email: string; role: UserRole }) => {
-      console.log("Current user:", user); // Debug log
+  // Check admin status when component mounts or user changes
+  useEffect(() => {
+    const checkAdminStatus = async () => {
+      if (!user) return;
 
-      if (!user) {
-        console.error("No user found in auth state");
-        throw new Error('You must be logged in to perform this action');
-      }
-
-      // Check admin role with detailed error logging
       const { data: adminCheck, error: adminCheckError } = await supabase
         .from('user_roles')
         .select('role')
@@ -29,20 +26,31 @@ export const useDirectAddUser = () => {
 
       if (adminCheckError) {
         console.error('Admin check error:', adminCheckError);
-        throw adminCheckError;
+        return;
       }
 
-      console.log("Admin check result:", adminCheck); // Debug log
+      setIsAdmin(adminCheck?.role === 'admin');
+    };
 
-      if (!adminCheck || adminCheck.role !== 'admin') {
-        console.error('User is not an admin:', adminCheck);
+    checkAdminStatus();
+  }, [user]);
+
+  const addUser = useMutation({
+    mutationFn: async ({ email, role }: { email: string; role: UserRole }) => {
+      if (!user) {
+        console.error("No user found in auth state");
+        throw new Error('You must be logged in to perform this action');
+      }
+
+      if (!isAdmin) {
+        console.error('User is not an admin');
         throw new Error('Only admins can add users');
       }
 
       const profileId = crypto.randomUUID();
-      console.log("Generated profile ID:", profileId); // Debug log
+      console.log("Generated profile ID:", profileId);
 
-      // Create profile with error details
+      // Create profile
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .insert([{ 
@@ -59,9 +67,9 @@ export const useDirectAddUser = () => {
         throw new Error(`Failed to create profile: ${profileError.message}`);
       }
 
-      console.log("Profile created:", profileData); // Debug log
+      console.log("Profile created:", profileData);
 
-      // Create user role with error details
+      // Create user role
       const { error: roleError } = await supabase
         .from('user_roles')
         .insert([{ 
@@ -96,5 +104,5 @@ export const useDirectAddUser = () => {
     },
   });
 
-  return { addUser };
+  return { addUser, isAdmin };
 };
