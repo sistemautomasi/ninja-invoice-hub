@@ -13,6 +13,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Database } from "@/integrations/supabase/types";
+
+type UserRole = Database["public"]["Enums"]["user_role"];
 
 export const TeamInvites = () => {
   const { toast } = useToast();
@@ -36,7 +39,7 @@ export const TeamInvites = () => {
   });
 
   const acceptInvite = useMutation({
-    mutationFn: async ({ email, role }: { email: string; role: 'admin' | 'staff' }) => {
+    mutationFn: async ({ email, role }: { email: string; role: UserRole }) => {
       // First update the invite status
       const { error: inviteError } = await supabase
         .from('team_invites')
@@ -82,7 +85,7 @@ export const TeamInvites = () => {
   });
 
   const sendInvite = useMutation({
-    mutationFn: async ({ email, role }: { email: string; role: 'admin' | 'staff' }) => {
+    mutationFn: async ({ email, role }: { email: string; role: UserRole }) => {
       // First, create the invite in the database
       const { data: invite, error: dbError } = await supabase
         .from('team_invites')
@@ -138,7 +141,7 @@ export const TeamInvites = () => {
     e.preventDefault();
     const formData = new FormData(e.target as HTMLFormElement);
     const email = formData.get('email') as string;
-    const role = formData.get('role') as 'admin' | 'staff';
+    const role = formData.get('role') as UserRole;
 
     if (!email || !role) {
       toast({
