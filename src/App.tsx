@@ -11,6 +11,7 @@ import OrderList from "@/pages/OrderList";
 import SubmitOrder from "@/pages/SubmitOrder";
 import SignIn from "@/pages/SignIn";
 import SignUp from "@/pages/SignUp";
+import Costs from "@/pages/Costs";
 import "./App.css";
 
 const queryClient = new QueryClient();
@@ -31,6 +32,7 @@ function App() {
               <Route path="settings" element={<Settings />} />
               <Route path="orders" element={<OrderList />} />
               <Route path="submit-order" element={<SubmitOrder />} />
+              <Route path="costs" element={<Costs />} />
             </Route>
           </Routes>
         </Router>

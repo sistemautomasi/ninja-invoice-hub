@@ -3,23 +3,15 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { DollarSign, Package, Megaphone, Loader2, X } from "lucide-react";
-import { useCurrency } from "@/hooks/use-currency";
-
-type Cost = {
-  id: string;
-  cost_type: string;
-  amount: number;
-  description: string;
-  date: string;
-};
+import { Loader2 } from "lucide-react";
+import { CostSummaryCards } from "@/components/costs/CostSummaryCards";
+import { AddCostForm } from "@/components/costs/AddCostForm";
+import { CostList } from "@/components/costs/CostList";
+import type { Cost } from "@/types/costs";
 
 const Costs = () => {
   const { toast } = useToast();
-  const { formatPrice } = useCurrency();
   const queryClient = useQueryClient();
   const [isAdding, setIsAdding] = useState(false);
 
@@ -114,45 +106,7 @@ const Costs = () => {
         Business Costs
       </h1>
 
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-            <CardTitle className="text-sm font-medium">Advertising Costs</CardTitle>
-            <Megaphone className="w-4 h-4 text-primary" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {formatPrice(costs?.filter(c => c.cost_type === 'advertising')
-                .reduce((sum, cost) => sum + Number(cost.amount), 0) || 0)}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-            <CardTitle className="text-sm font-medium">Shipping Costs</CardTitle>
-            <Package className="w-4 h-4 text-primary" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {formatPrice(costs?.filter(c => c.cost_type === 'shipping')
-                .reduce((sum, cost) => sum + Number(cost.amount), 0) || 0)}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-            <CardTitle className="text-sm font-medium">Total Costs</CardTitle>
-            <DollarSign className="w-4 h-4 text-primary" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {formatPrice(costs?.reduce((sum, cost) => sum + Number(cost.amount), 0) || 0)}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      <CostSummaryCards costs={costs} />
 
       <Card>
         <CardHeader>
@@ -165,89 +119,19 @@ const Costs = () => {
         </CardHeader>
         <CardContent>
           {isAdding && (
-            <form onSubmit={handleSubmit} className="space-y-4 mb-6">
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="type">Cost Type</Label>
-                  <select
-                    id="type"
-                    name="type"
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background"
-                    required
-                  >
-                    <option value="advertising">Advertising</option>
-                    <option value="shipping">Shipping</option>
-                  </select>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="amount">Amount</Label>
-                  <Input
-                    id="amount"
-                    name="amount"
-                    type="number"
-                    step="0.01"
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="date">Date</Label>
-                  <Input
-                    id="date"
-                    name="date"
-                    type="date"
-                    required
-                    defaultValue={new Date().toISOString().split('T')[0]}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="description">Description</Label>
-                  <Input
-                    id="description"
-                    name="description"
-                    type="text"
-                  />
-                </div>
-              </div>
-              <Button type="submit" disabled={addCost.isPending}>
-                {addCost.isPending && (
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                )}
-                Add Cost
-              </Button>
-            </form>
+            <div className="mb-6">
+              <AddCostForm 
+                onSubmit={handleSubmit}
+                isLoading={addCost.isPending}
+              />
+            </div>
           )}
 
-          <div className="space-y-4">
-            {costs?.map((cost) => (
-              <div
-                key={cost.id}
-                className="flex items-center justify-between p-4 border rounded-lg"
-              >
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium capitalize">{cost.cost_type}</span>
-                    <span className="text-sm text-muted-foreground">
-                      {new Date(cost.date).toLocaleDateString()}
-                    </span>
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    {cost.description}
-                  </div>
-                </div>
-                <div className="flex items-center gap-4">
-                  <span className="font-medium">{formatPrice(cost.amount)}</span>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => deleteCost.mutate(cost.id)}
-                    disabled={deleteCost.isPending}
-                  >
-                    <X className="w-4 h-4" />
-                  </Button>
-                </div>
-              </div>
-            ))}
-          </div>
+          <CostList 
+            costs={costs}
+            onDelete={(id) => deleteCost.mutate(id)}
+            isDeleting={deleteCost.isPending}
+          />
         </CardContent>
       </Card>
     </div>
