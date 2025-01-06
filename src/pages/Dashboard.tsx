@@ -108,14 +108,22 @@ const Dashboard = () => {
       let totalRevenue = 0;
       let totalCost = 0;
 
+      console.log('Current Orders:', currentOrders); // Debug log
+
       currentOrders?.forEach(order => {
         totalRevenue += Number(order.total_amount);
+        
         order.order_items?.forEach(item => {
           if (item.product) {
-            totalCost += Number(item.product.cost) * item.quantity;
+            const itemCost = Number(item.product.cost) * item.quantity;
+            totalCost += itemCost;
+            console.log(`Item: ${item.product.name}, Cost: ${itemCost}, Quantity: ${item.quantity}`); // Debug log
           }
         });
       });
+
+      console.log('Total Revenue:', totalRevenue); // Debug log
+      console.log('Total Cost:', totalCost); // Debug log
 
       // Calculate total revenue for previous period
       const previousRevenue = previousOrders?.reduce((sum, order) => 
@@ -123,7 +131,10 @@ const Dashboard = () => {
 
       // Calculate profit and profit margin using actual costs
       const profit = totalRevenue - totalCost;
+      console.log('Calculated Profit:', profit); // Debug log
+      
       const profitMargin = totalRevenue > 0 ? (profit / totalRevenue) * 100 : 0;
+      console.log('Profit Margin:', profitMargin); // Debug log
 
       // Calculate percentage change
       const percentageChange = previousRevenue === 0 
