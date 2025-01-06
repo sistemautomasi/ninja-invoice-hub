@@ -14,9 +14,9 @@ import {
   ResponsiveContainer,
   ComposedChart,
 } from "recharts";
-import { startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear, subDays, subWeeks, subMonths, subYears } from "date-fns";
+import { startOfDay, endOfDay, startOfMonth, endOfMonth, subDays, subMonths } from "date-fns";
 
-export function SalesChart() {
+const SalesChart = () => {
   const [timePeriod, setTimePeriod] = useState("last7days");
   const { formatPrice } = useCurrency();
 
@@ -141,4 +141,6 @@ export function SalesChart() {
       </div>
     </Card>
   );
-}
+};
+
+export default SalesChart;
