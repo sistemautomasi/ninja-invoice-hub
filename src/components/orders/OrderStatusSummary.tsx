@@ -1,7 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
-import { CirclePlus, CheckCircle, Truck, RotateCcw, CheckSquare, XSquare } from "lucide-react";
+import { CirclePlus, CheckCircle, Truck, RotateCcw, CheckSquare, XSquare, Loader2 } from "lucide-react";
 import { useEffect } from "react";
 
 interface StatusCount {
