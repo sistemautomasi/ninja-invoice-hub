@@ -1,22 +1,23 @@
 import { useState } from "react";
 import { Outlet } from "react-router-dom";
-import { Menu, X, LayoutDashboard, Package, ClipboardList, Settings, BoxIcon, LogOut, DollarSign, Megaphone, FileText } from "lucide-react";
+import { Menu, X, LayoutDashboard, Package, ClipboardList, Settings, BoxIcon, LogOut, DollarSign, Megaphone, FileText, Link2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SidebarBranding } from "@/components/ui/sidebar/SidebarBranding";
 import { SidebarNavItem } from "@/components/ui/sidebar/SidebarNavItem";
 
-const DashboardLayout = () => {
+export const DashboardLayout = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
   const sidebarItems = [
-    { icon: LayoutDashboard, label: "Dashboard", href: "/" },
+    { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
     { icon: BoxIcon, label: "Products", href: "/products" },
     { icon: Package, label: "Submit Order", href: "/submit-order" },
     { icon: ClipboardList, label: "Order List", href: "/orders" },
     { icon: FileText, label: "Invoices", href: "/invoices" },
     { icon: DollarSign, label: "Costs", href: "/costs" },
     { icon: Megaphone, label: "Advertising", href: "/advertising" },
+    { icon: Link2, label: "Integrations", href: "/integrations" },
     { icon: Settings, label: "Settings", href: "/settings" },
     { icon: LogOut, label: "Logout", href: "/signin", isLogout: true },
   ];
@@ -58,8 +59,10 @@ const DashboardLayout = () => {
           {sidebarItems.map((item) => (
             <SidebarNavItem
               key={item.href}
-              {...item}
-              isCollapsed={isCollapsed}
+              icon={item.icon}
+              label={item.label}
+              href={item.href}
+              isLogout={item.isLogout}
             />
           ))}
         </nav>

@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 
-interface SidebarBrandingProps {
+export interface SidebarBrandingProps {
   isCollapsed: boolean;
 }
 

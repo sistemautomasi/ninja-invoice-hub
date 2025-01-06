@@ -1,41 +1,21 @@
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import {
-  LayoutDashboard,
-  ClipboardList,
-  FileText,
-  Settings,
-  ShoppingCart,
-  DollarSign,
-  BarChart3,
-  Link2,
-} from "lucide-react";
+import { LucideIcon } from "lucide-react";
 
-const icons = {
-  dashboard: LayoutDashboard,
-  orders: ClipboardList,
-  products: ShoppingCart,
-  costs: DollarSign,
-  advertising: BarChart3,
-  invoices: FileText,
-  integrations: Link2,
-  settings: Settings,
-};
-
-interface SidebarNavItemProps {
-  path: string;
+export interface SidebarNavItemProps {
+  icon: LucideIcon;
   label: string;
-  icon: keyof typeof icons;
+  href: string;
+  isLogout?: boolean;
 }
 
-export const SidebarNavItem = ({ path, label, icon }: SidebarNavItemProps) => {
+export const SidebarNavItem = ({ icon: Icon, label, href, isLogout }: SidebarNavItemProps) => {
   const location = useLocation();
-  const Icon = icons[icon];
-  const isActive = location.pathname === path;
+  const isActive = location.pathname === href;
 
   return (
-    <Link to={path}>
+    <Link to={href}>
       <Button
         variant="ghost"
         className={cn(
