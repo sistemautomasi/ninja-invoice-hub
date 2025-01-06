@@ -31,6 +31,31 @@ const AdvertisingReport = () => {
     },
   });
 
+  // Calculate overall metrics
+  const calculateOverallMetrics = () => {
+    if (!metrics || metrics.length === 0) {
+      return {
+        roas: 0,
+        costPerPurchase: 0,
+        ctr: 0
+      };
+    }
+
+    const totalRevenue = metrics.reduce((sum, metric) => sum + Number(metric.revenue), 0);
+    const totalAdSpend = metrics.reduce((sum, metric) => sum + Number(metric.ad_spend), 0);
+    const totalConversions = metrics.reduce((sum, metric) => sum + metric.conversions, 0);
+    const totalClicks = metrics.reduce((sum, metric) => sum + metric.clicks, 0);
+    const totalImpressions = metrics.reduce((sum, metric) => sum + metric.impressions, 0);
+
+    return {
+      roas: totalAdSpend > 0 ? ((totalRevenue / totalAdSpend) * 100) : 0,
+      costPerPurchase: totalConversions > 0 ? (totalAdSpend / totalConversions) : 0,
+      ctr: totalImpressions > 0 ? ((totalClicks / totalImpressions) * 100) : 0
+    };
+  };
+
+  const overallMetrics = calculateOverallMetrics();
+
   const addMetrics = useMutation({
     mutationFn: async (formData: FormData) => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -97,11 +122,11 @@ const AdvertisingReport = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {metrics && metrics.length > 0
-                ? `${((metrics.reduce((acc, m) => acc + Number(m.revenue), 0) / 
-                    metrics.reduce((acc, m) => acc + Number(m.ad_spend), 0)) * 100).toFixed(2)}%`
-                : "0%"}
+              {overallMetrics.roas.toFixed(2)}%
             </div>
+            <p className="text-xs text-muted-foreground">
+              Return on Ad Spend
+            </p>
           </CardContent>
         </Card>
 
@@ -111,11 +136,11 @@ const AdvertisingReport = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {metrics && metrics.length > 0
-                ? `$${(metrics.reduce((acc, m) => acc + Number(m.ad_spend), 0) / 
-                    metrics.reduce((acc, m) => acc + Number(m.conversions), 0)).toFixed(2)}`
-                : "$0.00"}
+              ${overallMetrics.costPerPurchase.toFixed(2)}
             </div>
+            <p className="text-xs text-muted-foreground">
+              Average cost per conversion
+            </p>
           </CardContent>
         </Card>
 
@@ -125,11 +150,11 @@ const AdvertisingReport = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {metrics && metrics.length > 0
-                ? `${((metrics.reduce((acc, m) => acc + Number(m.clicks), 0) / 
-                    metrics.reduce((acc, m) => acc + Number(m.impressions), 0)) * 100).toFixed(2)}%`
-                : "0%"}
+              {overallMetrics.ctr.toFixed(2)}%
             </div>
+            <p className="text-xs text-muted-foreground">
+              Click-through Rate
+            </p>
           </CardContent>
         </Card>
       </div>

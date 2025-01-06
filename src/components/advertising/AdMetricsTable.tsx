@@ -41,11 +41,11 @@ export const AdMetricsTable = ({ metrics }: AdMetricsTableProps) => {
           <TableHead>Platform</TableHead>
           <TableHead>Campaign</TableHead>
           <TableHead className="text-right">Spend</TableHead>
+          <TableHead className="text-right">Revenue</TableHead>
+          <TableHead className="text-right">ROAS</TableHead>
           <TableHead className="text-right">Impressions</TableHead>
           <TableHead className="text-right">Clicks</TableHead>
           <TableHead className="text-right">Conv.</TableHead>
-          <TableHead className="text-right">Revenue</TableHead>
-          <TableHead className="text-right">ROAS</TableHead>
           <TableHead className="text-right">CPP</TableHead>
           <TableHead className="text-right">CTR</TableHead>
         </TableRow>
@@ -62,11 +62,11 @@ export const AdMetricsTable = ({ metrics }: AdMetricsTableProps) => {
               <TableCell className="capitalize">{metric.platform}</TableCell>
               <TableCell>{metric.campaign_name}</TableCell>
               <TableCell className="text-right">${metric.ad_spend.toFixed(2)}</TableCell>
+              <TableCell className="text-right">${metric.revenue.toFixed(2)}</TableCell>
+              <TableCell className="text-right">{roas}%</TableCell>
               <TableCell className="text-right">{metric.impressions.toLocaleString()}</TableCell>
               <TableCell className="text-right">{metric.clicks.toLocaleString()}</TableCell>
               <TableCell className="text-right">{metric.conversions}</TableCell>
-              <TableCell className="text-right">${metric.revenue.toFixed(2)}</TableCell>
-              <TableCell className="text-right">{roas}%</TableCell>
               <TableCell className="text-right">${cpp}</TableCell>
               <TableCell className="text-right">{ctr}%</TableCell>
             </TableRow>
