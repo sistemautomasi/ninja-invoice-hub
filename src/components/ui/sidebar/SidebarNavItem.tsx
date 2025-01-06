@@ -25,23 +25,24 @@ export const SidebarNavItem = ({
 
   const handleLogout = async () => {
     try {
-      // Clear any existing session data first
-      await supabase.auth.signOut({ scope: 'local' });
+      // First, clear all local storage and cookies
+      localStorage.clear();
       
-      // Then attempt a global signout
-      const { error } = await supabase.auth.signOut({ scope: 'global' });
-      
-      if (error) {
-        console.error("Error during logout:", error);
+      // Attempt to kill the session directly without checking status
+      try {
+        await supabase.auth.signOut({ scope: 'local' });
+      } catch (e) {
+        console.log("Local signout failed, continuing...");
       }
 
-      // Always clear local storage and redirect, regardless of error
-      localStorage.clear();
+      // Clear any remaining auth state
+      supabase.auth.clearSession();
+      
       toast.success("Logged out successfully");
       navigate("/signin");
     } catch (error) {
       console.error("Unexpected error during logout:", error);
-      // Ensure we still redirect even if there's an error
+      // Ensure we still clear everything and redirect
       localStorage.clear();
       navigate("/signin");
     }
