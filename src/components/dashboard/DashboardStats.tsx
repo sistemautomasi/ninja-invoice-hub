@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { DollarSign, Package, TrendingUp } from "lucide-react";
+import { DollarSign, Package, TrendingUp, Users, ShoppingCart } from "lucide-react";
 import { useCurrency } from "@/hooks/use-currency";
 
 interface DashboardStatsProps {
@@ -7,6 +7,8 @@ interface DashboardStatsProps {
     totalSales: number;
     ordersCount: number;
     percentageChange: string;
+    averageOrderValue?: number;
+    uniqueCustomers?: number;
   } | undefined;
 }
 
@@ -14,7 +16,7 @@ const DashboardStats = ({ stats }: DashboardStatsProps) => {
   const { formatPrice } = useCurrency();
 
   return (
-    <div className="grid gap-6 md:grid-cols-3">
+    <div className="grid gap-6 md:grid-cols-5">
       <Card className="hover:shadow-lg transition-shadow duration-200 hover:scale-105 transform">
         <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
           <CardTitle className="text-sm font-medium">Total Sales</CardTitle>
@@ -50,6 +52,34 @@ const DashboardStats = ({ stats }: DashboardStatsProps) => {
           <div className="text-2xl font-bold">{formatPrice(stats?.totalSales || 0)}</div>
           <p className="text-xs text-muted-foreground">
             Daily revenue
+          </p>
+        </CardContent>
+      </Card>
+
+      <Card className="hover:shadow-lg transition-shadow duration-200 hover:scale-105 transform">
+        <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+          <CardTitle className="text-sm font-medium">Avg. Order Value</CardTitle>
+          <ShoppingCart className="h-4 w-4 text-orange-500" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">
+            {formatPrice(stats?.averageOrderValue || 0)}
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Per order average
+          </p>
+        </CardContent>
+      </Card>
+
+      <Card className="hover:shadow-lg transition-shadow duration-200 hover:scale-105 transform">
+        <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+          <CardTitle className="text-sm font-medium">Unique Customers</CardTitle>
+          <Users className="h-4 w-4 text-purple-500" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{stats?.uniqueCustomers || 0}</div>
+          <p className="text-xs text-muted-foreground">
+            Active customers
           </p>
         </CardContent>
       </Card>

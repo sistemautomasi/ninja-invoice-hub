@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Line, CompositeChart } from 'recharts';
 import { useCurrency } from "@/hooks/use-currency";
 
 interface SalesChartProps {
@@ -20,7 +20,7 @@ const SalesChart = ({ salesData }: SalesChartProps) => {
       <CardContent>
         <div className="h-[400px] mt-4">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={salesData}>
+            <CompositeChart data={salesData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
               <XAxis dataKey="name" stroke="#6b7280" />
               <YAxis stroke="#6b7280" />
@@ -38,7 +38,14 @@ const SalesChart = ({ salesData }: SalesChartProps) => {
                 fill="#1E40AF"
                 radius={[4, 4, 0, 0]}
               />
-            </BarChart>
+              <Line
+                type="monotone"
+                dataKey="sales"
+                stroke="#4F46E5"
+                strokeWidth={2}
+                dot={{ fill: '#4F46E5', r: 4 }}
+              />
+            </CompositeChart>
           </ResponsiveContainer>
         </div>
       </CardContent>

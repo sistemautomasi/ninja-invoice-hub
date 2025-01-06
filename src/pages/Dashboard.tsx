@@ -44,14 +44,19 @@ const Dashboard = () => {
       const { start, end } = getDateRange();
       
       // Calculate previous period with proper day difference
-      const periodDays = differenceInDays(end, start) || 1; // Ensure at least 1 day
+      const periodDays = differenceInDays(end, start) || 1;
       const previousStart = subDays(start, periodDays);
       const previousEnd = start;
       
-      // Get current period orders
+      // Get current period orders with customer info
       const { data: currentOrders, error: currentError } = await supabase
         .from('orders')
-        .select('total_amount, status')
+        .select(`
+          total_amount,
+          status,
+          customer_name,
+          email
+        `)
         .gte('created_at', start.toISOString())
         .lte('created_at', end.toISOString());
 
@@ -66,13 +71,21 @@ const Dashboard = () => {
 
       if (previousError) throw previousError;
 
-      // Calculate totals
+      // Calculate totals and metrics
       const currentTotal = currentOrders?.reduce((sum, order) => sum + Number(order.total_amount), 0) || 0;
       const previousTotal = previousOrders?.reduce((sum, order) => sum + Number(order.total_amount), 0) || 0;
       
-      // Calculate shipping stats based on new flow
-      const confirmed = currentOrders?.filter(order => order.status === 'pending').length || 0; // New orders are now "confirmed"
-      const toShip = currentOrders?.filter(order => order.status === 'confirmed').length || 0; // Confirmed orders move to "to ship"
+      // Calculate unique customers
+      const uniqueCustomers = new Set(currentOrders?.map(order => order.email)).size;
+      
+      // Calculate average order value
+      const averageOrderValue = currentOrders?.length 
+        ? currentTotal / currentOrders.length 
+        : 0;
+      
+      // Calculate shipping stats
+      const confirmed = currentOrders?.filter(order => order.status === 'pending').length || 0;
+      const toShip = currentOrders?.filter(order => order.status === 'confirmed').length || 0;
       const inTransit = currentOrders?.filter(order => order.status === 'shipped').length || 0;
       const delivered = currentOrders?.filter(order => order.status === 'completed').length || 0;
 
@@ -84,6 +97,8 @@ const Dashboard = () => {
         totalSales: currentTotal,
         ordersCount: currentOrders?.length || 0,
         percentageChange: percentageChange.toFixed(1),
+        averageOrderValue,
+        uniqueCustomers,
         shipping: { confirmed, toShip, inTransit, delivered }
       };
     },
