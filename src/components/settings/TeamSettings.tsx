@@ -28,14 +28,30 @@ export const TeamSettings = () => {
       try {
         console.log("Checking admin status for:", user.email);
         
-        const { data: userRole, error } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', user.id)
+        // First try to get the user's profile ID
+        const { data: profileData, error: profileError } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('email', user.email)
           .single();
 
-        if (error) {
-          console.error('Error checking admin status:', error);
+        if (profileError) {
+          console.error('Error fetching profile:', profileError);
+          setLoading(false);
+          return;
+        }
+
+        console.log("Profile data:", profileData);
+
+        // Then check user_roles using the profile ID
+        const { data: userRole, error: roleError } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', profileData.id)
+          .single();
+
+        if (roleError) {
+          console.error('Error checking admin status:', roleError);
           setLoading(false);
           return;
         }
