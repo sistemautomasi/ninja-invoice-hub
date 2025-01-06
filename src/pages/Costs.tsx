@@ -39,10 +39,10 @@ const Costs = () => {
   const addCost = useMutation({
     mutationFn: async (formData: FormData) => {
       const cost = {
-        cost_type: formData.get("type"),
+        cost_type: String(formData.get("type")),
         amount: Number(formData.get("amount")),
-        description: formData.get("description"),
-        date: formData.get("date"),
+        description: String(formData.get("description")),
+        date: String(formData.get("date")),
       };
 
       const { error } = await supabase
