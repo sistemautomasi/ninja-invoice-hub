@@ -19,7 +19,8 @@ export const TeamSettings = () => {
 
   useEffect(() => {
     const checkAdminStatus = async () => {
-      if (!user) {
+      if (!user?.id) {
+        console.log("No user found in auth state");
         setLoading(false);
         return;
       }
@@ -27,7 +28,7 @@ export const TeamSettings = () => {
       try {
         console.log("Checking admin status for user:", user.email);
         
-        // First try to get role directly with user.id
+        // First check if user exists in user_roles directly
         const { data: roleData, error: roleError } = await supabase
           .from('user_roles')
           .select('role')
@@ -35,13 +36,13 @@ export const TeamSettings = () => {
           .single();
 
         if (!roleError && roleData?.role === 'admin') {
-          console.log("Found admin role:", roleData);
+          console.log("Found admin role directly:", roleData);
           setAdminStatus(true);
           setLoading(false);
           return;
         }
 
-        // If no direct match, try checking through profiles
+        // If no direct match, check through profiles
         const { data: profileData, error: profileError } = await supabase
           .from('profiles')
           .select('id')
@@ -50,6 +51,11 @@ export const TeamSettings = () => {
 
         if (profileError) {
           console.error('Profile check error:', profileError);
+          toast({
+            title: "Error",
+            description: "Failed to verify user profile",
+            variant: "destructive",
+          });
           setLoading(false);
           return;
         }
@@ -63,6 +69,11 @@ export const TeamSettings = () => {
 
           if (adminError) {
             console.error('Admin check error:', adminError);
+            toast({
+              title: "Error",
+              description: "Failed to verify admin status",
+              variant: "destructive",
+            });
           } else {
             console.log("Admin check result:", adminData);
             setAdminStatus(adminData?.role === 'admin');
@@ -80,7 +91,11 @@ export const TeamSettings = () => {
       }
     };
 
-    checkAdminStatus();
+    if (user) {
+      checkAdminStatus();
+    } else {
+      setLoading(false);
+    }
   }, [user, toast]);
 
   if (loading) {
@@ -125,7 +140,7 @@ export const TeamSettings = () => {
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
               You need admin access to view team management settings.
-              <div className="mt-2 text-sm">
+              <div className="mt-2 text-sm text-muted-foreground">
                 User ID: {user.id}
                 <br />
                 Email: {user.email}
