@@ -36,7 +36,8 @@ export const AddCostForm = ({ onSubmit, isLoading, editingCost }: AddCostFormPro
             required
           >
             <option value="advertising">Advertising</option>
-            <option value="shipping">Shipping</option>
+            <option value="shipping_cod">Shipping (Cash on Delivery)</option>
+            <option value="shipping_online">Shipping (Online Banking)</option>
           </select>
         </div>
         <div className="space-y-2">
@@ -65,6 +66,7 @@ export const AddCostForm = ({ onSubmit, isLoading, editingCost }: AddCostFormPro
             id="description"
             name="description"
             type="text"
+            placeholder="Optional notes about this cost"
           />
         </div>
       </div>
