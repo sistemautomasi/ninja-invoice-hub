@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 import { LucideIcon } from "lucide-react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -19,24 +19,20 @@ export const SidebarNavItem = ({
   isCollapsed,
   isLogout = false,
 }: SidebarNavItemProps) => {
-  const location = useLocation();
   const navigate = useNavigate();
-  const isActive = location.pathname === href;
 
   const handleLogout = async () => {
     try {
-      // First, clear all local storage and cookies
+      // First, clear all local storage
       localStorage.clear();
       
-      // Attempt to kill the session directly without checking status
-      try {
-        await supabase.auth.signOut({ scope: 'local' });
-      } catch (e) {
-        console.log("Local signout failed, continuing...");
+      // Sign out from Supabase
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) {
+        console.error("Error during signout:", error);
+        // Even if there's an error, we'll redirect to signin
       }
-
-      // Clear any remaining auth state
-      supabase.auth.clearSession();
       
       toast.success("Logged out successfully");
       navigate("/signin");
@@ -68,7 +64,7 @@ export const SidebarNavItem = ({
       to={href}
       className={cn(
         "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
-        isActive
+        location.pathname === href
           ? "bg-primary text-primary-foreground"
           : "text-muted-foreground hover:bg-muted hover:text-foreground"
       )}
