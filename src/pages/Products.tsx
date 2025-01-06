@@ -14,6 +14,7 @@ interface Product {
   description: string | null;
   price: number;
   stock_quantity: number;
+  cost: number;
 }
 
 const Products = () => {
@@ -45,6 +46,7 @@ const Products = () => {
         description: formData.get("description") as string || null,
         price: Number(formData.get("price")),
         stock_quantity: Number(formData.get("stock_quantity")),
+        cost: Number(formData.get("cost")),
       };
 
       const { data, error } = await supabase
@@ -78,6 +80,7 @@ const Products = () => {
         description: formData.get("description") as string || null,
         price: Number(formData.get("price")),
         stock_quantity: Number(formData.get("stock_quantity")),
+        cost: Number(formData.get("cost")),
       };
 
       const { data, error } = await supabase

@@ -16,6 +16,7 @@ interface Product {
   description: string | null;
   price: number;
   stock_quantity: number;
+  cost: number;
 }
 
 interface ProductListProps {
