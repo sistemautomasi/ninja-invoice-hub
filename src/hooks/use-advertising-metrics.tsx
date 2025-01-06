@@ -71,10 +71,10 @@ export const useAdvertisingMetrics = (selectedPeriod: string) => {
       // Calculate CTR and cost per purchase
       const totalImpressions = adMetrics?.reduce((sum, metric) => sum + metric.impressions, 0) || 0;
       const totalClicks = adMetrics?.reduce((sum, metric) => sum + metric.clicks, 0) || 0;
-      const totalConversions = adMetrics?.reduce((sum, metric) => sum + metric.conversions, 0) || 0;
+      const totalOrders = orders?.length || 0;
 
       const ctr = totalImpressions > 0 ? (totalClicks / totalImpressions) * 100 : 0;
-      const costPerPurchase = totalConversions > 0 ? totalAdCosts / totalConversions : 0;
+      const costPerPurchase = totalOrders > 0 ? totalAdCosts / totalOrders : 0;
 
       return {
         totalSales,
