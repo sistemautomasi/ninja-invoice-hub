@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { startOfDay, subDays, startOfMonth, endOfMonth, format, subMonths, differenceInDays } from "date-fns";
+import { startOfDay, subDays, startOfMonth, endOfMonth, format, subMonths, differenceInDays, eachDayOfInterval } from "date-fns";
 import DashboardStats from "@/components/dashboard/DashboardStats";
 import ShippingOverview from "@/components/dashboard/ShippingOverview";
 import TimePeriodSelect from "@/components/dashboard/TimePeriodSelect";
@@ -12,6 +12,7 @@ interface OrderWithItems {
   id: string;
   total_amount: number;
   status: string;
+  created_at: string;
   order_items: {
     quantity: number;
     price_at_time: number;
@@ -54,7 +55,7 @@ const Dashboard = () => {
     }
   };
 
-  const { data: stats } = useQuery({
+  const { data: stats, isLoading } = useQuery({
     queryKey: ["orderStats", timePeriod],
     queryFn: async () => {
       const { start, end } = getDateRange();
@@ -71,6 +72,7 @@ const Dashboard = () => {
           id,
           total_amount,
           status,
+          created_at,
           order_items (
             quantity,
             price_at_time,
@@ -165,6 +167,41 @@ const Dashboard = () => {
       const inTransit = currentOrders?.filter(order => order.status === 'shipped').length || 0;
       const delivered = currentOrders?.filter(order => order.status === 'completed').length || 0;
 
+      // Generate daily sales data for the chart
+      const dailyData = new Map();
+      const days = eachDayOfInterval({ start, end });
+      
+      // Initialize all days with zero values
+      days.forEach(day => {
+        const dateStr = format(day, 'MMM dd');
+        dailyData.set(dateStr, { name: dateStr, sales: 0, profit: 0 });
+      });
+
+      // Populate actual sales data
+      currentOrders?.forEach(order => {
+        const orderDate = format(new Date(order.created_at), 'MMM dd');
+        const existingData = dailyData.get(orderDate);
+        
+        if (existingData) {
+          let orderProfit = Number(order.total_amount);
+          
+          // Subtract product costs
+          order.order_items?.forEach(item => {
+            if (item.product) {
+              orderProfit -= Number(item.product.cost) * item.quantity;
+            }
+          });
+
+          // Update daily totals
+          existingData.sales += Number(order.total_amount);
+          existingData.profit += orderProfit;
+          dailyData.set(orderDate, existingData);
+        }
+      });
+
+      // Convert Map to array for the chart
+      const salesChartData = Array.from(dailyData.values());
+
       return {
         totalSales: totalRevenue,
         ordersCount: currentOrders?.length || 0,
@@ -173,7 +210,8 @@ const Dashboard = () => {
         profit: netProfit,
         advertisingCosts,
         topSellingProduct: topProduct,
-        shipping: { confirmed, toShip, inTransit, delivered }
+        shipping: { confirmed, toShip, inTransit, delivered },
+        salesChartData, // Add the chart data to the return object
       };
     },
   });
@@ -189,7 +227,7 @@ const Dashboard = () => {
       
       <DashboardStats stats={stats} />
       <ShippingOverview shipping={stats?.shipping} />
-      <SalesChartContainer data={salesData || []} />
+      <SalesChartContainer data={stats?.salesChartData || []} />
     </div>
   );
 };
