@@ -20,7 +20,6 @@ export const TeamSettings = () => {
   useEffect(() => {
     const checkAdminStatus = async () => {
       if (!user) {
-        console.log("No user found");
         setLoading(false);
         return;
       }
@@ -28,30 +27,52 @@ export const TeamSettings = () => {
       try {
         console.log("Checking admin status for user:", user.email);
         
+        // First try to get role directly with user.id
         const { data: roleData, error: roleError } = await supabase
           .from('user_roles')
           .select('role')
           .eq('user_id', user.id)
           .single();
 
-        if (roleError) {
-          console.error('Error checking admin status:', roleError);
-          toast({
-            title: "Error checking permissions",
-            description: roleError.message,
-            variant: "destructive",
-          });
+        if (!roleError && roleData?.role === 'admin') {
+          console.log("Found admin role:", roleData);
+          setAdminStatus(true);
           setLoading(false);
           return;
         }
 
-        console.log("Role data:", roleData);
-        setAdminStatus(roleData?.role === 'admin');
+        // If no direct match, try checking through profiles
+        const { data: profileData, error: profileError } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('email', user.email)
+          .single();
+
+        if (profileError) {
+          console.error('Profile check error:', profileError);
+          setLoading(false);
+          return;
+        }
+
+        if (profileData?.id) {
+          const { data: adminData, error: adminError } = await supabase
+            .from('user_roles')
+            .select('role')
+            .eq('user_id', profileData.id)
+            .single();
+
+          if (adminError) {
+            console.error('Admin check error:', adminError);
+          } else {
+            console.log("Admin check result:", adminData);
+            setAdminStatus(adminData?.role === 'admin');
+          }
+        }
       } catch (error) {
         console.error('Unexpected error:', error);
         toast({
           title: "Error",
-          description: "An unexpected error occurred",
+          description: "An unexpected error occurred while checking permissions",
           variant: "destructive",
         });
       } finally {
@@ -104,8 +125,11 @@ export const TeamSettings = () => {
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
               You need admin access to view team management settings.
-              User ID: {user.id}
-              Email: {user.email}
+              <div className="mt-2 text-sm">
+                User ID: {user.id}
+                <br />
+                Email: {user.email}
+              </div>
             </AlertDescription>
           </Alert>
         </CardContent>
