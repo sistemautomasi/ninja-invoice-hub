@@ -7,6 +7,28 @@ import ShippingOverview from "@/components/dashboard/ShippingOverview";
 import TimePeriodSelect from "@/components/dashboard/TimePeriodSelect";
 import SalesChartContainer from "@/components/dashboard/charts/SalesChartContainer";
 
+// Define the interval type for processing_time
+interface ProcessingTimeInterval {
+  hours: number;
+  minutes: number;
+  seconds: number;
+}
+
+interface OrderWithItems {
+  id: string;
+  total_amount: number;
+  status: string;
+  processing_time: ProcessingTimeInterval | null;
+  order_items: {
+    quantity: number;
+    price_at_time: number;
+    product: {
+      id: string;
+      name: string;
+    } | null;
+  }[] | null;
+}
+
 const Dashboard = () => {
   const [timePeriod, setTimePeriod] = useState("today");
 
@@ -66,7 +88,8 @@ const Dashboard = () => {
           )
         `)
         .gte('created_at', start.toISOString())
-        .lte('created_at', end.toISOString());
+        .lte('created_at', end.toISOString())
+        .returns<OrderWithItems[]>();
 
       if (currentError) throw currentError;
 
