@@ -94,6 +94,7 @@ export type Database = {
           date: string
           description: string | null
           id: string
+          platform: string | null
           updated_at: string
           user_id: string | null
         }
@@ -104,6 +105,7 @@ export type Database = {
           date?: string
           description?: string | null
           id?: string
+          platform?: string | null
           updated_at?: string
           user_id?: string | null
         }
@@ -114,6 +116,7 @@ export type Database = {
           date?: string
           description?: string | null
           id?: string
+          platform?: string | null
           updated_at?: string
           user_id?: string | null
         }

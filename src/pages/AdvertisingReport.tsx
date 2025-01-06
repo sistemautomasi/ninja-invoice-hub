@@ -9,6 +9,7 @@ import TimePeriodSelect from "@/components/dashboard/TimePeriodSelect";
 import { AddAdMetricsForm } from "@/components/advertising/AddAdMetricsForm";
 import { AdMetricsTable } from "@/components/advertising/AdMetricsTable";
 import { AdMetricsSummary } from "@/components/advertising/AdMetricsSummary";
+import { AdCostsChart } from "@/components/advertising/AdCostsChart";
 import { useAdvertisingMetrics } from "@/hooks/use-advertising-metrics";
 
 const AdvertisingReport = () => {
@@ -100,6 +101,8 @@ const AdvertisingReport = () => {
         costPerPurchase: overallMetrics?.costPerPurchase || 0,
         ctr: overallMetrics?.ctr || 0,
       }} />
+
+      <AdCostsChart selectedPeriod={selectedPeriod} />
 
       <Card>
         <CardHeader>
