@@ -36,6 +36,7 @@ export const CostList = ({ costs, onDelete, onEdit, isDeleting }: CostListProps)
           <TableRow>
             <TableHead>Date</TableHead>
             <TableHead>Type</TableHead>
+            <TableHead>Platform</TableHead>
             <TableHead>Description</TableHead>
             <TableHead className="text-right">Amount</TableHead>
             <TableHead className="w-[100px]">Actions</TableHead>
@@ -46,6 +47,7 @@ export const CostList = ({ costs, onDelete, onEdit, isDeleting }: CostListProps)
             <TableRow key={cost.id}>
               <TableCell>{new Date(cost.date).toLocaleDateString()}</TableCell>
               <TableCell className="capitalize">{cost.cost_type.replace('_', ' ')}</TableCell>
+              <TableCell className="capitalize">{cost.platform || '-'}</TableCell>
               <TableCell className="text-muted-foreground">
                 {cost.description}
               </TableCell>
