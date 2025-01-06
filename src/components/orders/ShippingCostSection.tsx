@@ -55,15 +55,20 @@ export const ShippingCostSection = ({
   if (!isAdmin) return null;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 border p-4 rounded-lg bg-gray-50">
       <div className="flex items-center justify-between">
-        <Label htmlFor="shippingCost">Shipping Cost</Label>
+        <Label htmlFor="shippingCost" className="text-lg font-semibold">Shipping Cost</Label>
         <div className="flex items-center space-x-2">
-          <Label htmlFor="manual-mode">Manual Override</Label>
+          <Label htmlFor="manual-mode" className="text-sm text-gray-600">Manual Override</Label>
           <Switch
             id="manual-mode"
             checked={isManual}
-            onCheckedChange={setIsManual}
+            onCheckedChange={(checked) => {
+              setIsManual(checked);
+              if (!checked && shippingRates !== null) {
+                onShippingCostChange(Number(shippingRates));
+              }
+            }}
           />
         </div>
       </div>
@@ -75,16 +80,26 @@ export const ShippingCostSection = ({
         value={shippingCost}
         onChange={(e) => onShippingCostChange(Number(e.target.value))}
         disabled={isLoading || !isManual}
-        className={isManual ? "bg-white" : "bg-gray-100"}
+        className={isManual ? "bg-white border-primary" : "bg-gray-100"}
       />
       
-      {!isManual && isLoading && (
-        <p className="text-sm text-muted-foreground">Loading default shipping rates...</p>
+      {!isManual && (
+        <div className="text-sm text-gray-600">
+          {isLoading ? (
+            <p>Loading default shipping rates...</p>
+          ) : shippingRates !== null ? (
+            <p>
+              Using default {paymentMethod === 'cod' ? 'Cash on Delivery' : 'Online Banking'} shipping rate: {shippingRates}
+            </p>
+          ) : (
+            <p>No default shipping rate found</p>
+          )}
+        </div>
       )}
-      
-      {!isManual && !isLoading && shippingRates !== null && (
-        <p className="text-sm text-muted-foreground">
-          Using default shipping rate: {shippingRates}
+
+      {isManual && (
+        <p className="text-sm text-primary">
+          Manual override active - enter custom shipping cost
         </p>
       )}
     </div>
