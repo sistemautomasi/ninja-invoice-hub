@@ -12,14 +12,15 @@ export const OrderStatusCell = ({ status: initialStatus, orderId }: OrderStatusC
   const [currentStatus, setCurrentStatus] = useState(initialStatus);
   const [isUpdating, setIsUpdating] = useState(false);
 
+  // Immediately update status when prop changes
   useEffect(() => {
-    // Always update local state when prop changes
     setCurrentStatus(initialStatus);
   }, [initialStatus]);
 
+  // Set up real-time subscription
   useEffect(() => {
     const channel = supabase
-      .channel('orders')
+      .channel(`orders-${orderId}`)
       .on(
         'postgres_changes',
         {

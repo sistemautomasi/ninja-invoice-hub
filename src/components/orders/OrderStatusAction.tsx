@@ -42,6 +42,9 @@ export const OrderStatusAction = ({ orderId, currentStatus }: OrderStatusActionP
     const previousStatus = selectedStatus;
 
     try {
+      // Optimistically update UI
+      setSelectedStatus(newStatus);
+
       // Update in Supabase
       const { error } = await supabase
         .from('orders')
@@ -55,8 +58,6 @@ export const OrderStatusAction = ({ orderId, currentStatus }: OrderStatusActionP
         queryClient.invalidateQueries({ queryKey: ["orderStatusCounts"] }),
         queryClient.invalidateQueries({ queryKey: ["orders"] })
       ]);
-
-      setSelectedStatus(newStatus);
 
       toast({
         title: "Status Updated",
