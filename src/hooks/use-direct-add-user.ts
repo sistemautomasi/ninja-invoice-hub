@@ -13,15 +13,37 @@ export const useDirectAddUser = () => {
   const user = useUser();
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
 
-  // Check admin status when component mounts or user changes
   useEffect(() => {
     const checkAdminStatus = async () => {
-      if (!user) return;
+      if (!user) {
+        console.log("No user found in auth state");
+        return;
+      }
+
+      console.log("Checking admin status for user:", user.email);
+
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('email', user.email)
+        .single();
+
+      if (profileError) {
+        console.error('Profile check error:', profileError);
+        return;
+      }
+
+      console.log("Profile data:", profileData);
+
+      if (!profileData?.id) {
+        console.log("No profile found for user");
+        return;
+      }
 
       const { data: adminCheck, error: adminCheckError } = await supabase
         .from('user_roles')
         .select('role')
-        .eq('user_id', user.id)
+        .eq('user_id', profileData.id)
         .single();
 
       if (adminCheckError) {
@@ -29,6 +51,7 @@ export const useDirectAddUser = () => {
         return;
       }
 
+      console.log("Admin check result:", adminCheck);
       setIsAdmin(adminCheck?.role === 'admin');
     };
 

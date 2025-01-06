@@ -7,9 +7,35 @@ import { ActivityLogs } from "./team/ActivityLogs";
 import { useDirectAddUser } from "@/hooks/use-direct-add-user";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
+import { useEffect } from "react";
+import { useUser } from "@supabase/auth-helpers-react";
 
 export const TeamSettings = () => {
   const { isAdmin } = useDirectAddUser();
+  const user = useUser();
+
+  useEffect(() => {
+    console.log("Current user:", user);
+    console.log("Is admin:", isAdmin);
+  }, [user, isAdmin]);
+
+  if (!user) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Team Management</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              Please log in to access team management settings.
+            </AlertDescription>
+          </Alert>
+        </CardContent>
+      </Card>
+    );
+  }
 
   if (!isAdmin) {
     return (
@@ -21,7 +47,7 @@ export const TeamSettings = () => {
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
-              You need admin access to view team management settings.
+              You need admin access to view team management settings. Current user: {user.email}
             </AlertDescription>
           </Alert>
         </CardContent>
