@@ -4,7 +4,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TeamMembersList } from "./team/TeamMembersList";
 import { TeamInvites } from "./team/TeamInvites";
 import { ActivityLogs } from "./team/ActivityLogs";
-import { useDirectAddUser } from "@/hooks/use-direct-add-user";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -12,52 +11,63 @@ import { useUser } from "@supabase/auth-helpers-react";
 import { supabase } from "@/integrations/supabase/client";
 
 export const TeamSettings = () => {
-  const { isAdmin } = useDirectAddUser();
   const user = useUser();
   const [loading, setLoading] = useState(true);
   const [adminStatus, setAdminStatus] = useState(false);
 
   useEffect(() => {
     const checkAdminStatus = async () => {
-      if (!user) {
-        console.log("No user found");
+      if (!user?.email) {
+        console.log("No user email found");
         setLoading(false);
         return;
       }
 
       try {
-        console.log("Checking admin status for:", user.email);
+        console.log("Checking admin status for email:", user.email);
         
-        // First try to get the user's profile ID
-        const { data: profileData, error: profileError } = await supabase
+        // Direct check in user_roles using auth.uid()
+        const { data: directCheck, error: directError } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', user.id)
+          .single();
+
+        if (!directError && directCheck?.role === 'admin') {
+          console.log("Admin status found directly:", directCheck);
+          setAdminStatus(true);
+          setLoading(false);
+          return;
+        }
+
+        // Fallback check through profiles if direct check fails
+        const { data: profileCheck, error: profileError } = await supabase
           .from('profiles')
           .select('id')
           .eq('email', user.email)
           .single();
 
         if (profileError) {
-          console.error('Error fetching profile:', profileError);
+          console.error('Profile check error:', profileError);
           setLoading(false);
           return;
         }
 
-        console.log("Profile data:", profileData);
+        if (profileCheck?.id) {
+          const { data: roleCheck, error: roleError } = await supabase
+            .from('user_roles')
+            .select('role')
+            .eq('user_id', profileCheck.id)
+            .single();
 
-        // Then check user_roles using the profile ID
-        const { data: userRole, error: roleError } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', profileData.id)
-          .single();
-
-        if (roleError) {
-          console.error('Error checking admin status:', roleError);
-          setLoading(false);
-          return;
+          if (!roleError && roleCheck?.role === 'admin') {
+            console.log("Admin status found through profile:", roleCheck);
+            setAdminStatus(true);
+          } else {
+            console.log("Not an admin or error:", roleError);
+            setAdminStatus(false);
+          }
         }
-
-        console.log("User role data:", userRole);
-        setAdminStatus(userRole?.role === 'admin');
       } catch (error) {
         console.error('Error in admin check:', error);
       } finally {
