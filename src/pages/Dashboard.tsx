@@ -15,6 +15,8 @@ const Dashboard = () => {
     const today = startOfDay(now);
     
     switch (timePeriod) {
+      case "allTime":
+        return { start: new Date(2020, 0, 1), end: now }; // Starting from 2020 as a reasonable default
       case "today":
         return { start: today, end: now };
       case "yesterday": {

@@ -12,6 +12,7 @@ const TimePeriodSelect = ({ value, onValueChange }: TimePeriodSelectProps) => {
         <SelectValue placeholder="Select time period" />
       </SelectTrigger>
       <SelectContent>
+        <SelectItem value="allTime">All Time</SelectItem>
         <SelectItem value="today">Today</SelectItem>
         <SelectItem value="yesterday">Yesterday</SelectItem>
         <SelectItem value="last7days">Last 7 Days</SelectItem>
