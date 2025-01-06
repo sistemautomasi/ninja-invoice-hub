@@ -6,6 +6,7 @@ import DashboardStats from "@/components/dashboard/DashboardStats";
 import ShippingOverview from "@/components/dashboard/ShippingOverview";
 import SalesChart from "@/components/dashboard/SalesChart";
 import TimePeriodSelect from "@/components/dashboard/TimePeriodSelect";
+import SalesChartContainer from "@/components/dashboard/charts/SalesChartContainer";
 
 const Dashboard = () => {
   const [timePeriod, setTimePeriod] = useState("today");
@@ -145,7 +146,7 @@ const Dashboard = () => {
       
       <DashboardStats stats={stats} />
       <ShippingOverview shipping={stats?.shipping} />
-      <SalesChart salesData={salesData || []} />
+      <SalesChartContainer salesData={salesData || []} />
     </div>
   );
 };
