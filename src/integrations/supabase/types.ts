@@ -406,6 +406,7 @@ export type Database = {
           bio: string | null
           company: string | null
           created_at: string
+          email: string | null
           full_name: string | null
           id: string
           job_title: string | null
@@ -419,6 +420,7 @@ export type Database = {
           bio?: string | null
           company?: string | null
           created_at?: string
+          email?: string | null
           full_name?: string | null
           id: string
           job_title?: string | null
@@ -432,6 +434,7 @@ export type Database = {
           bio?: string | null
           company?: string | null
           created_at?: string
+          email?: string | null
           full_name?: string | null
           id?: string
           job_title?: string | null
