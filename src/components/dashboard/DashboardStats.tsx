@@ -10,7 +10,6 @@ interface DashboardStatsProps {
     averageOrderValue?: number;
     profitMargin?: number;
     profit?: number;
-    customerLifetimeValue?: number;
     averageProcessingTime?: string;
     topSellingProduct?: {
       name: string;
@@ -21,6 +20,9 @@ interface DashboardStatsProps {
 
 const DashboardStats = ({ stats }: DashboardStatsProps) => {
   const { formatPrice } = useCurrency();
+
+  // Calculate average order value
+  const avgOrderValue = stats?.ordersCount ? stats.totalSales / stats.ordersCount : 0;
 
   return (
     <div className="grid gap-4 md:grid-cols-4">
@@ -56,15 +58,15 @@ const DashboardStats = ({ stats }: DashboardStatsProps) => {
 
       <Card className="hover:shadow-lg transition-shadow duration-200 hover:scale-105 transform">
         <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-          <CardTitle className="text-sm font-medium">Customer LTV</CardTitle>
-          <Users className="h-4 w-4 text-blue-500" />
+          <CardTitle className="text-sm font-medium">Average Order</CardTitle>
+          <ShoppingCart className="h-4 w-4 text-blue-500" />
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">
-            {formatPrice(stats?.customerLifetimeValue || 0)}
+            {formatPrice(avgOrderValue)}
           </div>
           <p className="text-xs mt-1 text-muted-foreground">
-            Average lifetime value
+            Average order value
           </p>
         </CardContent>
       </Card>
