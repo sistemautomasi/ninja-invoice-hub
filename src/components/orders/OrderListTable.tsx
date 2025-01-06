@@ -35,12 +35,24 @@ interface Order {
     quantity: number;
     product: {
       name: string;
-    };
+    } | null;
   }[];
 }
 
 export const OrderListTable = ({ orders, isLoading, onDelete }: OrderListTableProps) => {
   const { formatPrice } = useCurrency();
+
+  const getProductNames = (orderItems: Order['order_items']) => {
+    return orderItems
+      .filter(item => item.product !== null)
+      .map(item => item.product?.name)
+      .filter(Boolean)
+      .join(", ") || "N/A";
+  };
+
+  const getTotalQuantity = (orderItems: Order['order_items']) => {
+    return orderItems.reduce((sum, item) => sum + (item?.quantity || 0), 0);
+  };
 
   return (
     <div className="border rounded-lg">
@@ -92,12 +104,8 @@ export const OrderListTable = ({ orders, isLoading, onDelete }: OrderListTablePr
                     <div>{order.district}, {order.state} {order.postcode}</div>
                   </div>
                 </TableCell>
-                <TableCell>
-                  {order.order_items.map(item => item.product.name).join(", ")}
-                </TableCell>
-                <TableCell>
-                  {order.order_items.reduce((sum, item) => sum + item.quantity, 0)}
-                </TableCell>
+                <TableCell>{getProductNames(order.order_items)}</TableCell>
+                <TableCell>{getTotalQuantity(order.order_items)}</TableCell>
                 <TableCell>{formatPrice(order.total_amount)}</TableCell>
                 <TableCell>
                   <OrderStatusCell status={order.status} orderId={order.id} />

@@ -5,7 +5,11 @@ import { useToast } from "@/hooks/use-toast";
 import { OrderStatusSummary } from "@/components/orders/OrderStatusSummary";
 import { OrderListHeader } from "@/components/orders/OrderListHeader";
 import { OrderListTable } from "@/components/orders/OrderListTable";
-import { startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear, subDays, subWeeks, subMonths, subYears } from "date-fns";
+import { 
+  startOfDay, endOfDay, startOfWeek, endOfWeek, 
+  startOfMonth, endOfMonth, startOfYear, endOfYear, 
+  subDays, subWeeks, subMonths, subYears 
+} from "date-fns";
 
 const OrderList = () => {
   const [search, setSearch] = useState("");
@@ -111,7 +115,7 @@ const OrderList = () => {
 
   const filteredOrders = orders?.filter(order => 
     order.order_items.some(item => 
-      item.product.name.toLowerCase().includes(search.toLowerCase())
+      item.product?.name?.toLowerCase().includes(search.toLowerCase())
     )
   );
 
