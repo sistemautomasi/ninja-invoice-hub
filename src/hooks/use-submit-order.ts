@@ -20,7 +20,7 @@ export const useSubmitOrder = () => {
         .insert({
           user_id: user.id,
           total_amount: orderData.totalAmount,
-          status: "pending",
+          status: "pending", // This will show as "Confirmed" in the shipping overview
           customer_name: orderData.customerName,
           email: orderData.email,
           phone: orderData.phone,
