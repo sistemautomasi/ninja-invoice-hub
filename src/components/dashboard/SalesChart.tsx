@@ -1,23 +1,92 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Line, ComposedChart } from 'recharts';
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { Card } from "@/components/ui/card";
 import { useCurrency } from "@/hooks/use-currency";
+import TimePeriodSelect from "@/components/dashboard/TimePeriodSelect";
+import {
+  Bar,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  ComposedChart,
+} from "recharts";
+import { startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear, subDays, subWeeks, subMonths, subYears } from "date-fns";
 
-interface SalesChartProps {
-  salesData: Array<{ name: string; sales: number; }> | undefined;
-}
-
-const SalesChart = ({ salesData }: SalesChartProps) => {
+export function SalesChart() {
+  const [timePeriod, setTimePeriod] = useState("last7days");
   const { formatPrice } = useCurrency();
 
+  const getTimeRange = (period: string) => {
+    const now = new Date();
+    switch (period) {
+      case "today":
+        return { start: startOfDay(now), end: endOfDay(now) };
+      case "yesterday":
+        const yesterday = subDays(now, 1);
+        return { start: startOfDay(yesterday), end: endOfDay(yesterday) };
+      case "last7days":
+        return { start: subDays(now, 7), end: now };
+      case "last30days":
+        return { start: subDays(now, 30), end: now };
+      case "thisMonth":
+        return { start: startOfMonth(now), end: endOfMonth(now) };
+      case "lastMonth":
+        const lastMonth = subMonths(now, 1);
+        return { start: startOfMonth(lastMonth), end: endOfMonth(lastMonth) };
+      case "allTime":
+      default:
+        return null;
+    }
+  };
+
+  const { data: salesData } = useQuery({
+    queryKey: ["salesData", timePeriod],
+    queryFn: async () => {
+      const timeRange = getTimeRange(timePeriod);
+      let query = supabase
+        .from("orders")
+        .select("created_at, total_amount")
+        .eq("status", "completed");
+
+      if (timeRange) {
+        query = query
+          .gte("created_at", timeRange.start.toISOString())
+          .lte("created_at", timeRange.end.toISOString());
+      }
+
+      const { data, error } = await query;
+
+      if (error) throw error;
+
+      // Group sales by date
+      const salesByDate = data.reduce((acc: Record<string, number>, order) => {
+        const date = new Date(order.created_at).toLocaleDateString();
+        acc[date] = (acc[date] || 0) + Number(order.total_amount);
+        return acc;
+      }, {});
+
+      // Convert to array format for Recharts
+      return Object.entries(salesByDate).map(([name, sales]) => ({
+        name,
+        sales,
+      }));
+    },
+  });
+
   return (
-    <Card className="hover:shadow-lg transition-shadow duration-200">
-      <CardHeader>
-        <CardTitle className="text-xl font-semibold">Sales Overview</CardTitle>
-        <p className="text-sm text-muted-foreground">
-          Monthly sales performance
-        </p>
-      </CardHeader>
-      <CardContent>
+    <Card>
+      <div className="p-6">
+        <div className="flex items-center justify-between">
+          <h3 className="text-lg font-semibold">Sales Overview</h3>
+          <TimePeriodSelect
+            value={timePeriod}
+            onValueChange={setTimePeriod}
+          />
+        </div>
         <div className="h-[400px] mt-4">
           <ResponsiveContainer width="100%" height="100%">
             <ComposedChart data={salesData}>
@@ -69,9 +138,7 @@ const SalesChart = ({ salesData }: SalesChartProps) => {
             </ComposedChart>
           </ResponsiveContainer>
         </div>
-      </CardContent>
+      </div>
     </Card>
   );
-};
-
-export default SalesChart;
+}
