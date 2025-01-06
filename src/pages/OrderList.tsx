@@ -54,7 +54,7 @@ const OrderList = () => {
           *,
           order_items (
             quantity,
-            products (
+            product:products (
               name
             )
           )
@@ -76,15 +76,13 @@ const OrderList = () => {
 
       if (error) throw error;
       
-      const transformedData = data?.map(order => ({
+      return data?.map(order => ({
         ...order,
         order_items: order.order_items.map(item => ({
           quantity: item.quantity,
-          product: item.products
+          product: item.product
         }))
       }));
-
-      return transformedData;
     },
   });
 
@@ -113,11 +111,17 @@ const OrderList = () => {
     }
   };
 
-  const filteredOrders = orders?.filter(order => 
-    order.order_items.some(item => 
-      item.product?.name?.toLowerCase().includes(search.toLowerCase())
-    )
-  );
+  const filteredOrders = orders?.filter(order => {
+    if (!search) return true;
+    
+    return order.order_items.some(item => 
+      item.product?.name?.toLowerCase().includes(search.toLowerCase()) ||
+      order.customer_name?.toLowerCase().includes(search.toLowerCase()) ||
+      order.order_number?.toLowerCase().includes(search.toLowerCase()) ||
+      order.email?.toLowerCase().includes(search.toLowerCase()) ||
+      order.phone?.toLowerCase().includes(search.toLowerCase())
+    );
+  });
 
   const handleStatusClick = (status: string) => {
     setSelectedStatus(selectedStatus === status ? null : status);
