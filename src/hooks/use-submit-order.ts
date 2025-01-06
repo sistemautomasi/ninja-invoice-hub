@@ -14,13 +14,20 @@ export const useSubmitOrder = () => {
         throw new Error("You must be logged in to submit an order");
       }
 
-      // First create the order
+      // First create the order with customer information
       const { data: order, error: orderError } = await supabase
         .from("orders")
         .insert({
           user_id: user.id,
           total_amount: orderData.totalAmount,
-          status: "pending"
+          status: "pending",
+          customer_name: orderData.customerName,
+          email: orderData.email,
+          phone: orderData.phone,
+          address: orderData.address,
+          district: orderData.district,
+          state: orderData.state,
+          postcode: orderData.postcode
         })
         .select()
         .single();
