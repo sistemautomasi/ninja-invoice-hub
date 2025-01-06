@@ -18,16 +18,23 @@ export const Integrations = () => {
       return;
     }
 
+    // Basic URL validation
+    try {
+      new URL(webhookUrl);
+    } catch (e) {
+      toast("Please enter a valid URL");
+      return;
+    }
+
     setIsLoading(true);
     console.log("Triggering webhook:", webhookUrl);
 
     try {
-      await fetch(webhookUrl, {
+      const response = await fetch(webhookUrl, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        mode: "no-cors",
         body: JSON.stringify({
           timestamp: new Date().toISOString(),
           event: "test_connection",
@@ -35,10 +42,14 @@ export const Integrations = () => {
         }),
       });
 
-      toast("Request sent. Please check your webhook endpoint to confirm it was triggered.");
+      if (response.ok) {
+        toast("Webhook test successful! The endpoint responded correctly.");
+      } else {
+        toast(`Webhook test failed. Status: ${response.status} ${response.statusText}`);
+      }
     } catch (error) {
       console.error("Error triggering webhook:", error);
-      toast("Failed to trigger the webhook. Please check the URL and try again.");
+      toast("Failed to reach the webhook endpoint. Please verify the URL and try again.");
     } finally {
       setIsLoading(false);
     }
@@ -91,7 +102,7 @@ export const Integrations = () => {
               onClick={handleWebhookTest}
               disabled={isLoading}
             >
-              Test Connection
+              {isLoading ? "Testing..." : "Test Connection"}
             </Button>
           </CardFooter>
         </Card>
