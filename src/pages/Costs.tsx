@@ -26,7 +26,7 @@ const Costs = () => {
       const { data, error } = await supabase
         .from("business_costs")
         .select("*")
-        .not('cost_type', 'in', '("shipping_cod","shipping_online")')
+        .eq('cost_type', 'advertising')
         .order("date", { ascending: false });
       
       if (error) throw error;
