@@ -32,7 +32,7 @@ export const AdminCheck = ({ children }: AdminCheckProps) => {
           .from('user_roles')
           .select('role')
           .eq('user_id', user.id)
-          .maybeSingle();
+          .single();
 
         if (roleError) {
           console.error("Role check error:", roleError);
