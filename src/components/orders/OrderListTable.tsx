@@ -24,6 +24,13 @@ interface Order {
   created_at: string;
   status: string;
   total_amount: number;
+  customer_name: string | null;
+  email: string | null;
+  phone: string | null;
+  address: string | null;
+  district: string | null;
+  state: string | null;
+  postcode: string | null;
   order_items: {
     quantity: number;
     product: {
@@ -41,6 +48,9 @@ export const OrderListTable = ({ orders, isLoading, onDelete }: OrderListTablePr
         <TableHeader>
           <TableRow>
             <TableHead>Order Number</TableHead>
+            <TableHead>Customer</TableHead>
+            <TableHead>Contact</TableHead>
+            <TableHead>Address</TableHead>
             <TableHead>Product</TableHead>
             <TableHead>Quantity</TableHead>
             <TableHead>Total Amount</TableHead>
@@ -53,7 +63,7 @@ export const OrderListTable = ({ orders, isLoading, onDelete }: OrderListTablePr
         <TableBody>
           {isLoading ? (
             <TableRow>
-              <TableCell colSpan={8} className="text-center py-10">
+              <TableCell colSpan={11} className="text-center py-10">
                 <div className="flex items-center justify-center">
                   <Loader2 className="h-8 w-8 animate-spin" />
                 </div>
@@ -61,7 +71,7 @@ export const OrderListTable = ({ orders, isLoading, onDelete }: OrderListTablePr
             </TableRow>
           ) : orders?.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={8} className="text-center py-10">
+              <TableCell colSpan={11} className="text-center py-10">
                 No orders found
               </TableCell>
             </TableRow>
@@ -69,6 +79,19 @@ export const OrderListTable = ({ orders, isLoading, onDelete }: OrderListTablePr
             orders?.map((order) => (
               <TableRow key={order.id}>
                 <TableCell>{order.order_number || order.id}</TableCell>
+                <TableCell>{order.customer_name || "N/A"}</TableCell>
+                <TableCell>
+                  <div className="space-y-1">
+                    <div>{order.email || "N/A"}</div>
+                    <div>{order.phone || "N/A"}</div>
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <div className="space-y-1">
+                    <div>{order.address || "N/A"}</div>
+                    <div>{order.district}, {order.state} {order.postcode}</div>
+                  </div>
+                </TableCell>
                 <TableCell>
                   {order.order_items.map(item => item.product.name).join(", ")}
                 </TableCell>
