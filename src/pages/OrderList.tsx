@@ -121,9 +121,17 @@ const OrderList = () => {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary-foreground bg-clip-text text-transparent">
-        Order List
-      </h1>
+      <div className="flex flex-col gap-4">
+        <h1 className="text-3xl font-bold text-left bg-gradient-to-r from-primary to-secondary-foreground bg-clip-text text-transparent">
+          Order List
+        </h1>
+        <OrderListHeader 
+          search={search}
+          onSearchChange={setSearch}
+          timePeriod={timePeriod}
+          onTimePeriodChange={setTimePeriod}
+        />
+      </div>
 
       <OrderStatusSummary 
         onStatusClick={handleStatusClick}
