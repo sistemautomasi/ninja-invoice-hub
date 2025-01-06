@@ -41,6 +41,71 @@ export type Database = {
           },
         ]
       }
+      customer_metrics: {
+        Row: {
+          created_at: string
+          first_purchase_date: string | null
+          id: string
+          last_purchase_date: string | null
+          lifetime_value: number | null
+          total_orders: number | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          first_purchase_date?: string | null
+          id?: string
+          last_purchase_date?: string | null
+          lifetime_value?: number | null
+          total_orders?: number | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          first_purchase_date?: string | null
+          id?: string
+          last_purchase_date?: string | null
+          lifetime_value?: number | null
+          total_orders?: number | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      inventory_alerts: {
+        Row: {
+          alert_type: string
+          created_at: string
+          id: string
+          product_id: string | null
+          threshold: number | null
+        }
+        Insert: {
+          alert_type: string
+          created_at?: string
+          id?: string
+          product_id?: string | null
+          threshold?: number | null
+        }
+        Update: {
+          alert_type?: string
+          created_at?: string
+          id?: string
+          product_id?: string | null
+          threshold?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inventory_alerts_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       login_history: {
         Row: {
           browser: string
@@ -71,6 +136,33 @@ export type Database = {
           is_active?: boolean | null
           last_accessed?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          read: boolean | null
+          type: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message: string
+          read?: boolean | null
+          type: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          read?: boolean | null
+          type?: string
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -119,14 +211,23 @@ export type Database = {
       orders: {
         Row: {
           address: string | null
+          browser: string | null
+          city: string | null
           created_at: string
           customer_name: string | null
+          customer_rating: number | null
+          delivery_status: string | null
           district: string | null
           email: string | null
+          feedback_text: string | null
           id: string
           order_number: string | null
           phone: string | null
+          platform: string | null
           postcode: string | null
+          processing_time: unknown | null
+          region: string | null
+          return_reason: string | null
           state: string | null
           status: string
           total_amount: number
@@ -135,14 +236,23 @@ export type Database = {
         }
         Insert: {
           address?: string | null
+          browser?: string | null
+          city?: string | null
           created_at?: string
           customer_name?: string | null
+          customer_rating?: number | null
+          delivery_status?: string | null
           district?: string | null
           email?: string | null
+          feedback_text?: string | null
           id?: string
           order_number?: string | null
           phone?: string | null
+          platform?: string | null
           postcode?: string | null
+          processing_time?: unknown | null
+          region?: string | null
+          return_reason?: string | null
           state?: string | null
           status?: string
           total_amount: number
@@ -151,14 +261,23 @@ export type Database = {
         }
         Update: {
           address?: string | null
+          browser?: string | null
+          city?: string | null
           created_at?: string
           customer_name?: string | null
+          customer_rating?: number | null
+          delivery_status?: string | null
           district?: string | null
           email?: string | null
+          feedback_text?: string | null
           id?: string
           order_number?: string | null
           phone?: string | null
+          platform?: string | null
           postcode?: string | null
+          processing_time?: unknown | null
+          region?: string | null
+          return_reason?: string | null
           state?: string | null
           status?: string
           total_amount?: number
