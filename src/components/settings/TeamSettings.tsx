@@ -6,18 +6,64 @@ import { TeamInvites } from "./team/TeamInvites";
 import { ActivityLogs } from "./team/ActivityLogs";
 import { useDirectAddUser } from "@/hooks/use-direct-add-user";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle } from "lucide-react";
-import { useEffect } from "react";
+import { AlertCircle, Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useUser } from "@supabase/auth-helpers-react";
+import { supabase } from "@/integrations/supabase/client";
 
 export const TeamSettings = () => {
   const { isAdmin } = useDirectAddUser();
   const user = useUser();
+  const [loading, setLoading] = useState(true);
+  const [adminStatus, setAdminStatus] = useState(false);
 
   useEffect(() => {
-    console.log("Current user:", user);
-    console.log("Is admin:", isAdmin);
-  }, [user, isAdmin]);
+    const checkAdminStatus = async () => {
+      if (!user) {
+        console.log("No user found");
+        setLoading(false);
+        return;
+      }
+
+      try {
+        console.log("Checking admin status for:", user.email);
+        
+        const { data: userRole, error } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', user.id)
+          .single();
+
+        if (error) {
+          console.error('Error checking admin status:', error);
+          setLoading(false);
+          return;
+        }
+
+        console.log("User role data:", userRole);
+        setAdminStatus(userRole?.role === 'admin');
+      } catch (error) {
+        console.error('Error in admin check:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkAdminStatus();
+  }, [user]);
+
+  if (loading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Team Management</CardTitle>
+        </CardHeader>
+        <CardContent className="flex items-center justify-center p-8">
+          <Loader2 className="h-8 w-8 animate-spin" />
+        </CardContent>
+      </Card>
+    );
+  }
 
   if (!user) {
     return (
@@ -37,7 +83,7 @@ export const TeamSettings = () => {
     );
   }
 
-  if (!isAdmin) {
+  if (!adminStatus) {
     return (
       <Card>
         <CardHeader>
