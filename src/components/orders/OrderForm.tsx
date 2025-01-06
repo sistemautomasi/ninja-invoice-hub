@@ -10,8 +10,6 @@ import { useToast } from "@/hooks/use-toast";
 import { CustomerInfoFields } from "./CustomerInfoFields";
 import { ProductSelection } from "./ProductSelection";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 import { ShippingCostSection } from "./ShippingCostSection";
 
 interface Product {
@@ -35,43 +33,6 @@ export const OrderForm = ({ products, isSubmitting, onSubmit }: OrderFormProps) 
   const { formatPrice } = useCurrency();
   const { toast } = useToast();
 
-  // Fetch user role to determine if they're an admin
-  const { data: userRole, isError: isRoleError } = useQuery({
-    queryKey: ["userRole"],
-    queryFn: async () => {
-      try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return null;
-
-        const { data, error } = await supabase
-          .from("user_roles")
-          .select("role")
-          .eq("user_id", user.id)
-          .maybeSingle();
-
-        if (error) {
-          console.error("Error fetching user role:", error);
-          return null;
-        }
-        
-        return data?.role || null;
-      } catch (error) {
-        console.error("Error in userRole query:", error);
-        return null;
-      }
-    },
-    retry: false
-  });
-
-  if (isRoleError) {
-    toast({
-      title: "Error",
-      description: "Failed to fetch user role. Some features might be limited.",
-      variant: "destructive",
-    });
-  }
-
-  const isAdmin = userRole === 'admin';
   const subtotal = selectedProduct ? selectedProduct.price * quantity : 0;
   const totalAmount = subtotal + shippingCost;
 
@@ -141,7 +102,7 @@ export const OrderForm = ({ products, isSubmitting, onSubmit }: OrderFormProps) 
           </div>
 
           <ShippingCostSection
-            isAdmin={isAdmin}
+            isAdmin={true}
             paymentMethod={paymentMethod}
             shippingCost={shippingCost}
             onShippingCostChange={setShippingCost}

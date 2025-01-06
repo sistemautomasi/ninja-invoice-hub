@@ -7,12 +7,8 @@ export const TeamMembersList = () => {
     queryKey: ['team-members'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('user_roles')
-        .select(`
-          user_id,
-          role,
-          profiles:profiles(full_name)
-        `);
+        .from('profiles')
+        .select('id, full_name, email');
       
       if (error) throw error;
       return data;
@@ -32,10 +28,10 @@ export const TeamMembersList = () => {
       <h3 className="text-lg font-semibold">Current Team Members</h3>
       <div className="space-y-4">
         {teamMembers?.map((member: any) => (
-          <div key={member.user_id} className="flex items-center justify-between p-4 border rounded-lg">
+          <div key={member.id} className="flex items-center justify-between p-4 border rounded-lg">
             <div>
-              <p className="font-medium">{member.profiles?.full_name}</p>
-              <p className="text-sm text-muted-foreground">{member.role}</p>
+              <p className="font-medium">{member.full_name}</p>
+              <p className="text-sm text-muted-foreground">{member.email}</p>
             </div>
           </div>
         ))}

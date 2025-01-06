@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { useNavigate, Link, useSearchParams } from "react-router-dom";
+import { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,22 +13,12 @@ const SignUp = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [searchParams] = useSearchParams();
-  const inviteEmail = searchParams.get('invite_email');
-  const inviteRole = searchParams.get('role');
-
-  useEffect(() => {
-    if (inviteEmail) {
-      setEmail(inviteEmail);
-    }
-  }, [inviteEmail]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      // Sign up the user
       const { error: signUpError } = await supabase.auth.signUp({
         email,
         password,
@@ -41,27 +31,12 @@ const SignUp = () => {
 
       if (signUpError) throw signUpError;
 
-      // If this is an invited user, accept the invite
-      if (inviteEmail && inviteRole) {
-        const { error: inviteError } = await supabase
-          .from('team_invites')
-          .update({ status: 'accepted' })
-          .eq('email', inviteEmail)
-          .eq('status', 'pending');
-
-        if (inviteError) {
-          console.error('Error accepting invite:', inviteError);
-          // Don't throw here, we still want to complete the signup
-        }
-      }
-
       toast({
         title: "Success",
         description: "Please check your email to confirm your account.",
         duration: 6000,
       });
       
-      // Navigate to sign in page after successful registration
       navigate("/signin");
     } catch (error: any) {
       toast({
@@ -78,9 +53,7 @@ const SignUp = () => {
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl text-center">
-            {inviteEmail ? "Accept Team Invitation" : "Create an account"}
-          </CardTitle>
+          <CardTitle className="text-2xl text-center">Create an account</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -101,7 +74,7 @@ const SignUp = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                disabled={isLoading || !!inviteEmail}
+                disabled={isLoading}
               />
             </div>
             <div className="space-y-2">
