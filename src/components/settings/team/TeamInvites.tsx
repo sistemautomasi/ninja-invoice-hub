@@ -125,8 +125,8 @@ export const TeamInvites = () => {
         throw new Error('There is already a pending invite for this email');
       }
 
-      // First, create the invite in the database
-      const { data: invite, error: dbError } = await supabase
+      // Create the invite in the database
+      const { error: dbError } = await supabase
         .from('team_invites')
         .insert([
           {
@@ -135,16 +135,15 @@ export const TeamInvites = () => {
             invited_by: user?.id,
             status: 'pending'
           },
-        ])
-        .select();
+        ]);
       
       if (dbError) {
         console.error('Error creating invite:', dbError);
         throw dbError;
       }
 
-      // Then, send the invite email
-      const { data, error } = await supabase.functions.invoke('send-team-invite', {
+      // Send the invite email
+      const { error } = await supabase.functions.invoke('send-team-invite', {
         body: {
           to: email,
           role: role,
@@ -157,7 +156,7 @@ export const TeamInvites = () => {
         throw error;
       }
 
-      return invite;
+      return { success: true };
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['team-invites'] });
@@ -183,7 +182,7 @@ export const TeamInvites = () => {
         .from('profiles')
         .insert([
           {
-            id: crypto.randomUUID(), // Generate a UUID for the new profile
+            id: crypto.randomUUID(),
             email: email,
           },
         ])
@@ -201,7 +200,7 @@ export const TeamInvites = () => {
         .insert([
           {
             user_id: profile.id,
-            role,
+            role: role,
           },
         ]);
 
