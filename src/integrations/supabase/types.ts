@@ -41,6 +41,39 @@ export type Database = {
           },
         ]
       }
+      business_costs: {
+        Row: {
+          amount: number
+          cost_type: string
+          created_at: string
+          date: string
+          description: string | null
+          id: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          amount?: number
+          cost_type: string
+          created_at?: string
+          date?: string
+          description?: string | null
+          id?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          amount?: number
+          cost_type?: string
+          created_at?: string
+          date?: string
+          description?: string | null
+          id?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       customer_metrics: {
         Row: {
           created_at: string
