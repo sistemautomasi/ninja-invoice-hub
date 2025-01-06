@@ -6,6 +6,13 @@ import { Input } from "@/components/ui/input";
 import { Loader2 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export const TeamInvites = () => {
   const { toast } = useToast();
@@ -20,24 +27,33 @@ export const TeamInvites = () => {
         .select('*')
         .eq('status', 'pending');
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching invites:', error);
+        throw error;
+      }
       return data;
     },
   });
 
   const sendInvite = useMutation({
     mutationFn: async ({ email, role }: { email: string; role: 'admin' | 'staff' }) => {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('team_invites')
         .insert([
           {
             email,
             role,
             invited_by: user?.id,
+            status: 'pending'
           },
-        ]);
+        ])
+        .select();
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error sending invite:', error);
+        throw error;
+      }
+      return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['team-invites'] });
@@ -46,10 +62,11 @@ export const TeamInvites = () => {
         description: "Team invite sent successfully!",
       });
     },
-    onError: () => {
+    onError: (error) => {
+      console.error('Mutation error:', error);
       toast({
         title: "Error",
-        description: "Failed to send team invite.",
+        description: "Failed to send team invite. Please try again.",
         variant: "destructive",
       });
     },
@@ -58,10 +75,19 @@ export const TeamInvites = () => {
   const handleInviteSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const formData = new FormData(e.target as HTMLFormElement);
-    sendInvite.mutate({
-      email: String(formData.get('email')),
-      role: String(formData.get('role')) as 'admin' | 'staff',
-    });
+    const email = formData.get('email') as string;
+    const role = formData.get('role') as 'admin' | 'staff';
+
+    if (!email || !role) {
+      toast({
+        title: "Error",
+        description: "Please fill in all fields",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    sendInvite.mutate({ email, role });
     (e.target as HTMLFormElement).reset();
   };
 
@@ -84,15 +110,17 @@ export const TeamInvites = () => {
               type="email"
               placeholder="Email address"
               required
+              className="flex-1"
             />
-            <select
-              name="role"
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background"
-              required
-            >
-              <option value="staff">Staff</option>
-              <option value="admin">Admin</option>
-            </select>
+            <Select name="role" defaultValue="staff">
+              <SelectTrigger>
+                <SelectValue placeholder="Select role" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="staff">Staff</SelectItem>
+                <SelectItem value="admin">Admin</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           <Button type="submit" disabled={sendInvite.isPending}>
             {sendInvite.isPending && (
@@ -108,6 +136,9 @@ export const TeamInvites = () => {
       <div>
         <h3 className="text-lg font-semibold mb-4">Pending Invites</h3>
         <div className="space-y-4">
+          {pendingInvites?.length === 0 && (
+            <p className="text-muted-foreground">No pending invites</p>
+          )}
           {pendingInvites?.map((invite) => (
             <div key={invite.id} className="flex items-center justify-between p-4 border rounded-lg">
               <div>
