@@ -64,8 +64,8 @@ export function OrderStatusSummary({ onStatusClick, selectedStatus }: OrderStatu
 
   const statusConfigs = [
     {
-      status: "pending",
-      label: "Total Sales",
+      status: "new",
+      label: "New Orders",
       icon: CirclePlus,
       color: "text-gray-900",
       bgColor: "bg-white",
@@ -73,7 +73,7 @@ export function OrderStatusSummary({ onStatusClick, selectedStatus }: OrderStatu
     },
     {
       status: "confirmed",
-      label: "Orders",
+      label: "Confirmed",
       icon: CheckCircle,
       color: "text-gray-900",
       bgColor: "bg-white",
@@ -81,8 +81,16 @@ export function OrderStatusSummary({ onStatusClick, selectedStatus }: OrderStatu
     },
     {
       status: "shipped",
-      label: "Revenue",
+      label: "Shipped",
       icon: Truck,
+      color: "text-gray-900",
+      bgColor: "bg-white",
+      iconColor: "text-blue-500",
+    },
+    {
+      status: "returned",
+      label: "Returned",
+      icon: RotateCcw,
       color: "text-gray-900",
       bgColor: "bg-white",
       iconColor: "text-blue-500",
@@ -106,7 +114,7 @@ export function OrderStatusSummary({ onStatusClick, selectedStatus }: OrderStatu
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+    <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
       {statusConfigs.map((config) => {
         const count = statusCounts?.find(s => s.status === config.status)?.count || 0;
         const isSelected = selectedStatus === config.status;
@@ -128,7 +136,7 @@ export function OrderStatusSummary({ onStatusClick, selectedStatus }: OrderStatu
                 </h3>
                 <div className="flex items-center justify-between">
                   <p className="text-2xl font-semibold text-gray-900">
-                    RM {count}.00
+                    {count}
                   </p>
                   <config.icon className={`h-5 w-5 ${config.iconColor}`} />
                 </div>
