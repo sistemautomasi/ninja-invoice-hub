@@ -19,7 +19,7 @@ export const CostList = ({ costs, onDelete, isDeleting }: CostListProps) => {
           key={cost.id}
           className="flex items-center justify-between p-4 border rounded-lg"
         >
-          <div className="space-y-1">
+          <div className="space-y-1 text-left">
             <div className="flex items-center gap-2">
               <span className="font-medium capitalize">{cost.cost_type}</span>
               <span className="text-sm text-muted-foreground">

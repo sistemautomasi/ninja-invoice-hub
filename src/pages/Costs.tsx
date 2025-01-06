@@ -102,16 +102,14 @@ const Costs = () => {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary-foreground bg-clip-text text-transparent">
-        Business Costs
-      </h1>
+      <h1 className="text-3xl font-bold text-left">Business Costs</h1>
 
       <CostSummaryCards costs={costs} />
 
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle>Cost History</CardTitle>
+            <CardTitle className="text-left">Cost History</CardTitle>
             <Button onClick={() => setIsAdding(!isAdding)}>
               {isAdding ? "Cancel" : "Add Cost"}
             </Button>
