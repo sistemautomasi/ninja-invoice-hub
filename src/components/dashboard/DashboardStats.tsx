@@ -43,7 +43,7 @@ const DashboardStats = ({ stats }: DashboardStatsProps) => {
 
       <Card className="hover:shadow-lg transition-shadow duration-200 hover:scale-105 transform">
         <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-          <CardTitle className="text-sm font-medium">Profit</CardTitle>
+          <CardTitle className="text-sm font-medium">Net Profit</CardTitle>
           <Percent className="h-4 w-4 text-success" />
         </CardHeader>
         <CardContent>

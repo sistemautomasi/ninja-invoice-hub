@@ -6,6 +6,7 @@ import DashboardStats from "@/components/dashboard/DashboardStats";
 import ShippingOverview from "@/components/dashboard/ShippingOverview";
 import TimePeriodSelect from "@/components/dashboard/TimePeriodSelect";
 import SalesChartContainer from "@/components/dashboard/charts/SalesChartContainer";
+import { calculateTotalCostsByType, calculateNetProfit, calculateProfitMargin } from "@/utils/profitCalculations";
 
 // Define the interval type for processing_time
 interface ProcessingTimeInterval {
@@ -71,7 +72,7 @@ const Dashboard = () => {
       const previousStart = subDays(start, periodDays);
       const previousEnd = start;
       
-      // Fetch orders with items for the current period
+      // Fetch orders with items
       const { data: currentOrders, error: currentError } = await supabase
         .from('orders')
         .select(`
@@ -95,6 +96,15 @@ const Dashboard = () => {
 
       if (currentError) throw currentError;
 
+      // Fetch business costs for the period
+      const { data: businessCosts, error: costsError } = await supabase
+        .from('business_costs')
+        .select('*')
+        .gte('date', start.toISOString())
+        .lte('date', end.toISOString());
+
+      if (costsError) throw costsError;
+
       // Fetch previous period orders
       const { data: previousOrders, error: previousError } = await supabase
         .from('orders')
@@ -104,11 +114,9 @@ const Dashboard = () => {
 
       if (previousError) throw previousError;
 
-      // Calculate total revenue and total cost for current period
+      // Calculate total revenue and product costs
       let totalRevenue = 0;
-      let totalCost = 0;
-
-      console.log('Current Orders:', currentOrders); // Debug log
+      let totalProductCosts = 0;
 
       currentOrders?.forEach(order => {
         totalRevenue += Number(order.total_amount);
@@ -116,27 +124,29 @@ const Dashboard = () => {
         order.order_items?.forEach(item => {
           if (item.product) {
             const itemCost = Number(item.product.cost) * item.quantity;
-            totalCost += itemCost;
-            console.log(`Item: ${item.product.name}, Cost: ${itemCost}, Quantity: ${item.quantity}`); // Debug log
+            totalProductCosts += itemCost;
           }
         });
       });
 
-      console.log('Total Revenue:', totalRevenue); // Debug log
-      console.log('Total Cost:', totalCost); // Debug log
+      // Calculate advertising and shipping costs
+      const advertisingCosts = calculateTotalCostsByType(businessCosts, 'advertising', start, end);
+      const shippingCosts = calculateTotalCostsByType(businessCosts, 'shipping', start, end);
 
-      // Calculate total revenue for previous period
+      // Calculate net profit and margin
+      const netProfit = calculateNetProfit(
+        totalRevenue,
+        totalProductCosts,
+        advertisingCosts,
+        shippingCosts
+      );
+      
+      const profitMargin = calculateProfitMargin(netProfit, totalRevenue);
+
+      // Calculate percentage change
       const previousRevenue = previousOrders?.reduce((sum, order) => 
         sum + Number(order.total_amount), 0) || 0;
 
-      // Calculate profit and profit margin using actual costs
-      const profit = totalRevenue - totalCost;
-      console.log('Calculated Profit:', profit); // Debug log
-      
-      const profitMargin = totalRevenue > 0 ? (profit / totalRevenue) * 100 : 0;
-      console.log('Profit Margin:', profitMargin); // Debug log
-
-      // Calculate percentage change
       const percentageChange = previousRevenue === 0 
         ? 100 
         : ((totalRevenue - previousRevenue) / previousRevenue) * 100;
@@ -192,7 +202,7 @@ const Dashboard = () => {
         ordersCount: currentOrders?.length || 0,
         percentageChange: percentageChange.toFixed(1),
         profitMargin: Number(profitMargin.toFixed(1)),
-        profit: profit,
+        profit: netProfit,
         customerLifetimeValue: averageClv,
         averageProcessingTime: `${Math.floor(averageProcessingTime)}h ${Math.round((averageProcessingTime % 1) * 60)}m`,
         topSellingProduct: topProduct,
