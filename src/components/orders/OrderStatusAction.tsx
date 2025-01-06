@@ -8,7 +8,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Loader2 } from "lucide-react";
 
 interface OrderStatusActionProps {
@@ -21,6 +21,11 @@ export const OrderStatusAction = ({ orderId, currentStatus }: OrderStatusActionP
   const queryClient = useQueryClient();
   const [isLoading, setIsLoading] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState(currentStatus);
+
+  // Keep local state in sync with prop changes
+  useEffect(() => {
+    setSelectedStatus(currentStatus);
+  }, [currentStatus]);
 
   const statusOptions = [
     { value: "pending", label: "Pending" },
@@ -37,9 +42,6 @@ export const OrderStatusAction = ({ orderId, currentStatus }: OrderStatusActionP
     const previousStatus = selectedStatus;
 
     try {
-      // Optimistically update the UI
-      setSelectedStatus(newStatus);
-
       // Update in Supabase
       const { error } = await supabase
         .from('orders')
@@ -54,13 +56,15 @@ export const OrderStatusAction = ({ orderId, currentStatus }: OrderStatusActionP
         queryClient.invalidateQueries({ queryKey: ["orders"] })
       ]);
 
-      // Log successful update
-      console.log(`Status updated: Order ${orderId} changed from ${previousStatus} to ${newStatus}`);
+      setSelectedStatus(newStatus);
 
       toast({
         title: "Status Updated",
         description: `Order status has been changed to ${newStatus}`,
       });
+
+      // Log successful update
+      console.log(`Status updated: Order ${orderId} changed from ${previousStatus} to ${newStatus}`);
     } catch (error) {
       console.error('Error updating status:', error);
       

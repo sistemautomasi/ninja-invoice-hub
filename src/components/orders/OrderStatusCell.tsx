@@ -13,10 +13,11 @@ export const OrderStatusCell = ({ status: initialStatus, orderId }: OrderStatusC
   const [isUpdating, setIsUpdating] = useState(false);
 
   useEffect(() => {
-    // Update local state when prop changes
+    // Always update local state when prop changes
     setCurrentStatus(initialStatus);
-    
-    // Set up real-time subscription for status changes
+  }, [initialStatus]);
+
+  useEffect(() => {
     const channel = supabase
       .channel('orders')
       .on(
@@ -39,7 +40,7 @@ export const OrderStatusCell = ({ status: initialStatus, orderId }: OrderStatusC
     return () => {
       void supabase.removeChannel(channel);
     };
-  }, [orderId, initialStatus]);
+  }, [orderId]);
 
   const getStatusColor = (status: string) => {
     const colors = {
