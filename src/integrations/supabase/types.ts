@@ -475,62 +475,6 @@ export type Database = {
         }
         Relationships: []
       }
-      team_invites: {
-        Row: {
-          created_at: string
-          email: string
-          expires_at: string
-          id: string
-          invited_by: string | null
-          role: Database["public"]["Enums"]["user_role"]
-          status: string | null
-        }
-        Insert: {
-          created_at?: string
-          email: string
-          expires_at?: string
-          id?: string
-          invited_by?: string | null
-          role?: Database["public"]["Enums"]["user_role"]
-          status?: string | null
-        }
-        Update: {
-          created_at?: string
-          email?: string
-          expires_at?: string
-          id?: string
-          invited_by?: string | null
-          role?: Database["public"]["Enums"]["user_role"]
-          status?: string | null
-        }
-        Relationships: []
-      }
-      user_roles: {
-        Row: {
-          created_at: string
-          role: Database["public"]["Enums"]["user_role"]
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          role?: Database["public"]["Enums"]["user_role"]
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          role?: Database["public"]["Enums"]["user_role"]
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "user_roles_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: true
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
     }
     Views: {
       [_ in never]: never
@@ -540,7 +484,6 @@ export type Database = {
     }
     Enums: {
       supported_currency: "MYR" | "USD" | "SGD" | "EUR"
-      user_role: "admin" | "staff" | "customer"
     }
     CompositeTypes: {
       [_ in never]: never
