@@ -4,6 +4,7 @@ import { NotificationSettings } from "@/components/settings/NotificationSettings
 import { SecuritySettings } from "@/components/settings/SecuritySettings";
 import { AppearanceSettings } from "@/components/settings/AppearanceSettings";
 import { CurrencySettings } from "@/components/settings/CurrencySettings";
+import { TeamSettings } from "@/components/settings/team/TeamSettings";
 
 const Settings = () => {
   return (
@@ -19,6 +20,7 @@ const Settings = () => {
           <TabsTrigger value="security" className="flex-1">Security</TabsTrigger>
           <TabsTrigger value="appearance" className="flex-1">Appearance</TabsTrigger>
           <TabsTrigger value="currency" className="flex-1">Currency</TabsTrigger>
+          <TabsTrigger value="team" className="flex-1">Team</TabsTrigger>
         </TabsList>
         
         <TabsContent value="profile">
@@ -39,6 +41,10 @@ const Settings = () => {
 
         <TabsContent value="currency">
           <CurrencySettings />
+        </TabsContent>
+
+        <TabsContent value="team">
+          <TeamSettings />
         </TabsContent>
       </Tabs>
     </div>

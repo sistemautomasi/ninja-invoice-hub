@@ -475,6 +475,51 @@ export type Database = {
         }
         Relationships: []
       }
+      team_invites: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          invited_by: string | null
+          role: Database["public"]["Enums"]["user_role"] | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          invited_by?: string | null
+          role?: Database["public"]["Enums"]["user_role"] | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          invited_by?: string | null
+          role?: Database["public"]["Enums"]["user_role"] | null
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["user_role"] | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["user_role"] | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["user_role"] | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -484,6 +529,7 @@ export type Database = {
     }
     Enums: {
       supported_currency: "MYR" | "USD" | "SGD" | "EUR"
+      user_role: "admin" | "staff"
     }
     CompositeTypes: {
       [_ in never]: never
