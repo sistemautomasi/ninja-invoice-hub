@@ -1,7 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
-import { CirclePlus, CheckCircle, Truck, XCircle, RotateCcw, Loader2 } from "lucide-react";
+import { CirclePlus, CheckCircle, Truck, RotateCcw, Loader2 } from "lucide-react";
 import { useEffect } from "react";
 
 interface StatusCount {
@@ -29,7 +29,9 @@ export function OrderStatusSummary({ onStatusClick, selectedStatus }: OrderStatu
       if (!data) return [];
 
       const counts = data.reduce((acc: Record<string, number>, order) => {
-        acc[order.status] = (acc[order.status] || 0) + 1;
+        // Count 'pending' orders as 'new'
+        const status = order.status === 'pending' ? 'new' : order.status;
+        acc[status] = (acc[status] || 0) + 1;
         return acc;
       }, {});
 
@@ -116,7 +118,11 @@ export function OrderStatusSummary({ onStatusClick, selectedStatus }: OrderStatu
   return (
     <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
       {statusConfigs.map((config) => {
-        const count = statusCounts?.find(s => s.status === config.status)?.count || 0;
+        // For the "new" status, include both "new" and "pending" counts
+        const count = config.status === "new"
+          ? (statusCounts?.filter(s => s.status === "new" || s.status === "pending").reduce((sum, s) => sum + s.count, 0) || 0)
+          : (statusCounts?.find(s => s.status === config.status)?.count || 0);
+        
         const isSelected = selectedStatus === config.status;
         
         return (
