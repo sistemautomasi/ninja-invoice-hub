@@ -25,37 +25,24 @@ export const SidebarNavItem = ({
 
   const handleLogout = async () => {
     try {
-      // First try to get the session
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      // Clear any existing session data first
+      await supabase.auth.signOut({ scope: 'local' });
       
-      if (sessionError) {
-        console.error("Session error:", sessionError);
-        // If there's no session, just redirect to signin
-        navigate("/signin");
-        return;
-      }
-
-      if (!session) {
-        // No active session, just redirect
-        navigate("/signin");
-        return;
-      }
-
-      // Try to sign out
-      const { error } = await supabase.auth.signOut();
+      // Then attempt a global signout
+      const { error } = await supabase.auth.signOut({ scope: 'global' });
       
       if (error) {
         console.error("Error during logout:", error);
-        // Even if there's an error, we'll redirect to signin
-        navigate("/signin");
-        return;
       }
 
+      // Always clear local storage and redirect, regardless of error
+      localStorage.clear();
       toast.success("Logged out successfully");
       navigate("/signin");
     } catch (error) {
       console.error("Unexpected error during logout:", error);
-      // Ensure we redirect to signin even if there's an error
+      // Ensure we still redirect even if there's an error
+      localStorage.clear();
       navigate("/signin");
     }
   };
