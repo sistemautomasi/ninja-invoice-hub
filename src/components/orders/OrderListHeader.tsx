@@ -15,8 +15,7 @@ export const OrderListHeader = ({
   onTimePeriodChange 
 }: OrderListHeaderProps) => {
   return (
-    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-      <h1 className="text-3xl font-bold">Order List</h1>
+    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-end gap-4">
       <div className="flex flex-col sm:flex-row gap-4 sm:items-center">
         <Select value={timePeriod} onValueChange={onTimePeriodChange}>
           <SelectTrigger className="w-[180px]">
