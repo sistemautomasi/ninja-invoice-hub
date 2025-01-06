@@ -37,7 +37,8 @@ export const TeamInvites = () => {
 
   const sendInvite = useMutation({
     mutationFn: async ({ email, role }: { email: string; role: 'admin' | 'staff' }) => {
-      const { data, error } = await supabase
+      // First, create the invite in the database
+      const { data: invite, error: dbError } = await supabase
         .from('team_invites')
         .insert([
           {
@@ -49,11 +50,31 @@ export const TeamInvites = () => {
         ])
         .select();
       
-      if (error) {
-        console.error('Error sending invite:', error);
-        throw error;
+      if (dbError) {
+        console.error('Error creating invite:', dbError);
+        throw dbError;
       }
-      return data;
+
+      // Then, send the invite email
+      const response = await fetch('/functions/v1/send-team-invite', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${process.env.SUPABASE_ANON_KEY}`,
+        },
+        body: JSON.stringify({
+          to: email,
+          role: role,
+          invitedBy: user?.email,
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to send invite email');
+      }
+
+      return invite;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['team-invites'] });
