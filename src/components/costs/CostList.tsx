@@ -21,6 +21,18 @@ interface CostListProps {
 export const CostList = ({ costs, onDelete, onEdit, isDeleting }: CostListProps) => {
   const { formatPrice } = useCurrency();
 
+  const formatPlatform = (platform: string | undefined) => {
+    if (!platform) return '-';
+    const platforms: { [key: string]: string } = {
+      facebook: 'Facebook Ads',
+      tiktok: 'TikTok Ads',
+      google: 'Google Ads',
+      instagram: 'Instagram Ads',
+      others: 'Others'
+    };
+    return platforms[platform] || platform;
+  };
+
   if (!costs || costs.length === 0) {
     return (
       <div className="text-center text-muted-foreground py-4">
@@ -47,7 +59,7 @@ export const CostList = ({ costs, onDelete, onEdit, isDeleting }: CostListProps)
             <TableRow key={cost.id}>
               <TableCell>{new Date(cost.date).toLocaleDateString()}</TableCell>
               <TableCell className="capitalize">{cost.cost_type.replace('_', ' ')}</TableCell>
-              <TableCell className="capitalize">{cost.platform || '-'}</TableCell>
+              <TableCell className="capitalize">{formatPlatform(cost.platform)}</TableCell>
               <TableCell className="text-muted-foreground">
                 {cost.description}
               </TableCell>
