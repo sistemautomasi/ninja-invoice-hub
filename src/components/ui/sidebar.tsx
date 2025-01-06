@@ -14,16 +14,17 @@ interface NavigationItem {
 
 interface SidebarProps {
   navigation: NavigationItem[];
+  isCollapsed?: boolean;
 }
 
-export const Sidebar = ({ navigation }: SidebarProps) => {
+export const Sidebar = ({ navigation, isCollapsed = false }: SidebarProps) => {
   return (
-    <div className="flex h-full flex-col gap-2">
-      <SidebarBranding isCollapsed={false} />
+    <div className={`flex h-full flex-col gap-2 border-r ${isCollapsed ? "w-16" : "w-64"} transition-all duration-300`}>
+      <SidebarBranding isCollapsed={isCollapsed} />
       <ScrollArea className="flex-1 overflow-auto">
         <div className="flex flex-col gap-1 p-2">
           {navigation.map((item) => (
-            <SidebarNavItem key={item.href} {...item} />
+            <SidebarNavItem key={item.href} {...item} isCollapsed={isCollapsed} />
           ))}
         </div>
       </ScrollArea>
