@@ -18,36 +18,37 @@ export const AdminCheck = ({ children }: AdminCheckProps) => {
 
   useEffect(() => {
     const checkAdminStatus = async () => {
-      if (!user?.id) {
-        console.log("No user ID found in auth state");
-        setLoading(false);
-        return;
-      }
-
       try {
-        console.log("Checking admin status for user ID:", user.id);
+        // Reset loading state
+        setLoading(true);
         
-        // First check if user exists in user_roles directly with user.id
-        const { data: roleData, error: roleError } = await supabase
+        // Check if we have a valid user
+        if (!user?.id) {
+          console.log("No authenticated user found");
+          setLoading(false);
+          return;
+        }
+
+        console.log("Checking admin status for user:", user.id);
+        
+        // First try to check user_roles directly with user.id
+        const { data: directRoleCheck, error: directRoleError } = await supabase
           .from('user_roles')
           .select('role')
           .eq('user_id', user.id)
           .maybeSingle();
 
-        if (!roleError && roleData?.role === 'admin') {
-          console.log("Found admin role directly:", roleData);
+        if (!directRoleError && directRoleCheck?.role === 'admin') {
+          console.log("Found admin role directly:", directRoleCheck);
           setIsAdmin(true);
           setLoading(false);
           return;
         }
 
-        if (roleError) {
-          console.log("Direct role check failed, trying through email:", roleError);
-        }
-
-        // If no direct match and user has email, check through profiles
+        // If no direct match found and we have an email, try through profiles
         if (user.email) {
           console.log("Checking admin status through email:", user.email);
+          
           const { data: profileData, error: profileError } = await supabase
             .from('profiles')
             .select('id')
@@ -55,7 +56,7 @@ export const AdminCheck = ({ children }: AdminCheckProps) => {
             .maybeSingle();
 
           if (profileError) {
-            console.error('Profile check error:', profileError);
+            console.error("Profile lookup error:", profileError);
             toast({
               title: "Error",
               description: "Failed to verify user profile",
@@ -67,32 +68,33 @@ export const AdminCheck = ({ children }: AdminCheckProps) => {
 
           if (profileData?.id) {
             console.log("Found profile:", profileData);
-            const { data: adminData, error: adminError } = await supabase
+            
+            const { data: roleData, error: roleError } = await supabase
               .from('user_roles')
               .select('role')
               .eq('user_id', profileData.id)
               .maybeSingle();
 
-            if (adminError) {
-              console.error('Admin check error:', adminError);
+            if (roleError) {
+              console.error("Role lookup error:", roleError);
               toast({
                 title: "Error",
                 description: "Failed to verify admin status",
                 variant: "destructive",
               });
             } else {
-              console.log("Admin check result:", adminData);
-              setIsAdmin(adminData?.role === 'admin');
+              console.log("Role check result:", roleData);
+              setIsAdmin(roleData?.role === 'admin');
             }
           } else {
             console.log("No profile found for email:", user.email);
           }
         }
       } catch (error) {
-        console.error('Unexpected error:', error);
+        console.error("Unexpected error during admin check:", error);
         toast({
           title: "Error",
-          description: "An unexpected error occurred while checking permissions",
+          description: "An unexpected error occurred",
           variant: "destructive",
         });
       } finally {
@@ -100,11 +102,7 @@ export const AdminCheck = ({ children }: AdminCheckProps) => {
       }
     };
 
-    if (user) {
-      checkAdminStatus();
-    } else {
-      setLoading(false);
-    }
+    checkAdminStatus();
   }, [user, toast]);
 
   if (loading) {
