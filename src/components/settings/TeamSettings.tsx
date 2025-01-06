@@ -20,15 +20,14 @@ export const TeamSettings = () => {
   useEffect(() => {
     const checkAdminStatus = async () => {
       if (!user) {
-        console.log("No user found in auth state");
+        console.log("No user found");
         setLoading(false);
         return;
       }
 
       try {
-        console.log("Starting admin check for user:", user.id);
+        console.log("Checking admin status for user:", user.email);
         
-        // Simple direct check using user.id
         const { data: roleData, error: roleError } = await supabase
           .from('user_roles')
           .select('role')
@@ -36,25 +35,18 @@ export const TeamSettings = () => {
           .single();
 
         if (roleError) {
-          console.error('Role check error:', roleError);
+          console.error('Error checking admin status:', roleError);
           toast({
             title: "Error checking permissions",
-            description: "Please try refreshing the page",
+            description: roleError.message,
             variant: "destructive",
           });
           setLoading(false);
           return;
         }
 
-        console.log("Role check result:", roleData);
-        
-        if (roleData?.role === 'admin') {
-          console.log("Admin access granted");
-          setAdminStatus(true);
-        } else {
-          console.log("Not an admin");
-          setAdminStatus(false);
-        }
+        console.log("Role data:", roleData);
+        setAdminStatus(roleData?.role === 'admin');
       } catch (error) {
         console.error('Unexpected error:', error);
         toast({
@@ -112,7 +104,8 @@ export const TeamSettings = () => {
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
               You need admin access to view team management settings.
-              Current user ID: {user.id}
+              User ID: {user.id}
+              Email: {user.email}
             </AlertDescription>
           </Alert>
         </CardContent>
