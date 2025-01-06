@@ -13,55 +13,71 @@ export const useDirectAddUser = () => {
 
   const addUser = useMutation({
     mutationFn: async ({ email, role }: { email: string; role: UserRole }) => {
+      console.log("Current user:", user); // Debug log
+
       if (!user) {
+        console.error("No user found in auth state");
         throw new Error('You must be logged in to perform this action');
       }
 
-      // First check if the user has admin role
+      // Check admin role with detailed error logging
       const { data: adminCheck, error: adminCheckError } = await supabase
         .from('user_roles')
         .select('role')
         .eq('user_id', user.id)
         .single();
 
-      if (adminCheckError) throw adminCheckError;
+      if (adminCheckError) {
+        console.error('Admin check error:', adminCheckError);
+        throw adminCheckError;
+      }
+
+      console.log("Admin check result:", adminCheck); // Debug log
+
       if (!adminCheck || adminCheck.role !== 'admin') {
+        console.error('User is not an admin:', adminCheck);
         throw new Error('Only admins can add users');
       }
 
       const profileId = crypto.randomUUID();
+      console.log("Generated profile ID:", profileId); // Debug log
 
-      // Create a profile for the user
-      const { error: profileError } = await supabase
+      // Create profile with error details
+      const { data: profileData, error: profileError } = await supabase
         .from('profiles')
-        .insert([{ id: profileId, email }]);
+        .insert([{ 
+          id: profileId, 
+          email,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        }])
+        .select()
+        .single();
       
       if (profileError) {
         console.error('Profile creation error:', profileError);
-        throw new Error('Failed to create profile');
+        throw new Error(`Failed to create profile: ${profileError.message}`);
       }
 
-      // Create the user role
+      console.log("Profile created:", profileData); // Debug log
+
+      // Create user role with error details
       const { error: roleError } = await supabase
         .from('user_roles')
-        .insert([{ user_id: profileId, role }]);
+        .insert([{ 
+          user_id: profileId, 
+          role,
+          created_at: new Date().toISOString()
+        }]);
 
       if (roleError) {
         console.error('Role creation error:', roleError);
         // Clean up the profile if role creation fails
         await supabase.from('profiles').delete().eq('id', profileId);
-        throw new Error('Failed to assign role');
+        throw new Error(`Failed to assign role: ${roleError.message}`);
       }
 
-      // Fetch and return the created profile
-      const { data: profile, error: fetchError } = await supabase
-        .from('profiles')
-        .select()
-        .eq('id', profileId)
-        .single();
-
-      if (fetchError) throw fetchError;
-      return profile;
+      return profileData;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['team-members'] });
