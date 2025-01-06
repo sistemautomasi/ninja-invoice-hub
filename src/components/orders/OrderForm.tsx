@@ -9,6 +9,7 @@ import { useCurrency } from "@/hooks/use-currency";
 import { useToast } from "@/hooks/use-toast";
 import { CustomerInfoFields } from "./CustomerInfoFields";
 import { ProductSelection } from "./ProductSelection";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 interface Product {
   id: string;
@@ -26,8 +27,13 @@ interface OrderFormProps {
 export const OrderForm = ({ products, isSubmitting, onSubmit }: OrderFormProps) => {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [quantity, setQuantity] = useState(1);
+  const [paymentMethod, setPaymentMethod] = useState<'cod' | 'online_banking'>('online_banking');
   const { formatPrice } = useCurrency();
   const { toast } = useToast();
+
+  const shippingCost = paymentMethod === 'cod' ? 15 : 0;
+  const subtotal = selectedProduct ? selectedProduct.price * quantity : 0;
+  const totalAmount = subtotal + shippingCost;
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -52,8 +58,9 @@ export const OrderForm = ({ products, isSubmitting, onSubmit }: OrderFormProps) 
       state: String(formData.get("state")),
       postcode: String(formData.get("postcode")),
       quantity: quantity,
-      totalAmount: selectedProduct.price * quantity,
+      totalAmount: totalAmount,
       priceAtTime: selectedProduct.price,
+      paymentMethod: paymentMethod,
     });
   };
 
@@ -74,6 +81,42 @@ export const OrderForm = ({ products, isSubmitting, onSubmit }: OrderFormProps) 
             onQuantityChange={setQuantity}
             formatPrice={formatPrice}
           />
+
+          <div className="space-y-2 text-left">
+            <Label>Payment Method</Label>
+            <RadioGroup
+              defaultValue="online_banking"
+              onValueChange={(value) => setPaymentMethod(value as 'cod' | 'online_banking')}
+              className="flex flex-col space-y-2"
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="online_banking" id="online_banking" />
+                <Label htmlFor="online_banking">Online Banking (Free Shipping)</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="cod" id="cod" />
+                <Label htmlFor="cod">Cash on Delivery (RM15 Shipping)</Label>
+              </div>
+            </RadioGroup>
+          </div>
+
+          <div className="space-y-2 text-left">
+            <Label>Order Summary</Label>
+            <div className="bg-gray-50 p-4 rounded-lg space-y-2">
+              <div className="flex justify-between">
+                <span>Subtotal:</span>
+                <span>{formatPrice(subtotal)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Shipping:</span>
+                <span>{formatPrice(shippingCost)}</span>
+              </div>
+              <div className="flex justify-between font-bold border-t border-gray-200 pt-2 mt-2">
+                <span>Total:</span>
+                <span>{formatPrice(totalAmount)}</span>
+              </div>
+            </div>
+          </div>
 
           <Button type="submit" className="w-full bg-primary" disabled={isSubmitting}>
             {isSubmitting ? (

@@ -10,4 +10,5 @@ export interface OrderFormData {
   quantity: number;
   totalAmount: number;
   priceAtTime: number;
+  paymentMethod: 'cod' | 'online_banking';
 }

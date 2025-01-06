@@ -20,14 +20,15 @@ export const useSubmitOrder = () => {
         .insert({
           user_id: user.id,
           total_amount: orderData.totalAmount,
-          status: "pending", // This will show as "Confirmed" in the shipping overview
+          status: "pending",
           customer_name: orderData.customerName,
           email: orderData.email,
           phone: orderData.phone,
           address: orderData.address,
           district: orderData.district,
           state: orderData.state,
-          postcode: orderData.postcode
+          postcode: orderData.postcode,
+          platform: orderData.paymentMethod // Store payment method in platform field
         })
         .select()
         .single();
@@ -45,6 +46,21 @@ export const useSubmitOrder = () => {
         });
 
       if (itemError) throw itemError;
+
+      // Create a shipping cost record if COD
+      if (orderData.paymentMethod === 'cod') {
+        const { error: costError } = await supabase
+          .from("business_costs")
+          .insert({
+            user_id: user.id,
+            cost_type: 'shipping',
+            amount: 15,
+            description: `Shipping cost for order ${order.order_number}`,
+            date: new Date().toISOString().split('T')[0]
+          });
+
+        if (costError) throw costError;
+      }
 
       return order;
     },
