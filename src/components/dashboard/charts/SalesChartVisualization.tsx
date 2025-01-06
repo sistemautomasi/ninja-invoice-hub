@@ -8,21 +8,23 @@ import {
   Tooltip,
   ResponsiveContainer,
   ComposedChart,
+  Legend,
 } from "recharts";
 
 interface SalesChartVisualizationProps {
-  salesData: Array<{
+  data: Array<{
     name: string;
     sales: number;
+    profit: number;
   }>;
 }
 
-const SalesChartVisualization = ({ salesData }: SalesChartVisualizationProps) => {
+const SalesChartVisualization = ({ data }: SalesChartVisualizationProps) => {
   const { formatPrice } = useCurrency();
 
   return (
     <ResponsiveContainer width="100%" height="100%">
-      <ComposedChart data={salesData}>
+      <ComposedChart data={data}>
         <CartesianGrid 
           strokeDasharray="3 3" 
           stroke="#e5e7eb" 
@@ -41,9 +43,10 @@ const SalesChartVisualization = ({ salesData }: SalesChartVisualizationProps) =>
           tickLine={false}
           axisLine={false}
           dx={-10}
+          tickFormatter={(value) => formatPrice(value)}
         />
         <Tooltip 
-          formatter={(value) => formatPrice(Number(value))}
+          formatter={(value, name) => [formatPrice(Number(value)), name === 'sales' ? 'Sales' : 'Net Profit']}
           contentStyle={{ 
             background: '#fff',
             border: '1px solid #e5e7eb',
@@ -53,7 +56,9 @@ const SalesChartVisualization = ({ salesData }: SalesChartVisualizationProps) =>
           }}
           cursor={{ fill: 'rgba(30, 64, 175, 0.05)' }}
         />
+        <Legend />
         <Bar 
+          name="Sales"
           dataKey="sales" 
           fill="#1E40AF"
           radius={[4, 4, 0, 0]}
@@ -61,11 +66,12 @@ const SalesChartVisualization = ({ salesData }: SalesChartVisualizationProps) =>
           fillOpacity={0.8}
         />
         <Line
+          name="Net Profit"
           type="monotone"
-          dataKey="sales"
-          stroke="#4F46E5"
+          dataKey="profit"
+          stroke="#10B981"
           strokeWidth={2}
-          dot={{ fill: '#4F46E5', r: 4, strokeWidth: 2 }}
+          dot={{ fill: '#10B981', r: 4, strokeWidth: 2 }}
           activeDot={{ r: 6, strokeWidth: 0 }}
         />
       </ComposedChart>

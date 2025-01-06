@@ -216,25 +216,70 @@ const Dashboard = () => {
     queryFn: async () => {
       const { start, end } = getDateRange();
       
-      const { data, error } = await supabase
+      // Fetch orders with their items for the period
+      const { data: orders, error: ordersError } = await supabase
         .from('orders')
-        .select('created_at, total_amount')
+        .select(`
+          created_at, 
+          total_amount,
+          order_items (
+            quantity,
+            price_at_time,
+            product:products (
+              cost
+            )
+          )
+        `)
         .gte('created_at', start.toISOString())
         .lte('created_at', end.toISOString())
         .order('created_at', { ascending: true });
 
-      if (error) throw error;
+      if (ordersError) throw ordersError;
 
-      if (!data) return [];
+      // Fetch business costs for the period
+      const { data: businessCosts, error: costsError } = await supabase
+        .from('business_costs')
+        .select('*')
+        .gte('date', start.toISOString())
+        .lte('date', end.toISOString());
 
-      const groupedData: Record<string, { name: string; sales: number }> = {};
+      if (costsError) throw costsError;
+
+      if (!orders) return [];
+
+      const groupedData: Record<string, { name: string; sales: number; profit: number }> = {};
       
-      data.forEach(order => {
+      orders.forEach(order => {
         const date = format(new Date(order.created_at), 'MMM dd');
         if (!groupedData[date]) {
-          groupedData[date] = { name: date, sales: 0 };
+          groupedData[date] = { name: date, sales: 0, profit: 0 };
         }
-        groupedData[date].sales += Number(order.total_amount);
+        
+        const totalAmount = Number(order.total_amount);
+        groupedData[date].sales += totalAmount;
+
+        // Calculate product costs for this order
+        const productCosts = order.order_items?.reduce((total, item) => {
+          return total + (Number(item.product?.cost || 0) * item.quantity);
+        }, 0) || 0;
+
+        // Get business costs for this date
+        const dateCosts = businessCosts?.filter(cost => 
+          format(new Date(cost.date), 'MMM dd') === date
+        ) || [];
+
+        const advertisingCosts = calculateTotalCostsByType(dateCosts, 'advertising', new Date(order.created_at), new Date(order.created_at));
+        const shippingCosts = calculateTotalCostsByType(dateCosts, 'shipping', new Date(order.created_at), new Date(order.created_at));
+
+        // Calculate net profit
+        const profit = calculateNetProfit(
+          totalAmount,
+          productCosts,
+          advertisingCosts,
+          shippingCosts
+        );
+
+        groupedData[date].profit += profit;
       });
 
       return Object.values(groupedData);
@@ -252,7 +297,7 @@ const Dashboard = () => {
       
       <DashboardStats stats={stats} />
       <ShippingOverview shipping={stats?.shipping} />
-      <SalesChartContainer salesData={salesData || []} />
+      <SalesChartContainer data={salesData || []} />
     </div>
   );
 };
