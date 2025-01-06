@@ -52,7 +52,7 @@ export const AdMetricsSummary = ({ metrics }: AdMetricsSummaryProps) => {
             {formatPrice(metrics.costPerPurchase)}
           </div>
           <p className="text-xs text-muted-foreground">
-            Average cost per conversion
+            Average ad spend per order
           </p>
         </CardContent>
       </Card>
