@@ -20,8 +20,10 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
+    console.log("Starting to process invite email request");
     const { to, role, invitedBy } = await req.json() as InviteEmailRequest;
 
+    console.log(`Sending invite email to: ${to}, role: ${role}`);
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
@@ -45,15 +47,19 @@ const handler = async (req: Request): Promise<Response> => {
 
     if (!res.ok) {
       const error = await res.text();
+      console.error("Error from Resend API:", error);
       throw new Error(error);
     }
 
     const data = await res.json();
+    console.log("Email sent successfully:", data);
+
     return new Response(JSON.stringify(data), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
     });
   } catch (error) {
+    console.error("Error in send-team-invite function:", error);
     return new Response(
       JSON.stringify({ error: error.message }),
       {
