@@ -41,7 +41,8 @@ export const AdMetricsTable = ({ metrics }: AdMetricsTableProps) => {
           <TableHead>Platform</TableHead>
           <TableHead>Campaign</TableHead>
           <TableHead className="text-right">Spend</TableHead>
-          <TableHead className="text-right">Revenue</TableHead>
+          <TableHead className="text-right">Sales</TableHead>
+          <TableHead className="text-right">Net Revenue</TableHead>
           <TableHead className="text-right">ROAS</TableHead>
           <TableHead className="text-right">Impressions</TableHead>
           <TableHead className="text-right">Clicks</TableHead>
@@ -52,7 +53,8 @@ export const AdMetricsTable = ({ metrics }: AdMetricsTableProps) => {
       </TableHeader>
       <TableBody>
         {metrics.map((metric) => {
-          const roas = ((metric.revenue / metric.ad_spend) * 100).toFixed(2);
+          const netRevenue = metric.revenue - metric.ad_spend;
+          const roas = ((netRevenue / metric.ad_spend) * 100).toFixed(2);
           const cpp = (metric.ad_spend / metric.conversions).toFixed(2);
           const ctr = ((metric.clicks / metric.impressions) * 100).toFixed(2);
 
@@ -63,6 +65,7 @@ export const AdMetricsTable = ({ metrics }: AdMetricsTableProps) => {
               <TableCell>{metric.campaign_name}</TableCell>
               <TableCell className="text-right">${metric.ad_spend.toFixed(2)}</TableCell>
               <TableCell className="text-right">${metric.revenue.toFixed(2)}</TableCell>
+              <TableCell className="text-right">${netRevenue.toFixed(2)}</TableCell>
               <TableCell className="text-right">{roas}%</TableCell>
               <TableCell className="text-right">{metric.impressions.toLocaleString()}</TableCell>
               <TableCell className="text-right">{metric.clicks.toLocaleString()}</TableCell>

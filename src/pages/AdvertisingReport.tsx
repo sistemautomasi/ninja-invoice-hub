@@ -31,13 +31,14 @@ const AdvertisingReport = () => {
     },
   });
 
-  // Calculate overall metrics
+  // Calculate overall metrics with net revenue
   const calculateOverallMetrics = () => {
     if (!metrics || metrics.length === 0) {
       return {
         roas: 0,
         costPerPurchase: 0,
-        ctr: 0
+        ctr: 0,
+        netRevenue: 0
       };
     }
 
@@ -46,11 +47,13 @@ const AdvertisingReport = () => {
     const totalConversions = metrics.reduce((sum, metric) => sum + metric.conversions, 0);
     const totalClicks = metrics.reduce((sum, metric) => sum + metric.clicks, 0);
     const totalImpressions = metrics.reduce((sum, metric) => sum + metric.impressions, 0);
+    const netRevenue = totalRevenue - totalAdSpend;
 
     return {
-      roas: totalAdSpend > 0 ? ((totalRevenue / totalAdSpend) * 100) : 0,
+      roas: totalAdSpend > 0 ? ((netRevenue / totalAdSpend) * 100) : 0,
       costPerPurchase: totalConversions > 0 ? (totalAdSpend / totalConversions) : 0,
-      ctr: totalImpressions > 0 ? ((totalClicks / totalImpressions) * 100) : 0
+      ctr: totalImpressions > 0 ? ((totalClicks / totalImpressions) * 100) : 0,
+      netRevenue
     };
   };
 
@@ -115,7 +118,7 @@ const AdvertisingReport = () => {
         />
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">ROAS</CardTitle>
@@ -125,7 +128,21 @@ const AdvertisingReport = () => {
               {overallMetrics.roas.toFixed(2)}%
             </div>
             <p className="text-xs text-muted-foreground">
-              Return on Ad Spend
+              Return on Ad Spend (Net Revenue/Ad Spend)
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Net Revenue</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              ${overallMetrics.netRevenue.toFixed(2)}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Sales minus Ad Spend
             </p>
           </CardContent>
         </Card>
