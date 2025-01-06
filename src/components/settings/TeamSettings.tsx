@@ -28,7 +28,7 @@ export const TeamSettings = () => {
       try {
         console.log("Checking admin status for user:", user.email);
         
-        // First check if user exists in user_roles directly
+        // First check if user exists in user_roles directly with user.id
         const { data: roleData, error: roleError } = await supabase
           .from('user_roles')
           .select('role')
