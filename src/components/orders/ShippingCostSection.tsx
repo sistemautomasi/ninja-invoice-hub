@@ -17,22 +17,29 @@ export const ShippingCostSection = ({
   shippingCost,
   onShippingCostChange,
 }: ShippingCostSectionProps) => {
+  const [isLoading, setIsLoading] = useState(false);
+
   // Fetch shipping rates based on payment method
   const { data: shippingRates } = useQuery({
     queryKey: ["shippingRates", paymentMethod],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("business_costs")
-        .select("amount")
-        .eq("cost_type", paymentMethod === 'cod' ? 'shipping_cod' : 'shipping_online')
-        .maybeSingle();
+      setIsLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from("business_costs")
+          .select("amount")
+          .eq("cost_type", paymentMethod === 'cod' ? 'shipping_cod' : 'shipping_online')
+          .maybeSingle();
 
-      if (error) {
-        console.error("Error fetching shipping rates:", error);
-        return null;
+        if (error) {
+          console.error("Error fetching shipping rates:", error);
+          return null;
+        }
+
+        return data?.amount || 0;
+      } finally {
+        setIsLoading(false);
       }
-
-      return data?.amount || 0;
     }
   });
 
@@ -54,7 +61,9 @@ export const ShippingCostSection = ({
         step="0.01"
         value={shippingCost}
         onChange={(e) => onShippingCostChange(Number(e.target.value))}
+        disabled={isLoading}
       />
+      {isLoading && <p className="text-sm text-muted-foreground">Loading shipping rates...</p>}
     </div>
   );
 };
