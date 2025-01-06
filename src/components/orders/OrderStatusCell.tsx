@@ -33,6 +33,7 @@ export const OrderStatusCell = ({ status: initialStatus, orderId }: OrderStatusC
       )
       .subscribe();
 
+    // Cleanup subscription on unmount
     return () => {
       void supabase.removeChannel(channel);
     };
