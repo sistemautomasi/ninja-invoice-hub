@@ -1,50 +1,43 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { Toaster } from "@/components/ui/sonner";
 import DashboardLayout from "@/components/DashboardLayout";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 // Pages
+import Index from "@/pages/Index";
+import SignIn from "@/pages/SignIn";
+import SignUp from "@/pages/SignUp";
+import ForgotPassword from "@/pages/ForgotPassword";
 import Dashboard from "@/pages/Dashboard";
+import Products from "@/pages/Products";
 import OrderList from "@/pages/OrderList";
 import SubmitOrder from "@/pages/SubmitOrder";
-import Products from "@/pages/Products";
 import Settings from "@/pages/Settings";
 import Costs from "@/pages/Costs";
 import AdvertisingReport from "@/pages/AdvertisingReport";
-import Invoices from "@/pages/Invoices";
-import Integrations from "@/pages/Integrations";
+import { Integrations } from "@/pages/Integrations";
 
-// Create a client
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 5 * 60 * 1000, // 5 minutes
-      retry: 1,
-    },
-  },
-});
-
-const App = () => {
+function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <Router>
-        <DashboardLayout>
-          <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/orders" element={<OrderList />} />
-            <Route path="/submit-order" element={<SubmitOrder />} />
-            <Route path="/products" element={<Products />} />
-            <Route path="/settings/*" element={<Settings />} />
-            <Route path="/costs" element={<Costs />} />
-            <Route path="/advertising" element={<AdvertisingReport />} />
-            <Route path="/invoices" element={<Invoices />} />
-            <Route path="/integrations" element={<Integrations />} />
-          </Routes>
-        </DashboardLayout>
-        <Toaster />
-      </Router>
-    </QueryClientProvider>
+    <Router>
+      <Routes>
+        <Route path="/" element={<Index />} />
+        <Route path="/signin" element={<SignIn />} />
+        <Route path="/signup" element={<SignUp />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route element={<DashboardLayout />}>
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/products" element={<Products />} />
+          <Route path="/orders" element={<OrderList />} />
+          <Route path="/submit-order" element={<SubmitOrder />} />
+          <Route path="/settings" element={<Settings />} />
+          <Route path="/costs" element={<Costs />} />
+          <Route path="/advertising" element={<AdvertisingReport />} />
+          <Route path="/integrations" element={<Integrations />} />
+        </Route>
+      </Routes>
+      <Toaster />
+    </Router>
   );
-};
+}
 
 export default App;

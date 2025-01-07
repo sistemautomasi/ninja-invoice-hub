@@ -7,49 +7,37 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 
 export const Integrations = () => {
-  const [webhookUrl, setWebhookUrl] = useState("");
+  const [zapierWebhook, setZapierWebhook] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleWebhookTest = async (e: React.FormEvent) => {
+  const handleZapierTest = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!webhookUrl) {
-      toast("Please enter a webhook URL");
-      return;
-    }
-
-    // Basic URL validation
-    try {
-      new URL(webhookUrl);
-    } catch (e) {
-      toast("Please enter a valid URL");
+    if (!zapierWebhook) {
+      toast("Error: Please enter your Zapier webhook URL");
       return;
     }
 
     setIsLoading(true);
-    console.log("Triggering webhook:", webhookUrl);
+    console.log("Triggering Zapier webhook:", zapierWebhook);
 
     try {
-      const response = await fetch(webhookUrl, {
+      await fetch(zapierWebhook, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
+        mode: "no-cors",
         body: JSON.stringify({
           timestamp: new Date().toISOString(),
-          event: "test_connection",
-          source: window.location.origin,
+          triggered_from: window.location.origin,
         }),
       });
 
-      if (response.ok) {
-        toast("Webhook test successful! The endpoint responded correctly.");
-      } else {
-        toast(`Webhook test failed. Status: ${response.status} ${response.statusText}`);
-      }
+      toast("Request sent to Zapier. Please check your Zap's history to confirm it was triggered.");
     } catch (error) {
       console.error("Error triggering webhook:", error);
-      toast("Failed to reach the webhook endpoint. Please verify the URL and try again.");
+      toast("Error: Failed to trigger the Zapier webhook. Please check the URL and try again.");
     } finally {
       setIsLoading(false);
     }
@@ -64,49 +52,6 @@ export const Integrations = () => {
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {/* Generic Webhook Integration Card */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Link2 className="h-5 w-5" />
-              Webhook Integration
-            </CardTitle>
-            <CardDescription>
-              Connect your application with any service that supports webhooks
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleWebhookTest} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="webhook">Webhook URL</Label>
-                <Input
-                  id="webhook"
-                  placeholder="Enter your webhook URL"
-                  value={webhookUrl}
-                  onChange={(e) => setWebhookUrl(e.target.value)}
-                />
-              </div>
-            </form>
-          </CardContent>
-          <CardFooter className="flex justify-between">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => window.open("https://zapier.com/blog/what-are-webhooks/", "_blank")}
-            >
-              <ExternalLink className="h-4 w-4 mr-2" />
-              Learn More
-            </Button>
-            <Button 
-              size="sm"
-              onClick={handleWebhookTest}
-              disabled={isLoading}
-            >
-              {isLoading ? "Testing..." : "Test Connection"}
-            </Button>
-          </CardFooter>
-        </Card>
-
         {/* Zapier Integration Card */}
         <Card>
           <CardHeader>
@@ -115,23 +60,37 @@ export const Integrations = () => {
               Zapier
             </CardTitle>
             <CardDescription>
-              Connect with thousands of apps through Zapier's automation platform
+              Connect your application with thousands of apps through Zapier
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground">
-              Create Zaps to automate your workflows and connect with multiple services at once.
-            </p>
+            <form onSubmit={handleZapierTest} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="webhook">Webhook URL</Label>
+                <Input
+                  id="webhook"
+                  placeholder="Enter your Zapier webhook URL"
+                  value={zapierWebhook}
+                  onChange={(e) => setZapierWebhook(e.target.value)}
+                />
+              </div>
+            </form>
           </CardContent>
-          <CardFooter>
+          <CardFooter className="flex justify-between">
             <Button
               variant="outline"
               size="sm"
-              className="w-full"
               onClick={() => window.open("https://zapier.com/apps/webhook/integrations", "_blank")}
             >
               <ExternalLink className="h-4 w-4 mr-2" />
-              Connect with Zapier
+              Learn More
+            </Button>
+            <Button 
+              size="sm"
+              onClick={handleZapierTest}
+              disabled={isLoading}
+            >
+              Test Connection
             </Button>
           </CardFooter>
         </Card>

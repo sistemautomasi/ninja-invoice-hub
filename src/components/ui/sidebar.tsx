@@ -1,30 +1,27 @@
 import { SidebarNavItem } from "./sidebar/SidebarNavItem";
 import { SidebarBranding } from "./sidebar/SidebarBranding";
 import { ScrollArea } from "./scroll-area";
-import { LucideIcon } from "lucide-react";
+import { LayoutDashboard, ClipboardList, ShoppingCart, DollarSign, BarChart3, FileText, Link2, Settings } from "lucide-react";
 
-interface NavigationItem {
-  href: string;
-  label: string;
-  icon: LucideIcon;
-  isLogout?: boolean;
-  onClick?: () => void;
-  disabled?: boolean;
-}
+const navigation = [
+  { href: "/", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/orders", label: "Orders", icon: ClipboardList },
+  { href: "/products", label: "Products", icon: ShoppingCart },
+  { href: "/costs", label: "Costs", icon: DollarSign },
+  { href: "/advertising", label: "Advertising", icon: BarChart3 },
+  { href: "/invoices", label: "Invoices", icon: FileText },
+  { href: "/integrations", label: "Integrations", icon: Link2 },
+  { href: "/settings", label: "Settings", icon: Settings },
+];
 
-interface SidebarProps {
-  navigation: NavigationItem[];
-  isCollapsed?: boolean;
-}
-
-export const Sidebar = ({ navigation, isCollapsed = false }: SidebarProps) => {
+export const Sidebar = () => {
   return (
-    <div className={`flex h-full flex-col gap-2 border-r ${isCollapsed ? "w-16" : "w-64"} transition-all duration-300`}>
-      <SidebarBranding isCollapsed={isCollapsed} />
+    <div className="flex h-full flex-col gap-2">
+      <SidebarBranding isCollapsed={false} />
       <ScrollArea className="flex-1 overflow-auto">
         <div className="flex flex-col gap-1 p-2">
           {navigation.map((item) => (
-            <SidebarNavItem key={item.href} {...item} isCollapsed={isCollapsed} />
+            <SidebarNavItem key={item.href} {...item} />
           ))}
         </div>
       </ScrollArea>
